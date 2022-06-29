@@ -47,7 +47,6 @@ class Timeline:
 
     @staticmethod
     def de_duplicate_events(list_of_events: List[VEvent]) -> List[VEvent]:
-        """This function could obviously be improved. However, there currently doesn't seem to be a need for it."""
         event_dict: Mapping[Tuple[Tuple[DateTime, DateTime], str], List[VEvent]] = defaultdict(list)
         for event in list_of_events:
             event_dict[(event.timespan.tuple, event.summary.value if event.summary else "")].append(event)
@@ -85,27 +84,27 @@ class Timeline:
             yield popped, popped.parent
 
     def includes(self, start: DateTime, stop: DateTime) -> Iterator[VEvent]:
-        """Iterators (in chronological order) over every event that is in the specified timespan."""
+        """Iterate (in chronological order) over every event that is in the specified timespan."""
         query_timespan = Timespan(start, stop)
         for timespan, event in self.iterate():
             if timespan.is_included_in(query_timespan):
                 yield event
 
     def overlapping(self, start: DateTime, stop: DateTime) -> Iterator[VEvent]:
-        """Iterates (in chronological order) over every event that has an intersection with the timespan."""
+        """Iterate (in chronological order) over every event that has an intersection with the timespan."""
         query_timespan = Timespan(start, stop)
         for timespan, event in self.iterate():
             if timespan.intersects(query_timespan):
                 yield event
 
     def start_after(self, instant: DateTime) -> Iterator[VEvent]:
-        """Iterates (in chronological order) on every event larger than instant in chronological order."""
+        """Iterate (in chronological order) on every event larger than instant in chronological order."""
         for timespan, event in self.iterate():
             if timespan.begin > instant:
                 yield event
 
     def at(self, instant: DateTime) -> Iterator[VEvent]:
-        """Iterates (in chronological order) over all events that are occurring during `instant`."""
+        """Iterate (in chronological order) over all events that are occurring during `instant`."""
         for timespan, event in self.iterate():
             if timespan.includes(instant):
                 yield event

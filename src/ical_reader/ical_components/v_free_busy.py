@@ -10,6 +10,8 @@ from ical_reader.ical_properties.periods import FreeBusyProperty
 
 @dataclass
 class VFreeBusy(CalendarComponent):
+    """This class represents the VFREEBUSY component specified in RFC 5545 in '3.6.4. Free/Busy Component'."""
+
     # Required
     dtstamp: Optional[DTStamp] = None
     uid: Optional[UID] = None

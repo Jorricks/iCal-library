@@ -84,6 +84,7 @@ def expand_event_in_range_only_return_first(
     return_range: Timespan,
     make_tz_aware: Optional[Timezone],
 ) -> Union[Iterator[DateTime], Iterator[Date]]:
+    """@ToDo(jorrick) write this."""
     excluded_times_set: Union[Set[DateTime], Set[Date]] = set()
     iterator = _yield_rdate_list(
         rdate_list=rdate_list,
@@ -118,6 +119,8 @@ def expand_component_in_range(
     make_tz_aware: Optional[Timezone],
 ) -> Union[Iterator[Tuple[DateTime, DateTime]], Iterator[Tuple[Date, Date]]]:
     """
+    Expand a Component according to the variables starting from the first_event_start.
+
     For us to expand events according to the iCalendar specification, we need to keep track of the start times as
     we should not return the same event twice.
     Furthermore, RDate takes priority over RRule.

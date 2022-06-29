@@ -154,24 +154,21 @@ class RRule(Property):
             "byeaster": self.by_easter,
         }
         no_none_keywords = {key: value for key, value in keyword_arguments.items() if value is not None}
-        try:
-            dt_iterator = rrule(dtstart=starting_datetime, freq=self.freq, **no_none_keywords)
-            for dt in dt_iterator:
-                if dt > max_datetime:
-                    break
-                p_instance = pendulum.instance(dt, tz=None)
-                yield p_instance if is_datetime_format else p_instance.date()
-        except Exception as exc:
-            pass
+        dt_iterator = rrule(dtstart=starting_datetime, freq=self.freq, **no_none_keywords)
+        for dt in dt_iterator:
+            if dt > max_datetime:
+                break
+            p_instance = pendulum.instance(dt, tz=None)
+            yield p_instance if is_datetime_format else p_instance.date()
 
 
-if __name__ == "__main__":
-    r_rule = RRule.create_property_from_str(None, "RRULE:FREQ=WEEKLY;UNTIL=20220608T215959Z;BYDAY=FR,MO,TH,TU,WE")
-    for an_item in r_rule.sequence_iterator(
-        DateTime(2022, 5, 1, 12, 13, 14).in_tz("UTC"), DateTime(2022, 6, 8, 12, 13, 14).in_tz("UTC")
-    ):
-        print(an_item)
-
-    r_rule = RRule.create_property_from_str(None, "RRULE:FREQ=WEEKLY;WKST=MO;COUNT=5;INTERVAL=10;BYDAY=WE")
-    for an_item in r_rule.sequence_iterator(Date(2022, 3, 2), Date(2030, 3, 20)):
-        print(an_item)
+# if __name__ == "__main__":
+#     r_rule = RRule.create_property_from_str(None, "RRULE:FREQ=WEEKLY;UNTIL=20220608T215959Z;BYDAY=FR,MO,TH,TU,WE")
+#     for an_item in r_rule.sequence_iterator(
+#         DateTime(2022, 5, 1, 12, 13, 14).in_tz("UTC"), DateTime(2022, 6, 8, 12, 13, 14).in_tz("UTC")
+#     ):
+#         print(an_item)
+#
+#     r_rule = RRule.create_property_from_str(None, "RRULE:FREQ=WEEKLY;WKST=MO;COUNT=5;INTERVAL=10;BYDAY=WE")
+#     for an_item in r_rule.sequence_iterator(Date(2022, 3, 2), Date(2030, 3, 20)):
+#         print(an_item)

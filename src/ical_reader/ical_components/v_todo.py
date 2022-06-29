@@ -29,6 +29,8 @@ from ical_reader.ical_utils import property_utils
 
 @dataclass(repr=False)
 class VToDo(AbstractStartStopComponent):
+    """This class represents the VTODO component specified in RFC 5545 in '3.6.2. To-Do Component'."""
+
     # Optional, may only occur once
     ical_class: Optional[Class] = None  # As class is a reserved keyword in python, we prefixed it with `ical_`.
     completed: Optional[Completed] = None
@@ -88,6 +90,13 @@ class VToDo(AbstractStartStopComponent):
 
 @dataclass(repr=False)
 class VRecurringToDo(AbstractRecurringComponent, VToDo):
+    """
+    This class represents VToDo that are recurring.
+    Inside the AbstractRecurringComponent class we overwrite specific dunder methods and property methods. This way
+     our end users have a very similar interface to an actual VToDo but without us needing to code the exact same
+     thing twice.
+    """
+
     def __init__(self, original_component_instance: VToDo, start: DateTime, end: DateTime):
         super(VToDo, self).__init__()
         self._parent = original_component_instance

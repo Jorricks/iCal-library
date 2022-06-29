@@ -1,11 +1,9 @@
-from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from pendulum import DateTime
 
 from ical_reader.base_classes.calendar_component import CalendarComponent
-from ical_reader.base_classes.property import Property
 from ical_reader.ical_components.v_event import VEvent
 from ical_reader.ical_components.v_free_busy import VFreeBusy
 from ical_reader.ical_components.v_journal import VJournal
@@ -17,6 +15,8 @@ from ical_reader.timeline import Timeline
 
 @dataclass
 class VCalendar(CalendarComponent):
+    """This class represents the VCALENDER component specified in RFC 5545 in '3.6. Calendar Components'."""
+
     # Required properties, only one occurrence allowed.
     prodid: Optional[ProdID] = None
     version: Optional[Version] = None

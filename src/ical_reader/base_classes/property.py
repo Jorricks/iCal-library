@@ -1,4 +1,3 @@
-import re
 from typing import Dict, Optional, TYPE_CHECKING
 
 from ical_reader.base_classes.base_class import ICalBaseClass
@@ -50,15 +49,3 @@ class Property(ICalBaseClass):
     def as_original_string(self) -> str:
         add_subs = f";{self._sub_properties.strip(';')}" if self._sub_properties else ""
         return f"{self._name}{add_subs}:{self._value}"
-
-    @classmethod
-    def get_property_ical_name(cls) -> str:
-        return cls.__name__.replace("_", "-").upper()
-
-    @classmethod
-    def create_property_from_str(cls, parent: "CalendarComponent", line: str) -> "Property":
-        """Thanks @Jan Goyvaerts: https://stackoverflow.com/a/2482067/2277445"""
-        result = re.search("([^\r\n;:]+)(;[^\r\n:]+)?:(.*)", line)
-        if result is None:
-            raise ValueError(f"{result=} should never be None!")
-        return cls(parent=parent, name=result.group(1), sub_properties=result.group(2), value=result.group(3))

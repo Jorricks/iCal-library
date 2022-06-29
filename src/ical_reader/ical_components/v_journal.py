@@ -24,6 +24,8 @@ from ical_reader.ical_utils import property_utils
 
 @dataclass(repr=False)
 class VJournal(AbstractStartStopComponent):
+    """This class represents the VJOURNAL component specified in RFC 5545 in '3.6.3. Journal Component'."""
+
     # Optional, may only occur once
     ical_class: Optional[Class] = None  # As class is a reserved keyword in python, we prefixed it with `ical_`.
     created: Optional[Created] = None
@@ -75,6 +77,13 @@ class VJournal(AbstractStartStopComponent):
 
 @dataclass(repr=False)
 class VRecurringJournal(AbstractRecurringComponent, VJournal):
+    """
+    This class represents VJournal that are recurring.
+    Inside the AbstractRecurringComponent class we overwrite specific dunder methods and property methods. This way
+     our end users have a very similar interface to an actual VJournal but without us needing to code the exact same
+     thing twice.
+    """
+
     def __init__(self, original_component_instance: VJournal, start: DateTime, end: DateTime):
         super(VJournal, self).__init__()
         self._parent = original_component_instance

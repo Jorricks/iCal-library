@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Generic, List, Optional, TYPE_CHECKING, TypeVar, Union
+from typing import Any, List, Optional, TYPE_CHECKING, TypeVar, Union
 
 from pendulum import Date, DateTime, Duration, Period
 

@@ -1,12 +1,10 @@
-from datetime import timedelta
 from typing import List
-
-from pendulum import DateTime
 
 from ical_reader.ical_components.v_calendar import VCalendar
 
 
 def get_calendar(lines: List[str]) -> VCalendar:
+    """Given all the lines of the iCalendar file, return a VCalendar instance."""
     new_instance = VCalendar()
     if lines[0] != "BEGIN:VCALENDAR":
         raise ValueError(f"This is not a ICalendar as it started with {lines[0]=}.")

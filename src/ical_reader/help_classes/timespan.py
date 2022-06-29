@@ -1,6 +1,6 @@
 import functools
 from dataclasses import dataclass
-from typing import Any, Optional, Tuple, Union, TYPE_CHECKING
+from typing import Any, Optional, Tuple, TYPE_CHECKING, Union
 
 from pendulum import Date, DateTime
 

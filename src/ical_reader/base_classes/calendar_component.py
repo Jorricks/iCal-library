@@ -32,7 +32,9 @@ T = TypeVar("T")
 @dataclass(repr=False)
 class CalendarComponent(ICalBaseClass):
     """
-    There are four kind of variables:
+    This is the base class for any Component (according to the RFC 5545 specification) in ical-reader.
+
+    Inside all Components (so also all classes inheriting this class, e.g. VEvent) there are four kind of variables:
     - variables that start with _. These are specific to the class and not directly related to a property or
      component from iCalendar.
     - variables that have a type of List[x] and a default value of List. These are child components of the corresponding
@@ -116,9 +118,7 @@ class CalendarComponent(ICalBaseClass):
 
     @staticmethod
     def _extract_ical_class_from_args(var_name: str, a_type: Union[Type[List], type(Union)]) -> Type:
-        sub_types: List[Type] = [
-            st for st in get_args(a_type) if not issubclass(get_origin(st) or st, type(None))
-        ]
+        sub_types: List[Type] = [st for st in get_args(a_type) if not issubclass(get_origin(st) or st, type(None))]
         if len(sub_types) != 1:
             raise TypeError(f"Incorrect number of sub_types to follow here for {var_name=}, {a_type=}, {sub_types=}.")
         return sub_types[0]
@@ -191,6 +191,11 @@ class CalendarComponent(ICalBaseClass):
             child.print_tree_structure(indent=indent + 1)
 
     def parse_property(self, line: str) -> None:
+        """
+        Parse a line containing a Property definition.
+
+        Credits for the excellent regex parsing string go to @Jan Goyvaerts: https://stackoverflow.com/a/2482067/2277445
+        """
         property_mapping = self._get_property_mapping_2()
         result = re.search("([^\r\n;:]+)(;[^\r\n:]+)?:(.*)", line)
         if result is None:
