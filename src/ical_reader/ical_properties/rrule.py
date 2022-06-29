@@ -1,12 +1,12 @@
-from typing import Dict, Optional, Iterator, List, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 import pendulum
 from dateutil import rrule as base_for_time_periods
 from dateutil.rrule import rrule, weekday
-from pendulum import DateTime, Date
+from pendulum import Date, DateTime
 
-from ical_reader.base_classes.property import Property
 from ical_reader.base_classes.calendar_component import CalendarComponent
+from ical_reader.base_classes.property import Property
 from ical_reader.ical_utils import dt_utils
 from ical_reader.ical_utils.lru_cache import instance_lru_cache
 
@@ -61,7 +61,9 @@ class RRule(Property):
     @property
     def by_day(self) -> Optional[Union[Tuple[int, ...], Tuple[weekday, ...]]]:
         """Note: To prevent confusion, this was renamed to byweekday in dateutil.rrule."""
-        day_list: List[weekday, ] = []
+        day_list: List[
+            weekday,
+        ] = []
         value = self.dict.get("BYDAY")
         if not value:
             return None
@@ -110,9 +112,7 @@ class RRule(Property):
         return self.convert_str_to_optional_integer_tuple(self.dict.get("BYEASTER"))
 
     def sequence_iterator(
-        self,
-        starting_datetime: Union[Date, DateTime],
-        max_datetime: Union[Date, DateTime]
+        self, starting_datetime: Union[Date, DateTime], max_datetime: Union[Date, DateTime]
     ) -> Iterator[DateTime]:
         if type(starting_datetime) != type(max_datetime):
             raise TypeError(f"{type(starting_datetime)=} and {type(max_datetime)=} should be of the same type.")
@@ -155,11 +155,7 @@ class RRule(Property):
         }
         no_none_keywords = {key: value for key, value in keyword_arguments.items() if value is not None}
         try:
-            dt_iterator = rrule(
-                dtstart=starting_datetime,
-                freq=self.freq,
-                **no_none_keywords
-            )
+            dt_iterator = rrule(dtstart=starting_datetime, freq=self.freq, **no_none_keywords)
             for dt in dt_iterator:
                 if dt > max_datetime:
                     break
@@ -172,14 +168,10 @@ class RRule(Property):
 if __name__ == "__main__":
     r_rule = RRule.create_property_from_str(None, "RRULE:FREQ=WEEKLY;UNTIL=20220608T215959Z;BYDAY=FR,MO,TH,TU,WE")
     for an_item in r_rule.sequence_iterator(
-        DateTime(2022, 5, 1, 12, 13, 14).in_tz("UTC"),
-        DateTime(2022, 6, 8, 12, 13, 14).in_tz("UTC")
+        DateTime(2022, 5, 1, 12, 13, 14).in_tz("UTC"), DateTime(2022, 6, 8, 12, 13, 14).in_tz("UTC")
     ):
         print(an_item)
 
     r_rule = RRule.create_property_from_str(None, "RRULE:FREQ=WEEKLY;WKST=MO;COUNT=5;INTERVAL=10;BYDAY=WE")
-    for an_item in r_rule.sequence_iterator(
-        Date(2022, 3, 2),
-        Date(2030, 3, 20)
-    ):
+    for an_item in r_rule.sequence_iterator(Date(2022, 3, 2), Date(2030, 3, 20)):
         print(an_item)

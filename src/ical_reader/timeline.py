@@ -1,6 +1,6 @@
 import heapq
 from collections import defaultdict
-from typing import TYPE_CHECKING, Iterator, Tuple, List, Optional, Mapping
+from typing import Iterator, List, Mapping, Optional, Tuple, TYPE_CHECKING
 
 from pendulum import DateTime
 
@@ -14,10 +14,7 @@ if TYPE_CHECKING:
 
 class Timeline:
     def __init__(
-        self,
-        v_calendar: "VCalendar",
-        start_date: Optional[DateTime] = None,
-        end_date: Optional[DateTime] = None
+        self, v_calendar: "VCalendar", start_date: Optional[DateTime] = None, end_date: Optional[DateTime] = None
     ):
         self.v_calendar: VCalendar = v_calendar
         self._start_date: DateTime = start_date or DateTime(1970, 1, 1)
@@ -83,6 +80,8 @@ class Timeline:
         heapq.heapify(heap)
         while heap:
             popped = heapq.heappop(heap)
+            if not isinstance(popped.parent, VEvent):
+                raise TypeError("Expected only VEvents here!")
             yield popped, popped.parent
 
     def includes(self, start: DateTime, stop: DateTime) -> Iterator[VEvent]:

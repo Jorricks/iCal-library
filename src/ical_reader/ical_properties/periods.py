@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Union, Tuple, List
+from typing import List, Literal, Optional, Tuple, Union
 
 import pendulum
 from pendulum import Date, DateTime, Duration
@@ -35,9 +35,7 @@ class _PeriodFunctionality(Property):
             computed_datetime: DateTime = first_instance + second_instance
             return first_instance, computed_datetime
         else:
-            raise TypeError(
-                f"Expected {duration=} to contain a DateTime or Duration as second argument."
-            )
+            raise TypeError(f"Expected {duration=} to contain a DateTime or Duration as second argument.")
 
 
 class _ExOrRDate(_PeriodFunctionality):

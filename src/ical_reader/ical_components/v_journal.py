@@ -1,15 +1,24 @@
 from dataclasses import dataclass
-from typing import Optional, List, Iterator
+from typing import Iterator, List, Optional
 
 from pendulum import DateTime, Duration
 
 from ical_reader.help_classes.timespan import Timespan
-from ical_reader.ical_components.abstract_components import AbstractStartStopComponent, AbstractRecurringComponent
-from ical_reader.ical_properties.cal_address import Organizer, Attendee
-from ical_reader.ical_properties.dt import Created, LastModified, RecurrenceID, _DTBoth
+from ical_reader.ical_components.abstract_components import AbstractRecurringComponent, AbstractStartStopComponent
+from ical_reader.ical_properties.cal_address import Attendee, Organizer
+from ical_reader.ical_properties.dt import _DTBoth, Created, LastModified, RecurrenceID
 from ical_reader.ical_properties.ints import Sequence
-from ical_reader.ical_properties.pass_properties import Class, Status, URL, Attach, Categories, Contact, Description, \
-    Related, RStatus
+from ical_reader.ical_properties.pass_properties import (
+    Attach,
+    Categories,
+    Class,
+    Contact,
+    Description,
+    Related,
+    RStatus,
+    Status,
+    URL,
+)
 from ical_reader.ical_utils import property_utils
 
 
@@ -38,7 +47,7 @@ class VJournal(AbstractStartStopComponent):
         return f"VJournal({self.start}: {self.summary.value})"
 
     @property
-    def ending(self) -> _DTBoth:
+    def ending(self) -> Optional[_DTBoth]:
         return self.dtstart
 
     def get_duration(self) -> Optional[Duration]:
@@ -65,7 +74,7 @@ class VJournal(AbstractStartStopComponent):
 
 
 @dataclass(repr=False)
-class VRecurringJournal(AbstractRecurringComponent[VJournal], VJournal):
+class VRecurringJournal(AbstractRecurringComponent, VJournal):
     def __init__(self, original_component_instance: VJournal, start: DateTime, end: DateTime):
         super(VJournal, self).__init__()
         self._parent = original_component_instance
@@ -75,4 +84,3 @@ class VRecurringJournal(AbstractRecurringComponent[VJournal], VJournal):
 
     def __repr__(self) -> str:
         return f"RVJournal({self._start}: {self.original.summary.value})"
-

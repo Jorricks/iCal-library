@@ -1,10 +1,13 @@
 import functools
 from dataclasses import dataclass
-from typing import Optional, Tuple, Any, Union
+from typing import Any, Optional, Tuple, Union, TYPE_CHECKING
 
-from pendulum import DateTime, Date
+from pendulum import Date, DateTime
 
 from ical_reader.ical_utils import dt_utils
+
+if TYPE_CHECKING:
+    from ical_reader.base_classes.calendar_component import CalendarComponent
 
 
 @dataclass
@@ -62,10 +65,12 @@ class Timespan:
         return other.begin <= self.begin and self.end < other.end
 
     def intersects(self, other: "Timespan") -> bool:
-        return self.begin <= other.begin < self.end or \
-               self.begin <= other.end < self.end or \
-               other.begin <= self.begin < other.end or \
-               other.begin <= self.end < other.end
+        return (
+            self.begin <= other.begin < self.end
+            or self.begin <= other.end < self.end
+            or other.begin <= self.begin < other.end
+            or other.begin <= self.end < other.end
+        )
 
     def includes(self, instant: Union[Date, DateTime]) -> bool:
         dt = dt_utils.convert_time_object_to_aware_datetime(instant)
@@ -74,8 +79,8 @@ class Timespan:
 
 @dataclass
 class TimespanWithParent(Timespan):
-    parent: Optional["TreeComponent"]
+    parent: Optional["CalendarComponent"]
 
-    def __init__(self, parent: Optional["TreeComponent"], begin: Union[Date, DateTime], end: Union[Date, DateTime]):
+    def __init__(self, parent: Optional["CalendarComponent"], begin: Union[Date, DateTime], end: Union[Date, DateTime]):
         super().__init__(begin, end)
         self.parent = parent

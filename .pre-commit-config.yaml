@@ -39,13 +39,12 @@ repos:
         additional_dependencies:
           - flake8
           - flake8-docstrings
-      - id: mypy
-        name: mypy - Static type checking
-        description: Mypy helps ensure that we use our functions and variables correctly by checking the types.
-        entry: mypy
+    -   id: pytype
+        name: pytype
+        entry: pytype
         language: python
         types: [python]
-        exclude: ^examples/
+        args: ["--config=pytype.cfg",]
         require_serial: true
         additional_dependencies:
-          - mypy
+          - pytype

@@ -1,4 +1,2 @@
-
-
 class VEventExpansionFailed(ValueError):
     pass

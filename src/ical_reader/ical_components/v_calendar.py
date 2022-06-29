@@ -1,17 +1,17 @@
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import List, Optional, Tuple, Dict
+from typing import Dict, List, Optional, Tuple
 
 from pendulum import DateTime
 
+from ical_reader.base_classes.calendar_component import CalendarComponent
+from ical_reader.base_classes.property import Property
 from ical_reader.ical_components.v_event import VEvent
 from ical_reader.ical_components.v_free_busy import VFreeBusy
 from ical_reader.ical_components.v_journal import VJournal
 from ical_reader.ical_components.v_timezone import VTimeZone
-from ical_reader.base_classes.property import Property
-from ical_reader.base_classes.calendar_component import CalendarComponent
 from ical_reader.ical_components.v_todo import VToDo
-from ical_reader.ical_properties.pass_properties import ProdID, Version, CalScale, Method
+from ical_reader.ical_properties.pass_properties import CalScale, Method, ProdID, Version
 from ical_reader.timeline import Timeline
 
 
@@ -31,8 +31,7 @@ class VCalendar(CalendarComponent):
     journals: List[VJournal] = field(default_factory=list)
     free_busy_list: List[VFreeBusy] = field(default_factory=list)
     time_zones: List[VTimeZone] = field(default_factory=list)
-    _extra_child_components: Dict[str, List[Property]] = field(default_factory=lambda: defaultdict(list))
-    _lines: List[str] = None
+    _lines: Optional[List[str]] = None
 
     @property
     def children(self) -> Tuple["CalendarComponent", ...]:
@@ -42,7 +41,7 @@ class VCalendar(CalendarComponent):
             *self.journals,
             *self.free_busy_list,
             *self.time_zones,
-            *self._extra_child_components
+            *[child for list_of_children in self._extra_child_components.values() for child in list_of_children],
         )
 
     def add_child(self, child: "CalendarComponent") -> None:
@@ -88,10 +87,11 @@ class VCalendar(CalendarComponent):
         lines = self._lines
         if lines is None:
             raise TypeError("We should first parse the component section before calling this function.")
-        return "\n".join(line for line in self.tree_root._lines[max(0, start_line): min(len(lines), end_line)])
+        return "\n".join(line for line in self.tree_root._lines[max(0, start_line) : min(len(lines), end_line)])
 
 
 if __name__ == "__main__":
     import pprint
+
     pprint.pprint(VCalendar._get_property_mapping_2())
     pprint.pprint(VCalendar._get_child_component_mapping())

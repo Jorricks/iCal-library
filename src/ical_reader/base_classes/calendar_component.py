@@ -3,9 +3,21 @@ import re
 from collections import defaultdict
 from dataclasses import dataclass, field
 from functools import lru_cache
-from typing import Optional, List, Tuple, Type, Dict, Union, TYPE_CHECKING, get_args, get_origin, ClassVar, \
-    Mapping, TypeVar, Set
-
+from typing import (
+    ClassVar,
+    Dict,
+    get_args,
+    get_origin,
+    List,
+    Mapping,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    TYPE_CHECKING,
+    TypeVar,
+    Union,
+)
 
 from ical_reader.base_classes.base_class import ICalBaseClass
 from ical_reader.base_classes.property import Property
@@ -30,9 +42,10 @@ class CalendarComponent(ICalBaseClass):
     - variables that have a type of Optional[x] (and not Optional[List[x]]). These are properties of the corresponding
      Component. They can be either optional or required, but may only occur once in the iCal file.
     """
+
     _name: Optional[str] = None
     _parent: Optional["CalendarComponent"] = None
-    _extra_child_components: List["CalendarComponent"] = field(default_factory=list)
+    _extra_child_components: Dict[str, List["CalendarComponent"]] = field(default_factory=lambda: defaultdict(list))
     _extra_properties: Dict[str, List[Property]] = field(default_factory=lambda: defaultdict(list))
     _parse_line_start: Optional[int] = 0
     _parse_line_end: Optional[int] = 0
@@ -42,14 +55,16 @@ class CalendarComponent(ICalBaseClass):
         return f"{self.__class__.__name__}({properties_as_string})"
 
     @property
-    def tree_root(self) -> "VCalendar":
-        from ical_reader.ical_components.v_calendar import VCalendar
-        instance = self
-        while instance.parent is not None:
-            instance = instance.parent
-        if not isinstance(instance, VCalendar):
-            raise TypeError(f"Invalid TreeRoot as it was of type {type(instance)=} instead of VCalendar.")
-        return instance
+    def name(self):
+        return self._name
+
+    @property
+    def extra_child_components(self) -> Dict[str, List["CalendarComponent"]]:
+        return self._extra_child_components
+
+    @property
+    def extra_properties(self) -> Dict[str, List[Property]]:
+        return self._extra_properties
 
     @property
     def parent(self) -> Optional["CalendarComponent"]:
@@ -61,12 +76,25 @@ class CalendarComponent(ICalBaseClass):
         self._parent = parent
 
     @property
+    def tree_root(self) -> "VCalendar":
+        from ical_reader.ical_components.v_calendar import VCalendar
+
+        instance = self
+        while instance.parent is not None:
+            instance = instance.parent
+        if not isinstance(instance, VCalendar):
+            raise TypeError(f"Invalid TreeRoot as it was of type {type(instance)=} instead of VCalendar.")
+        return instance
+
+    @property
     def children(self) -> List["CalendarComponent"]:
-        return [
+        children = [child for list_of_children in self._extra_child_components.values() for child in list_of_children]
+        children.extend(
             item_in_list
             for ical_name, (var_name, var_type, is_list) in self._get_child_component_mapping().items()
             for item_in_list in getattr(self, var_name)
-        ] + self._extra_child_components
+        )
+        return children
 
     def add_child(self, child: "CalendarComponent") -> None:
         child.set_parent(self)
@@ -75,7 +103,7 @@ class CalendarComponent(ICalBaseClass):
             var_name, var_type, is_list = child_component_mapping[child._name]
             getattr(self, var_name).append(child)
             return
-        self._extra_child_components.append(child)
+        self._extra_child_components[child._name].append(child)
 
     @property
     def original_ical_text(self) -> str:
@@ -87,10 +115,8 @@ class CalendarComponent(ICalBaseClass):
         return {var_name for var_name, var_type, is_list in cls._get_property_mapping_2().values()}
 
     @staticmethod
-    def _extract_ical_class_from_args(
-        var_name: str, a_type: Union[Type[List], Type[Optional[T]]]
-    ):
-        sub_types: List[Type[ICalBaseClass]] = [
+    def _extract_ical_class_from_args(var_name: str, a_type: Union[Type[List], type(Union)]) -> Type:
+        sub_types: List[Type] = [
             st for st in get_args(a_type) if not issubclass(get_origin(st) or st, type(None))
         ]
         if len(sub_types) != 1:
@@ -154,7 +180,7 @@ class CalendarComponent(ICalBaseClass):
     def properties(self) -> Dict[str, Union[Property, List[Property]]]:
         standard_properties = {
             var_name: getattr(self, var_name)
-            for ical_name, (var_name, var_type, is_list) in self._get_property_mapping_2().values()
+            for var_name, var_type, is_list in self._get_property_mapping_2().values()
             if getattr(self, var_name) is not None
         }
         return {**standard_properties, **self._extra_properties}
@@ -162,7 +188,7 @@ class CalendarComponent(ICalBaseClass):
     def print_tree_structure(self, indent: int = 0):
         print(f"{'  ' * indent} - {self}")
         for child in self.children:
-            child.print_tree_structure(indent=indent+1)
+            child.print_tree_structure(indent=indent + 1)
 
     def parse_property(self, line: str) -> None:
         property_mapping = self._get_property_mapping_2()
@@ -193,7 +219,7 @@ class CalendarComponent(ICalBaseClass):
         while not (current_line := lines[line_number]).startswith("END:"):
             line_number += 1
             if current_line.startswith("BEGIN:"):
-                component_name = current_line[len("BEGIN:"):]
+                component_name = current_line[len("BEGIN:") :]
                 if component_name in component_mapping:
                     var_name, var_type, is_list = component_mapping[component_name]
                     instance: "CalendarComponent" = var_type()

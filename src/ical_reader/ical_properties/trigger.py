@@ -1,7 +1,7 @@
-from typing import Union, Literal
+from typing import Literal, Union
 
 import pendulum
-from pendulum import Duration, DateTime
+from pendulum import DateTime, Duration
 
 from ical_reader.base_classes.property import Property
 

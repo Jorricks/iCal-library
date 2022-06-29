@@ -1,17 +1,28 @@
 from dataclasses import dataclass
-from typing import Optional, List, Iterator
+from typing import Iterator, List, Optional
 
 from pendulum import DateTime, Duration
 
 from ical_reader.help_classes.timespan import Timespan
-from ical_reader.ical_components.abstract_components import AbstractStartStopComponent, AbstractRecurringComponent
-from ical_reader.ical_properties.cal_address import Organizer, Attendee
-from ical_reader.ical_properties.dt import Created, LastModified, RecurrenceID, Due, Completed, _DTBoth
+from ical_reader.ical_components.abstract_components import AbstractRecurringComponent, AbstractStartStopComponent
+from ical_reader.ical_properties.cal_address import Attendee, Organizer
+from ical_reader.ical_properties.dt import _DTBoth, Completed, Created, Due, LastModified, RecurrenceID
 from ical_reader.ical_properties.geo import GEO
 from ical_reader.ical_properties.ical_duration import ICALDuration
 from ical_reader.ical_properties.ints import Priority, Sequence
-from ical_reader.ical_properties.pass_properties import Class, Description, Location, Status, URL, Attach, Categories, \
-    Contact, RStatus, Related, Resources
+from ical_reader.ical_properties.pass_properties import (
+    Attach,
+    Categories,
+    Class,
+    Contact,
+    Description,
+    Location,
+    Related,
+    Resources,
+    RStatus,
+    Status,
+    URL,
+)
 from ical_reader.ical_properties.percent import Percent
 from ical_reader.ical_utils import property_utils
 
@@ -49,7 +60,7 @@ class VToDo(AbstractStartStopComponent):
         return f"VAlarm({self.start} - {self.end}: {self.summary.value})"
 
     @property
-    def ending(self) -> _DTBoth:
+    def ending(self) -> Optional[_DTBoth]:
         return self.due
 
     def get_duration(self) -> Optional[Duration]:
@@ -76,7 +87,7 @@ class VToDo(AbstractStartStopComponent):
 
 
 @dataclass(repr=False)
-class VRecurringToDo(AbstractRecurringComponent[VToDo], VToDo):
+class VRecurringToDo(AbstractRecurringComponent, VToDo):
     def __init__(self, original_component_instance: VToDo, start: DateTime, end: DateTime):
         super(VToDo, self).__init__()
         self._parent = original_component_instance

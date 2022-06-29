@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from typing import Optional, List
+from typing import List, Optional
 
 from ical_reader.base_classes.calendar_component import CalendarComponent
-from ical_reader.ical_properties.cal_address import Organizer, Attendee
-from ical_reader.ical_properties.dt import DTStamp, DTEnd, DTStart
-from ical_reader.ical_properties.pass_properties import Contact, UID, URL, RStatus, Comment
+from ical_reader.ical_properties.cal_address import Attendee, Organizer
+from ical_reader.ical_properties.dt import DTEnd, DTStamp, DTStart
+from ical_reader.ical_properties.pass_properties import Comment, Contact, RStatus, UID, URL
 from ical_reader.ical_properties.periods import FreeBusyProperty
 
 

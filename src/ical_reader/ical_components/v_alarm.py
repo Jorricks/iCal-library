@@ -3,9 +3,8 @@ from typing import Optional
 
 from ical_reader.base_classes.calendar_component import CalendarComponent
 from ical_reader.base_classes.property import Property
-
 from ical_reader.ical_properties.ical_duration import ICALDuration
-from ical_reader.ical_properties.pass_properties import Attach, Action
+from ical_reader.ical_properties.pass_properties import Action, Attach
 from ical_reader.ical_properties.repeat import Repeat
 from ical_reader.ical_properties.trigger import Trigger
 
@@ -27,4 +26,3 @@ class VAlarm(CalendarComponent):
 
     def __repr__(self) -> str:
         return f"VAlarm({self.action.value}: {self.trigger.value})"
-

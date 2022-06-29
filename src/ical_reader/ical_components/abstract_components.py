@@ -1,24 +1,28 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional, List, TypeVar, Union, TYPE_CHECKING, Any, Generic
+from typing import Any, Generic, List, Optional, TYPE_CHECKING, TypeVar, Union
 
 from pendulum import Date, DateTime, Duration, Period
 
 from ical_reader.base_classes.calendar_component import CalendarComponent
 from ical_reader.base_classes.property import Property
 from ical_reader.help_classes.timespan import TimespanWithParent
-from ical_reader.ical_properties.dt import DTStamp, DTStart, _DTBoth
-from ical_reader.ical_properties.pass_properties import UID, Summary, Comment
+from ical_reader.ical_properties.dt import _DTBoth, DTStamp, DTStart
+from ical_reader.ical_properties.pass_properties import Comment, Summary, UID
 from ical_reader.ical_properties.periods import EXDate, RDate
 from ical_reader.ical_properties.rrule import RRule
 from ical_reader.ical_utils.lru_cache import instance_lru_cache
 
 if TYPE_CHECKING:
     from ical_reader.ical_components.v_event import VEvent  # noqa: F401
-    from ical_reader.ical_components.v_todo import VToDo  # noqa: F401
     from ical_reader.ical_components.v_journal import VJournal  # noqa: F401
+    from ical_reader.ical_components.v_todo import VToDo  # noqa: F401
 
-T = TypeVar("T", "VEvent", "VToDo", )
+T = TypeVar(
+    "T",
+    "VEvent",
+    "VToDo",
+)
 
 
 @dataclass(repr=False)
@@ -29,6 +33,7 @@ class AbstractStartStopComponent(CalendarComponent, ABC):
     Note: The out one out here is VJournal as these events don't have a duration.
     Therefore,
     """
+
     # Required
     dtstamp: Optional[DTStamp] = None
     uid: Optional[UID] = None
@@ -51,7 +56,7 @@ class AbstractStartStopComponent(CalendarComponent, ABC):
 
     @abstractmethod
     def get_duration(self) -> Optional[Duration]:
-        """As the duration is not present in each of them, we ask this to be implemented.."""
+        """As the duration is not present in each of them, we ask this to be implemented."""
         pass
 
     @staticmethod
@@ -75,37 +80,37 @@ class AbstractStartStopComponent(CalendarComponent, ABC):
                 return False
         return True
 
-    def __eq__(self: T, other: T) -> bool:
+    def __eq__(self: "AbstractStartStopComponent", other: "AbstractStartStopComponent") -> bool:
         return (
-                self.compare_property_value(self.dtstart, other.dtstart) and
-                self.compare_property_value(self.ending, other.ending) and
-                self.compare_property_value(self.summary, other.summary) and
-                self.compare_property_list(self.comment, other.comment)
+            self.compare_property_value(self.dtstart, other.dtstart)
+            and self.compare_property_value(self.ending, other.ending)
+            and self.compare_property_value(self.summary, other.summary)
+            and self.compare_property_list(self.comment, other.comment)
         )
 
     @property
-    def timespan(self: T) -> TimespanWithParent:
+    def timespan(self) -> TimespanWithParent:
         if self.start is None or self.end is None:
             raise ValueError(f"{self.start=} and {self.end=} may not be None.")
         return TimespanWithParent(parent=self, begin=self.start, end=self.end)
 
     @property
     @instance_lru_cache()
-    def start(self: T) -> Union[Date, DateTime]:
+    def start(self) -> Union[Date, DateTime]:
         return self.dtstart.datetime_or_date_value
 
     @property
     @instance_lru_cache()
-    def end(self: T) -> Optional[Union[Date, DateTime]]:
+    def end(self) -> Optional[Union[Date, DateTime]]:
         if self.ending:
             return self.ending.datetime_or_date_value
-        elif self.duration and self.start:
-            return self.start + self.duration.duration
-        return self.dtend.datetime_or_date_value if self.dtend else None
+        elif self.start and self.get_duration():
+            return self.start + self.get_duration()
+        return None
 
     @property
     @instance_lru_cache()
-    def computed_duration(self: T) -> Optional[Duration]:
+    def computed_duration(self: "AbstractStartStopComponent") -> Optional[Duration]:
         if a_duration := self.get_duration():
             return a_duration
         elif self.end and self.start:
@@ -115,7 +120,7 @@ class AbstractStartStopComponent(CalendarComponent, ABC):
 
 
 @dataclass(repr=False)
-class AbstractRecurringComponent(Generic[T]):
+class AbstractRecurringComponent(AbstractStartStopComponent, ABC):
     def __getattribute__(self, name: str) -> Any:
         if name in ("_start", "_end", "_original", "_parent", "start", "end", "original", "parent"):
             return object.__getattribute__(self, name)
@@ -134,7 +139,7 @@ class AbstractRecurringComponent(Generic[T]):
         return self._end
 
     @property
-    def original(self) -> T:
+    def original(self) -> AbstractStartStopComponent:
         return self._original
 
     @property

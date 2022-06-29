@@ -1,17 +1,17 @@
 from dataclasses import dataclass, field
-from typing import Optional, List, Tuple, Union, Iterator, Dict
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 
-from pendulum import DateTime, Date
+from pendulum import Date, DateTime
 
-from ical_reader.base_classes.property import Property
 from ical_reader.base_classes.calendar_component import CalendarComponent
+from ical_reader.base_classes.property import Property
 from ical_reader.help_classes.timespan import Timespan
-from ical_reader.ical_properties.dt import LastModified, DTStart
-from ical_reader.ical_properties.pass_properties import Comment, TZName, TZID, TZURL
+from ical_reader.ical_properties.dt import DTStart, LastModified
+from ical_reader.ical_properties.pass_properties import Comment, TZID, TZName, TZURL
 from ical_reader.ical_properties.periods import RDate
 from ical_reader.ical_properties.rrule import RRule
-from ical_reader.ical_properties.tz_offset import TZOffsetTo, TZOffsetFrom
-from ical_reader.ical_utils import property_utils, dt_utils
+from ical_reader.ical_properties.tz_offset import TZOffsetFrom, TZOffsetTo
+from ical_reader.ical_utils import dt_utils, property_utils
 
 
 @dataclass(repr=False)
@@ -39,7 +39,7 @@ class _TimeOffsetPeriod(CalendarComponent):
             rrule=self.rrule,
             first_event_start=self.timezone_aware_start(),
             return_range=Timespan(self.dtstart.datetime_or_date_value, max_datetime),
-            make_tz_aware=self.tzoffsetfrom.as_timezone_object()
+            make_tz_aware=self.tzoffsetfrom.as_timezone_object(),
         ):
             if not isinstance(rtime, DateTime):
                 raise TypeError(f"{rtime} was expected to be a DateTime object.")
@@ -70,9 +70,7 @@ class VTimeZone(CalendarComponent):
 
     __storage_of_results: Dict[DateTime, List[Tuple[DateTime, _TimeOffsetPeriod]]] = field(default_factory=dict)
 
-    def get_ordered_timezone_overview(
-        self, max_datetime: DateTime
-    ) -> List[Tuple[DateTime, _TimeOffsetPeriod]]:
+    def get_ordered_timezone_overview(self, max_datetime: DateTime) -> List[Tuple[DateTime, _TimeOffsetPeriod]]:
         if max_datetime in self.__storage_of_results.keys():
             return self.__storage_of_results[max_datetime]
         all_timezones: List[Tuple[Union[DateTime, Date], _TimeOffsetPeriod]] = []

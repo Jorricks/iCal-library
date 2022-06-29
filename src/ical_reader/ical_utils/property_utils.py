@@ -1,6 +1,6 @@
-from typing import Set, Union, Optional, Iterator, List, Tuple
+from typing import Iterator, List, Optional, Set, Tuple, Union
 
-from pendulum import DateTime, Date, Duration
+from pendulum import Date, DateTime, Duration
 from pendulum.tz.timezone import Timezone
 
 from ical_reader.help_classes.timespan import Timespan
@@ -90,7 +90,7 @@ def expand_event_in_range_only_return_first(
         excluded_times_set=excluded_times_set,
         first_event_duration=Duration(),
         return_range=return_range,
-        make_tz_aware=make_tz_aware
+        make_tz_aware=make_tz_aware,
     )
     rdate: Union[Tuple[Date, Date], Tuple[DateTime, DateTime]]
     for rdate_start, rdate_ending in iterator:
@@ -101,7 +101,7 @@ def expand_event_in_range_only_return_first(
         excluded_times_set=set(),
         first_event_start=first_event_start,
         return_range=return_range,
-        make_tz_aware=make_tz_aware
+        make_tz_aware=make_tz_aware,
     )
     rrule_time: Union[Date, DateTime]
     for rrule_time in iterator:
@@ -127,9 +127,7 @@ def expand_component_in_range(
     """
     # @ToDo(jorrick) improve upon this time filter.
     excluded_times_set: Union[Set[DateTime], Set[Date]] = _compute_exdates(
-        exdate_list=exdate_list,
-        return_range=return_range,
-        make_tz_aware=make_tz_aware
+        exdate_list=exdate_list, return_range=return_range, make_tz_aware=make_tz_aware
     )
 
     iterator = _yield_rdate_list(
@@ -137,7 +135,7 @@ def expand_component_in_range(
         excluded_times_set=excluded_times_set,
         first_event_duration=first_event_duration,
         return_range=return_range,
-        make_tz_aware=make_tz_aware
+        make_tz_aware=make_tz_aware,
     )
     rdate: Union[Tuple[Date, Date], Tuple[DateTime, DateTime]]
     for rdate in iterator:
@@ -148,7 +146,7 @@ def expand_component_in_range(
         excluded_times_set=excluded_times_set,
         first_event_start=first_event_start,
         return_range=return_range,
-        make_tz_aware=make_tz_aware
+        make_tz_aware=make_tz_aware,
     )
     rrule_time: Union[Date, DateTime]
     for rrule_time in iterator:

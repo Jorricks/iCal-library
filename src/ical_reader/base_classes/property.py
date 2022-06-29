@@ -1,5 +1,5 @@
 import re
-from typing import Optional, Dict, TYPE_CHECKING
+from typing import Dict, Optional, TYPE_CHECKING
 
 from ical_reader.base_classes.base_class import ICalBaseClass
 from ical_reader.ical_utils.lru_cache import instance_lru_cache
@@ -37,6 +37,9 @@ class Property(ICalBaseClass):
         return key in self.sub_properties
 
     def get_sub_property(self, key: str, default: Optional[str] = None) -> Optional[str]:
+        return self.sub_properties.get(key, default)
+
+    def get_sub_property_default(self, key: str, default: str) -> str:
         return self.sub_properties.get(key, default)
 
     @property

@@ -1,17 +1,29 @@
 from dataclasses import dataclass
-from typing import Optional, List, Iterator
+from typing import Iterator, List, Optional
 
 from pendulum import DateTime, Duration
 
 from ical_reader.help_classes.timespan import Timespan
-from ical_reader.ical_components.abstract_components import AbstractStartStopComponent, AbstractRecurringComponent
-from ical_reader.ical_properties.cal_address import Organizer, Attendee
-from ical_reader.ical_properties.dt import Created, LastModified, DTEnd, RecurrenceID, _DTBoth
+from ical_reader.ical_components.abstract_components import AbstractRecurringComponent, AbstractStartStopComponent
+from ical_reader.ical_properties.cal_address import Attendee, Organizer
+from ical_reader.ical_properties.dt import _DTBoth, Created, DTEnd, LastModified, RecurrenceID
 from ical_reader.ical_properties.geo import GEO
 from ical_reader.ical_properties.ical_duration import ICALDuration
 from ical_reader.ical_properties.ints import Priority, Sequence
-from ical_reader.ical_properties.pass_properties import Resources, Related, RStatus, Contact, Categories, Attach, URL, \
-    TransP, Status, Location, Description, Class
+from ical_reader.ical_properties.pass_properties import (
+    Attach,
+    Categories,
+    Class,
+    Contact,
+    Description,
+    Location,
+    Related,
+    Resources,
+    RStatus,
+    Status,
+    TransP,
+    URL,
+)
 from ical_reader.ical_properties.rrule import RRule
 from ical_reader.ical_utils import property_utils
 
@@ -49,7 +61,7 @@ class VEvent(AbstractStartStopComponent):
         return f"VEvent({self.start} - {self.end}: {self.summary.value if self.summary else ''})"
 
     @property
-    def ending(self) -> _DTBoth:
+    def ending(self) -> Optional[_DTBoth]:
         return self.dtend
 
     def get_duration(self) -> Optional[Duration]:
@@ -76,7 +88,7 @@ class VEvent(AbstractStartStopComponent):
 
 
 @dataclass(repr=False)
-class VRecurringEvent(AbstractRecurringComponent[VEvent], VEvent):
+class VRecurringEvent(AbstractRecurringComponent, VEvent):
     def __init__(self, original_component_instance: VEvent, start: DateTime, end: DateTime):
         super(VEvent, self).__init__()
         self._parent = original_component_instance
