@@ -5,7 +5,7 @@ The ICal reader module provides easy access to iCalenders with full support for 
 
 Installation
 ============
-dateutil can be installed from PyPI using pip (note that the package name is different from the importable name)::
+ical-reader can be installed from PyPI using pip (note that the package name is different from the importable name)::
 
     pip install ical-reader
 
