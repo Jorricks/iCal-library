@@ -9,7 +9,7 @@ from ical_reader.base_classes.property import Property
 class Trigger(Property):
     @property
     def kind(self) -> Literal["DATE-TIME", "DURATION"]:
-        kind_of_value = self.get_sub_property("VALUE")
+        kind_of_value = self.get_property_parameter("VALUE")
         return "DATE-TIME" if kind_of_value and kind_of_value == "DATE-TIME" else "DURATION"  # noqa
 
     def parse_value(self) -> Union[Duration, DateTime]:
@@ -25,4 +25,4 @@ class Trigger(Property):
             return parsed_value
 
     def trigger_relation(self) -> Literal["START", "END"]:
-        return "START" if self.get_sub_property("RELATED", "START") == "START" else "END"  # noqa
+        return "START" if self.get_property_parameter("RELATED", "START") == "START" else "END"  # noqa

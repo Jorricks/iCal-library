@@ -3,7 +3,7 @@ from typing import List, Optional, Tuple
 
 from pendulum import DateTime
 
-from ical_reader.base_classes.calendar_component import CalendarComponent
+from ical_reader.base_classes.component import Component
 from ical_reader.ical_components.v_event import VEvent
 from ical_reader.ical_components.v_free_busy import VFreeBusy
 from ical_reader.ical_components.v_journal import VJournal
@@ -14,7 +14,7 @@ from ical_reader.timeline import Timeline
 
 
 @dataclass
-class VCalendar(CalendarComponent):
+class VCalendar(Component):
     """This class represents the VCALENDER component specified in RFC 5545 in '3.6. Calendar Components'."""
 
     # Required properties, only one occurrence allowed.
@@ -34,7 +34,7 @@ class VCalendar(CalendarComponent):
     _lines: Optional[List[str]] = None
 
     @property
-    def children(self) -> Tuple["CalendarComponent", ...]:
+    def children(self) -> Tuple["Component", ...]:
         return (
             *self.events,
             *self.todos,
@@ -44,7 +44,7 @@ class VCalendar(CalendarComponent):
             *[child for list_of_children in self._extra_child_components.values() for child in list_of_children],
         )
 
-    def add_child(self, child: "CalendarComponent") -> None:
+    def add_child(self, child: "Component") -> None:
         if isinstance(child, VEvent):
             self.events.append(child)
             child.set_parent(self)

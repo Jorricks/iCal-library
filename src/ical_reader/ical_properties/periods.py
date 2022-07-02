@@ -73,7 +73,7 @@ class FreeBusyProperty(_PeriodFunctionality):
 
     @property
     def free_busy_type(self):
-        return self.get_sub_property("FBTYPE", "BUSY")
+        return self.get_property_parameter("FBTYPE", "BUSY")
 
     @property
     def all_values(self) -> List[Tuple[DateTime, DateTime]]:
@@ -83,7 +83,7 @@ class FreeBusyProperty(_PeriodFunctionality):
 class EXDate(_ExOrRDate):
     @property
     def kind(self) -> Optional[Literal["DATE-TIME", "DATE"]]:
-        return self.sub_properties.get("VALUE", "DATE-TIME")
+        return self.property_parameters.get("VALUE", "DATE-TIME")
 
     @property
     def all_values(self) -> Union[List[DateTime], List[Date]]:
@@ -98,7 +98,7 @@ class EXDate(_ExOrRDate):
 class RDate(_ExOrRDate):
     @property
     def kind(self) -> Optional[Literal["DATE-TIME", "DATE", "PERIOD"]]:
-        return self.sub_properties.get("VALUE", "DATE-TIME")
+        return self.property_parameters.get("VALUE", "DATE-TIME")
 
     @property
     def all_values(self) -> Union[List[DateTime], List[Date], List[Tuple[DateTime, DateTime]]]:
