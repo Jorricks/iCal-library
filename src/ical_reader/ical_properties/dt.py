@@ -12,7 +12,7 @@ class _DTBoth(Property):
     def datetime_or_date_value(self) -> Union[Date, DateTime]:
         value = dt_utils.parse_date_or_datetime(self.value)
         if isinstance(value, DateTime):
-            tz_id = self.get_sub_property("TZID", None)
+            tz_id = self.get_property_parameter("TZID", None)
             if value.tz or not tz_id:
                 return value
             return self.parent.tree_root.get_aware_dt_for_timezone(dt=value, tzid=tz_id)
@@ -26,7 +26,7 @@ class _DTSingular(Property):
     @property
     def datetime(self) -> DateTime:
         value = pendulum.parse(self.value, tz=None)
-        tz_id = self.get_sub_property("TZID", None)
+        tz_id = self.get_property_parameter("TZID", None)
         if value.tz or not tz_id:
             return value
         return self.parent.tree_root.get_aware_dt_for_timezone(dt=value, tzid=tz_id)

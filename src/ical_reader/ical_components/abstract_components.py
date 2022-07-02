@@ -4,7 +4,7 @@ from typing import Any, List, Optional, TYPE_CHECKING, TypeVar, Union
 
 from pendulum import Date, DateTime, Duration, Period
 
-from ical_reader.base_classes.calendar_component import CalendarComponent
+from ical_reader.base_classes.component import Component
 from ical_reader.base_classes.property import Property
 from ical_reader.help_classes.timespan import TimespanWithParent
 from ical_reader.ical_properties.dt import _DTBoth, DTStamp, DTStart
@@ -26,12 +26,16 @@ T = TypeVar(
 
 
 @dataclass(repr=False)
-class AbstractStartStopComponent(CalendarComponent, ABC):
+class AbstractStartStopComponent(Component, ABC):
     """
-    This class helps with Events that have recurring properties luke rrule, rdate and exdate.
+    This class helps avoid code repetition with different :class:`Component` classes.
 
-    Note: The out one out here is VJournal as these events don't have a duration.
-    Therefore,
+    Tthat have recurring properties
+    like :class:`RRule`, :class:`RDate` and :class:`EXDate`.
+
+    This class is inherited by VEvent, VToDo and VJournal as these all have recurring properties like :class:`RRule`,
+    :class:`RDate` and :class:`EXDate`. All properties they had in common are part of this class.
+    Note: VJournal is the odd one out as these events don't have a duration.
     """
 
     # Required
@@ -51,16 +55,30 @@ class AbstractStartStopComponent(CalendarComponent, ABC):
     @property
     @abstractmethod
     def ending(self) -> _DTBoth:
-        """As the argument for this is different in each class, we ask this to be implemented."""
+        """
+        As the argument for this is different in each class, we ask this to be implemented.
+
+        :return: The ending of the :class:`Component`, except for :class:`VJournal` which returns the start.
+        """
         pass
 
     @abstractmethod
     def get_duration(self) -> Optional[Duration]:
-        """As the duration is not present in each of them, we ask this to be implemented."""
+        """
+        As the duration is not present in each of them, we ask this to be implemented by the subclasses.
+
+        :return: The duration of the :class:`Component`.
+        """
         pass
 
     @staticmethod
     def compare_property_value(own: Property, others: Property) -> bool:
+        """
+        Compare two properties for whether they are the same.
+        :param own: The instance own property.
+        :param others: A property of another :class:`Component` instance.
+        :return: Boolean of whether they are the same.
+        """
         if not own and others or own and not others:
             return False
         if own and others and own.as_original_string != others.as_original_string:
@@ -69,6 +87,12 @@ class AbstractStartStopComponent(CalendarComponent, ABC):
 
     @staticmethod
     def compare_property_list(own: List[Property], others: List[Property]) -> bool:
+        """
+        Compare a list of two properties for whether they are the same.
+        :param own: The list of properties from the :class:`Component` instance itself.
+        :param others: A list of properties from the other :class:`Component` instance.
+        :return: Boolean of whether they are the same.
+        """
         if not own and others or own and not others:
             return False
         if not own and not others:
@@ -90,6 +114,10 @@ class AbstractStartStopComponent(CalendarComponent, ABC):
 
     @property
     def timespan(self) -> TimespanWithParent:
+        """
+        Return a timespan as a property representing the start and end of the instance.
+        :return: A timespan instance with this class instance as parent.
+        """
         if self.start is None or self.end is None:
             raise ValueError(f"{self.start=} and {self.end=} may not be None.")
         return TimespanWithParent(parent=self, begin=self.start, end=self.end)
@@ -143,5 +171,5 @@ class AbstractRecurringComponent(AbstractStartStopComponent, ABC):
         return self._original
 
     @property
-    def parent(self) -> "CalendarComponent":
+    def parent(self) -> "Component":
         return self._original._parent

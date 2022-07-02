@@ -5,15 +5,15 @@ from dateutil import rrule as base_for_time_periods
 from dateutil.rrule import rrule, weekday
 from pendulum import Date, DateTime
 
-from ical_reader.base_classes.calendar_component import CalendarComponent
+from ical_reader.base_classes.component import Component
 from ical_reader.base_classes.property import Property
 from ical_reader.ical_utils import dt_utils
 from ical_reader.ical_utils.lru_cache import instance_lru_cache
 
 
 class RRule(Property):
-    def __init__(self, parent: CalendarComponent, name: str, sub_properties: str, value: str):
-        super().__init__(parent=parent, name=name, sub_properties=sub_properties, value=value)
+    def __init__(self, parent: Component, name: str, property_parameters: str, value: str):
+        super().__init__(parent=parent, name=name, property_parameters=property_parameters, value=value)
 
     @property
     @instance_lru_cache()

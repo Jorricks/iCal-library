@@ -3,7 +3,7 @@ from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 from pendulum import Date, DateTime
 
-from ical_reader.base_classes.calendar_component import CalendarComponent
+from ical_reader.base_classes.component import Component
 from ical_reader.help_classes.timespan import Timespan
 from ical_reader.ical_properties.dt import DTStart, LastModified
 from ical_reader.ical_properties.pass_properties import Comment, TZID, TZName, TZURL
@@ -14,7 +14,7 @@ from ical_reader.ical_utils import dt_utils, property_utils
 
 
 @dataclass(repr=False)
-class _TimeOffsetPeriod(CalendarComponent):
+class _TimeOffsetPeriod(Component):
     # Required
     dtstart: Optional[DTStart] = None
     tzoffsetto: Optional[TZOffsetTo] = None
@@ -56,7 +56,7 @@ class Standard(_TimeOffsetPeriod):
 
 
 @dataclass
-class VTimeZone(CalendarComponent):
+class VTimeZone(Component):
     """This class represents the VTIMEZONE component specified in RFC 5545 in '3.6.5. Time Zone Component'."""
 
     # Fully done AFAIK.. Remains to be verified though.

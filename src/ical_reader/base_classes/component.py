@@ -30,24 +30,24 @@ T = TypeVar("T")
 
 
 @dataclass(repr=False)
-class CalendarComponent(ICalBaseClass):
+class Component(ICalBaseClass):
     """
-    This is the base class for any Component (according to the RFC 5545 specification) in ical-reader.
+    This is the base class for any component (according to the RFC 5545 specification) in ical-reader.
 
-    Inside all Components (so also all classes inheriting this class, e.g. VEvent) there are four kind of variables:
+    Inside all components (so also all classes inheriting this class, e.g. VEvent) there are four kind of variables:
     - variables that start with _. These are specific to the class and not directly related to a property or
      component from iCalendar.
-    - variables that have a type of List[x] and a default value of List. These are child components of the corresponding
-     class. These components may or may not be required to be present in the iCal file.
-    - variables that have a type of Optional[List[x]]. These are properties of the corresponding Component. They can
-     be either optional or required and may occur multiple times in the iCal file.
-    - variables that have a type of Optional[x] (and not Optional[List[x]]). These are properties of the corresponding
-     Component. They can be either optional or required, but may only occur once in the iCal file.
+    - variables that have a type of List[x] and a default value of List. These are child components/properties of
+    the instance. These components/properties may or may not be required to be present in the iCal file.
+    - variables that have a type of Optional[List[x]]. These are components/properties of the instance.
+    They can be either optional or required and may occur multiple times in the iCal file.
+    - variables that have a type of Optional[x] (and not Optional[List[x]]). These are properties of the instance.
+    They can be either optional or required, but may only occur once in the iCal file.
     """
 
     _name: Optional[str] = None
-    _parent: Optional["CalendarComponent"] = None
-    _extra_child_components: Dict[str, List["CalendarComponent"]] = field(default_factory=lambda: defaultdict(list))
+    _parent: Optional["Component"] = None
+    _extra_child_components: Dict[str, List["Component"]] = field(default_factory=lambda: defaultdict(list))
     _extra_properties: Dict[str, List[Property]] = field(default_factory=lambda: defaultdict(list))
     _parse_line_start: Optional[int] = 0
     _parse_line_end: Optional[int] = 0
@@ -61,7 +61,7 @@ class CalendarComponent(ICalBaseClass):
         return self._name
 
     @property
-    def extra_child_components(self) -> Dict[str, List["CalendarComponent"]]:
+    def extra_child_components(self) -> Dict[str, List["Component"]]:
         return self._extra_child_components
 
     @property
@@ -69,10 +69,10 @@ class CalendarComponent(ICalBaseClass):
         return self._extra_properties
 
     @property
-    def parent(self) -> Optional["CalendarComponent"]:
+    def parent(self) -> Optional["Component"]:
         return self._parent
 
-    def set_parent(self, parent: "CalendarComponent") -> None:
+    def set_parent(self, parent: "Component") -> None:
         if self._parent is not None:
             raise ValueError(f"Can not overwrite the parent of {self} to {parent=}")
         self._parent = parent
@@ -89,7 +89,7 @@ class CalendarComponent(ICalBaseClass):
         return instance
 
     @property
-    def children(self) -> List["CalendarComponent"]:
+    def children(self) -> List["Component"]:
         children = [child for list_of_children in self._extra_child_components.values() for child in list_of_children]
         children.extend(
             item_in_list
@@ -98,7 +98,7 @@ class CalendarComponent(ICalBaseClass):
         )
         return children
 
-    def add_child(self, child: "CalendarComponent") -> None:
+    def add_child(self, child: "Component") -> None:
         child.set_parent(self)
         child_component_mapping = self._get_child_component_mapping()
         if child._name in child_component_mapping:
@@ -132,16 +132,15 @@ class CalendarComponent(ICalBaseClass):
                 return a_type.get_ical_name_of_class(), (var_name, a_type, is_in_list)
             return None
         elif get_origin(a_type) == Union:  # This also covers the Optional case.
-            sub_class = CalendarComponent._extract_ical_class_from_args(var_name, a_type)
-            return CalendarComponent._extract_type_information(var_name, sub_class, is_in_list)
+            sub_class = Component._extract_ical_class_from_args(var_name, a_type)
+            return Component._extract_type_information(var_name, sub_class, is_in_list)
         elif issubclass(get_origin(a_type), List):
-            sub_class = CalendarComponent._extract_ical_class_from_args(var_name, a_type)
-            return CalendarComponent._extract_type_information(var_name, sub_class, True)
+            sub_class = Component._extract_ical_class_from_args(var_name, a_type)
+            return Component._extract_type_information(var_name, sub_class, True)
         elif get_origin(a_type) == ClassVar:
             return None
         else:
-            print(f"Unknown type '{a_type}' came by in CalendarComponent.extract_custom_type.")
-            return None
+            raise TypeError(f"Unknown type '{a_type}' came by in Component.extract_custom_type.")
 
     @classmethod
     @lru_cache()
@@ -150,7 +149,7 @@ class CalendarComponent(ICalBaseClass):
         for a_field in dataclasses.fields(cls):
             if a_field.name.startswith("_"):
                 continue
-            result = CalendarComponent._extract_type_information(a_field.name, a_field.type, False)
+            result = Component._extract_type_information(a_field.name, a_field.type, False)
             if result is None:
                 continue
             ical_name, var_type_info = result
@@ -169,11 +168,11 @@ class CalendarComponent(ICalBaseClass):
 
     @classmethod
     @lru_cache()
-    def _get_child_component_mapping(cls) -> Mapping[str, Tuple[str, Type["CalendarComponent"], bool]]:
+    def _get_child_component_mapping(cls) -> Mapping[str, Tuple[str, Type["Component"], bool]]:
         return {
             ical_name: var_tuple
             for ical_name, var_tuple in cls._get_var_mapping().items()
-            if issubclass(var_tuple[1], CalendarComponent)
+            if issubclass(var_tuple[1], Component)
         }
 
     @property
@@ -200,22 +199,26 @@ class CalendarComponent(ICalBaseClass):
         result = re.search("([^\r\n;:]+)(;[^\r\n:]+)?:(.*)", line)
         if result is None:
             raise ValueError(f"{result=} should never be None!")
-        name, sub_properties, value = result.group(1), result.group(2), result.group(3)
+        name, property_parameters, value = result.group(1), result.group(2), result.group(3)
         if name in property_mapping.keys():
             var_name, var_type, is_list = property_mapping[name]
             if is_list:
-                property_instance = var_type(parent=self, name=name, sub_properties=sub_properties, value=value)
+                property_instance = var_type(
+                    parent=self, name=name, property_parameters=property_parameters, value=value
+                )
                 if getattr(self, var_name) is None:
                     setattr(self, var_name, [property_instance])
                 else:
                     current_value: List[Property] = getattr(self, var_name)
                     current_value.append(property_instance)
             else:
-                property_instance = var_type(parent=self, name=name, sub_properties=sub_properties, value=value)
+                property_instance = var_type(
+                    parent=self, name=name, property_parameters=property_parameters, value=value
+                )
                 setattr(self, var_name, property_instance)
         else:
             pythonic_name = name.lower().replace("-", "_")
-            property_instance = Property(parent=self, name=name, sub_properties=sub_properties, value=value)
+            property_instance = Property(parent=self, name=name, property_parameters=property_parameters, value=value)
             self._extra_properties[pythonic_name].append(property_instance)
 
     def parse_component_section(self, lines: List[str], line_number: int) -> int:
@@ -227,9 +230,9 @@ class CalendarComponent(ICalBaseClass):
                 component_name = current_line[len("BEGIN:") :]
                 if component_name in component_mapping:
                     var_name, var_type, is_list = component_mapping[component_name]
-                    instance: "CalendarComponent" = var_type()
+                    instance: "Component" = var_type()
                 else:
-                    instance: "CalendarComponent" = CalendarComponent()
+                    instance: "Component" = Component()
                 instance._name = component_name
                 self.add_child(instance)
                 line_number = instance.parse_component_section(lines=lines, line_number=line_number)
