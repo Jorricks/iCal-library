@@ -15,7 +15,7 @@ from ical_reader.ical_utils import dt_utils, property_utils
 
 @dataclass(repr=False)
 class _TimeOffsetPeriod(Component):
-    # Required
+    # Required, must occur only once.
     dtstart: Optional[DTStart] = None
     tzoffsetto: Optional[TZOffsetTo] = None
     tzoffsetfrom: Optional[TZOffsetFrom] = None
@@ -27,12 +27,18 @@ class _TimeOffsetPeriod(Component):
     tzname: Optional[List[TZName]] = None
 
     def timezone_aware_start(self) -> DateTime:
+        """Return a timezone aware start."""
         dt: DateTime = dt_utils.convert_time_object_to_datetime(self.dtstart.datetime_or_date_value)
         return dt.in_timezone(tz=self.tzoffsetfrom.as_timezone_object())
 
     def get_time_sequence(
         self, max_datetime: Optional[DateTime] = None
     ) -> Iterator[Tuple[DateTime, "_TimeOffsetPeriod"]]:
+        """
+        Expand the TimeZone start date according to its recurring *RDate* and *RRule* properties.
+        :param max_datetime: The maximum datetime value we wish to expand to.
+        :return: Yield all the datetime values according to the recurring properties that are lower than *max_datetime*.
+        """
         for rtime in property_utils.expand_event_in_range_only_return_first(
             rdate_list=self.rdate or [],
             rrule=self.rrule,
@@ -47,11 +53,15 @@ class _TimeOffsetPeriod(Component):
 
 @dataclass
 class DayLight(_TimeOffsetPeriod):
+    """A TimeOffsetPeriod representing a DayLight(a.k.a. Advanced Time, Summer Time or Legal Time) configuration."""
+
     pass
 
 
 @dataclass
 class Standard(_TimeOffsetPeriod):
+    """A TimeOffsetPeriod representing a Standard(a.k.a. Winter Time) configuration."""
+
     pass
 
 
@@ -59,7 +69,6 @@ class Standard(_TimeOffsetPeriod):
 class VTimeZone(Component):
     """This class represents the VTIMEZONE component specified in RFC 5545 in '3.6.5. Time Zone Component'."""
 
-    # Fully done AFAIK.. Remains to be verified though.
     # Required properties, must occur one.
     tzid: Optional[TZID] = None
     # Optional properties, may only occur once.
@@ -72,6 +81,12 @@ class VTimeZone(Component):
     __storage_of_results: Dict[DateTime, List[Tuple[DateTime, _TimeOffsetPeriod]]] = field(default_factory=dict)
 
     def get_ordered_timezone_overview(self, max_datetime: DateTime) -> List[Tuple[DateTime, _TimeOffsetPeriod]]:
+        """
+        Expand all TimeOffsetPeriod configuration and return them in an ordered by time fashion.
+        :param max_datetime: The maximum datetime value we wish to expand to.
+        :return: A sorted list on datetime containing tuples of datetime and offset period where the datetime is
+        lower than *max_datetime*.
+        """
         if max_datetime in self.__storage_of_results.keys():
             return self.__storage_of_results[max_datetime]
         all_timezones: List[Tuple[Union[DateTime, Date], _TimeOffsetPeriod]] = []
@@ -84,6 +99,11 @@ class VTimeZone(Component):
         return sorted_list
 
     def convert_naive_datetime_to_aware(self, dt: DateTime) -> DateTime:
+        """
+        Convert a naive datetime to an aware datetime using the configuration of this TimeZone object.
+        :param dt: The (possibly naive) datetime to convert to this timezone configuration.
+        :return: The timezone aware datetime.
+        """
         if dt.tzinfo is not None:
             return dt
 

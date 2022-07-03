@@ -11,6 +11,7 @@ from ical_reader.ical_utils import dt_utils
 from ical_reader.ical_utils.lru_cache import instance_lru_cache
 
 
+# @ToDo(jorrick) add doc strings here.
 class RRule(Property):
     def __init__(self, parent: Component, name: str, property_parameters: str, value: str):
         super().__init__(parent=parent, name=name, property_parameters=property_parameters, value=value)

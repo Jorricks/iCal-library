@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from ical_reader.ical_components.v_calendar import VCalendar
 
 
+# @ToDo(jorrick) add doc strings here.
 class Timeline:
     def __init__(
         self, v_calendar: "VCalendar", start_date: Optional[DateTime] = None, end_date: Optional[DateTime] = None
@@ -20,8 +21,8 @@ class Timeline:
         self._start_date: DateTime = start_date or DateTime(1970, 1, 1)
         self._end_date: DateTime = end_date or DateTime(2100, 1, 1)
 
-    # @ToDo(jorrick) also allow ToDo & Journal expansions.
-    # @ToDo(jorrick) inside the RRule, compute an estimated end_date so we can skip many right away.
+    # @ToDo also allow ToDo & Journal expansions.
+    # @ToDo inside the RRule, compute an estimated end_date so we can skip many right away.
 
     @property
     def start_date(self):

@@ -3,6 +3,7 @@ from typing import List
 from ical_reader.ical_components.v_calendar import VCalendar
 
 
+# @ToDo(jorrick) implement methods to get it from online.
 def get_calendar(lines: List[str]) -> VCalendar:
     """Given all the lines of the iCalendar file, return a VCalendar instance."""
     new_instance = VCalendar()

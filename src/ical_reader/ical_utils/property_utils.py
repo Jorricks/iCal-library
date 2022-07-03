@@ -9,6 +9,7 @@ from ical_reader.ical_properties.rrule import RRule
 from ical_reader.ical_utils import dt_utils
 
 
+# @ToDo(jorrick) add doc strings here.
 def _handle_tz(dt: Union[DateTime, Date], make_tz_aware: Optional[Timezone]) -> Union[DateTime, Date]:
     if make_tz_aware:
         return dt_utils.convert_time_object_to_aware_datetime(dt, make_tz_aware)

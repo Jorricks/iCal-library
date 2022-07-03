@@ -6,6 +6,7 @@ from pendulum.tz import get_local_timezone
 from pendulum.tz.timezone import Timezone
 
 
+# @ToDo(jorrick) add doc strings here.
 def parse_date_or_datetime(value: str) -> Union[Date, DateTime]:
     """Parse a string into a pendulum.Date or pendulum.Datetime."""
     if len(value) == 8:

@@ -17,11 +17,11 @@ from ical_reader.ical_properties.pass_properties import (
     Contact,
     Description,
     Location,
-    Related,
+    RelatedTo,
+    RequestStatus,
     Resources,
-    RStatus,
     Status,
-    TransP,
+    TimeTransparency,
     URL,
 )
 from ical_reader.ical_properties.rrule import RRule
@@ -30,7 +30,11 @@ from ical_reader.ical_utils import property_utils
 
 @dataclass(repr=False)
 class VEvent(AbstractStartStopComponent):
-    """This class represents the VEVENT component specified in RFC 5545 in '3.6.1. Event Component'."""
+    """
+    This class represents the VEVENT component specified in RFC 5545 in '3.6.1. Event Component'.
+
+    Note: Not all properties are listed here as some of them are inherited by :class:`AbstractStartStopComponent`.
+    """
 
     # Optional, may only occur once
     ical_class: Optional[Class] = None  # As class is a reserved keyword in python, we prefixed it with `ical_`.
@@ -44,7 +48,7 @@ class VEvent(AbstractStartStopComponent):
     priority: Optional[Priority] = None
     sequence: Optional[Sequence] = None
     status: Optional[Status] = None
-    transp: Optional[TransP] = None
+    transp: Optional[TimeTransparency] = None
     url: Optional[URL] = None
     recurrence_id: Optional[RecurrenceID] = None
     rrule: Optional[RRule] = None
@@ -55,21 +59,37 @@ class VEvent(AbstractStartStopComponent):
     attendee: Optional[List[Attendee]] = None
     categories: Optional[List[Categories]] = None
     contact: Optional[List[Contact]] = None
-    rstatus: Optional[List[RStatus]] = None
-    related: Optional[List[Related]] = None
+    rstatus: Optional[List[RequestStatus]] = None
+    related: Optional[List[RelatedTo]] = None
     resources: Optional[List[Resources]] = None
 
     def __repr__(self) -> str:
+        """Overwrite the repr to create a better representation for the item."""
         return f"VEvent({self.start} - {self.end}: {self.summary.value if self.summary else ''})"
 
     @property
     def ending(self) -> Optional[_DTBoth]:
+        """
+        Return the ending of the event.
+
+        Note: This is an abstract method from :class:`AbstractStartStopComponent` that we have to implement.
+        """
         return self.dtend
 
     def get_duration(self) -> Optional[Duration]:
+        """
+        Return the duration of the event.
+
+        Note: This is an abstract method from :class:`AbstractStartStopComponent` that we have to implement.
+        """
         return self.duration.duration if self.duration else None
 
     def expand_component_in_range(self: "VEvent", return_range: Timespan) -> Iterator["VEvent"]:
+        """
+        Expand this VEvent in range according to its recurring *RDate*, *EXDate* and *RRule* properties.
+        :param return_range: The timespan range on which we should return VEvent instances.
+        :return: Yield all recurring VEvent instances related to this VEvent in the given *return_range*.
+        """
         yield self
         iterator = property_utils.expand_component_in_range(
             exdate_list=self.exdate or [],
@@ -106,4 +126,5 @@ class VRecurringEvent(AbstractRecurringComponent, VEvent):
         self._end = end
 
     def __repr__(self) -> str:
+        """Overwrite the repr to create a better representation for the item."""
         return f"RVEvent({self._start} - {self._end}: {self.original.summary.value if self.original.summary else ''})"

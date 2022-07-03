@@ -4,7 +4,7 @@ from typing import List, Optional
 from ical_reader.base_classes.component import Component
 from ical_reader.ical_properties.cal_address import Attendee, Organizer
 from ical_reader.ical_properties.dt import DTEnd, DTStamp, DTStart
-from ical_reader.ical_properties.pass_properties import Comment, Contact, RStatus, UID, URL
+from ical_reader.ical_properties.pass_properties import Comment, Contact, RequestStatus, UID, URL
 from ical_reader.ical_properties.periods import FreeBusyProperty
 
 
@@ -27,4 +27,4 @@ class VFreeBusy(Component):
     attendee: Optional[List[Attendee]] = None
     comment: Optional[List[Comment]] = None
     freebusy: Optional[List[FreeBusyProperty]] = None
-    rstatus: Optional[List[RStatus]] = None
+    rstatus: Optional[List[RequestStatus]] = None

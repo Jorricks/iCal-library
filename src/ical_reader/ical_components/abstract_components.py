@@ -30,9 +30,6 @@ class AbstractStartStopComponent(Component, ABC):
     """
     This class helps avoid code repetition with different :class:`Component` classes.
 
-    Tthat have recurring properties
-    like :class:`RRule`, :class:`RDate` and :class:`EXDate`.
-
     This class is inherited by VEvent, VToDo and VJournal as these all have recurring properties like :class:`RRule`,
     :class:`RDate` and :class:`EXDate`. All properties they had in common are part of this class.
     Note: VJournal is the odd one out as these events don't have a duration.
@@ -125,11 +122,13 @@ class AbstractStartStopComponent(Component, ABC):
     @property
     @instance_lru_cache()
     def start(self) -> Union[Date, DateTime]:
+        """Return the start of this Component as a :class:`Date` or :class:`DateTime` value."""
         return self.dtstart.datetime_or_date_value
 
     @property
     @instance_lru_cache()
     def end(self) -> Optional[Union[Date, DateTime]]:
+        """Return the ending of this Component as a Date or DateTime value."""
         if self.ending:
             return self.ending.datetime_or_date_value
         elif self.start and self.get_duration():
@@ -139,6 +138,7 @@ class AbstractStartStopComponent(Component, ABC):
     @property
     @instance_lru_cache()
     def computed_duration(self: "AbstractStartStopComponent") -> Optional[Duration]:
+        """Return the duration of this Component as a :class:`Date` or :class:`DateTime` value."""
         if a_duration := self.get_duration():
             return a_duration
         elif self.end and self.start:
@@ -149,27 +149,49 @@ class AbstractStartStopComponent(Component, ABC):
 
 @dataclass(repr=False)
 class AbstractRecurringComponent(AbstractStartStopComponent, ABC):
+    """
+    This class extends :class:`AbstractStartStopComponent` to represent a recurring Component.
+
+    This class is inherited by VRecurringEvent, VRecurringToDo and VRecurringJournal. When we compute the recurrence
+    based on the :class:`RRule`, :class:`RDate` and :class:`EXDate` properties, we create new occurrences of that
+    specific component. Instead of copying over all Properties (and using a lot of memory), this class overwrites the
+    *__getattribute__* function to act like the original component for most attributes except for *start*, *end*,
+    *original* and *parent*.
+    """
+
     def __getattribute__(self, name: str) -> Any:
+        """
+        Overwrite this function to return the originals properties except for *start*, *end*, *original* and *parent*.
+
+        Depending on the attributes *name* we are requesting, we either return its own properties or the original
+        components properties. This way we don't need to copy over all the variables.
+        :param name: Name of the attribute we are accessing.
+        :return: The value of the attribute we are accessing either from the *original* or from this instance itself.
+        """
         if name in ("_start", "_end", "_original", "_parent", "start", "end", "original", "parent"):
             return object.__getattribute__(self, name)
         if name in ("_name", "_extra_child_components", "_extra_properties"):
             return object.__getattribute__(self._original, name)
-        if name in self._original._get_property_attributes():
+        if name in self._original.get_property_ical_names():
             return object.__getattribute__(self._original, name)
         return object.__getattribute__(self, name)
 
     @property
     def start(self) -> DateTime:
+        """Return the start of this recurring event."""
         return self._start
 
     @property
     def end(self) -> DateTime:
+        """Return the end of this recurring event."""
         return self._end
 
     @property
     def original(self) -> AbstractStartStopComponent:
+        """Return the original component that created this recurring component."""
         return self._original
 
     @property
     def parent(self) -> "Component":
+        """Return the parent of the original component."""
         return self._original._parent
