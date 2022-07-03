@@ -35,7 +35,7 @@ repos:
         name: pytype - A static type analyzer for Python code
         description: Pytype checks and infers types for your Python code - without requiring type annotations.
         entry: pytype
-        args: ["--config=pytype.cfg",]
+        args: ["--config=pytype.cfg", "--jobs auto"]
         language: python
         types: [python]
         require_serial: true
