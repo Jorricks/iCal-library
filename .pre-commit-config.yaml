@@ -39,3 +39,4 @@ repos:
         language: python
         types: [python]
         require_serial: true
+        verbose: true
