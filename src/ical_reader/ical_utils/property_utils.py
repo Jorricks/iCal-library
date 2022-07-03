@@ -9,8 +9,11 @@ from ical_reader.ical_properties.rrule import RRule
 from ical_reader.ical_utils import dt_utils
 
 
-# @ToDo(jorrick) add doc strings here.
 def _handle_tz(dt: Union[DateTime, Date], make_tz_aware: Optional[Timezone]) -> Union[DateTime, Date]:
+    """
+    Small helper function to help with handling timezones.
+    It makes the *dt* timezone aware if *make_tz_aware* is specified to be anything but None.
+    """
     if make_tz_aware:
         return dt_utils.convert_time_object_to_aware_datetime(dt, make_tz_aware)
     else:
@@ -22,6 +25,16 @@ def _compute_exdates(
     return_range: Timespan,
     make_tz_aware: Optional[Timezone],
 ) -> Union[Set[Date], Set[DateTime]]:
+    """
+    Return a set of Dates or a set of DateTimes that should be excluded based on the EXDate definitions.
+
+    :param exdate_list: The list of EXDate definitions of the component. This defines what dates/datetimes should be
+    excluded.
+    :param return_range: Returns all DateTimes starts that are within this range.
+    :param make_tz_aware: If this contains a non-none value, we make all timezone naive DateTimes timezone aware to
+    using this Timezone.
+    :return: a set of Dates or a set of DateTimes that should be excluded.
+    """
     full_list: Union[Set[Date], Set[DateTime]] = set()
     for exdate in exdate_list:
         full_list.update(_handle_tz(time, make_tz_aware) for time in exdate.all_values if return_range.includes(time))
@@ -35,6 +48,25 @@ def _yield_rdate_list(
     return_range: Timespan,
     make_tz_aware: Optional[Timezone],
 ) -> Union[Iterator[Tuple[Date, Date]], Iterator[Tuple[DateTime, DateTime]]]:
+    """
+    Yield a Tuple containing two Dates or yields a tuple containing two DateTimes based on the RDate definitions.
+
+    Note: Instead of the other two functions, this yield a tuple as it might contain a start and end date (or
+    start and duration to be more precise) instead of just a start date like the other two. As this duration might be
+    different from the original component's duration, we need to always return the start and end date of the component
+    here.
+
+    :param rdate_list: The list of RDate definitions of the component. RDate defines a sequence of date/datetimes at
+    which the component occurs as well.
+    :param excluded_times_set: The set of Dates or a set of DateTimes that should be excluded.
+    :param first_event_duration: The duration of the original component which we should use for the rest of the
+    components.
+    :param return_range: Returns all DateTimes starts that are within this range.
+    :param make_tz_aware: If this contains a non-none value, we make all timezone naive DateTimes timezone aware to
+    using this Timezone.
+    :return: Yields a Tuple containing two Dates or yields a tuple containing two DateTimes representing the full
+    duration of the occurrence.
+    """
     for rdate in rdate_list:
         rdate_time: Union[DateTime, Date, Tuple[DateTime, DateTime]]
         for rdate_time in rdate.all_values:
@@ -61,6 +93,20 @@ def _yield_rrule_list(
     return_range: Timespan,
     make_tz_aware: Optional[Timezone],
 ) -> Union[Iterator[Date], Iterator[DateTime]]:
+    """
+    Yield dates or yields DateTimes according to the RRule definition.
+
+    Note: Depending on whether *first_event_start* is a DateTime or a Date, this function also yields in the same
+    type.
+    :param rrule: The RRule definition of the component.
+    :param excluded_times_set: The set of Dates or a set of DateTimes that should be excluded.
+    :param first_event_start: The starting point from which we should compute the recurrence.
+    :param return_range: Returns all DateTimes starts that are within this range.
+    :param make_tz_aware: If this contains a non-none value, we make all timezone naive DateTimes timezone aware to
+    using this Timezone.
+    :return: Yields dates or yields DateTimes for all occurrences of the component specified in the RRule within the
+    *return_range*.
+    """
     if not rrule:
         return
 
@@ -85,7 +131,23 @@ def expand_event_in_range_only_return_first(
     return_range: Timespan,
     make_tz_aware: Optional[Timezone],
 ) -> Union[Iterator[DateTime], Iterator[Date]]:
-    """@ToDo(jorrick) write this."""
+    """
+    Expand a Component without a duration according to the variables starting from the first_event_start.
+
+    For us to expand events according to the iCalendar specification, we need to keep track of the start times as
+    we should not return the same event twice. This is because RDate and RRule might return the same time twice, in
+    which case RDate takes priority over RRule.
+
+    :param rdate_list: The list of RDate definitions of the component. RDate defines a sequence of date/datetimes at
+    which the component occurs as well
+    :param rrule: The RRule definition of the component. RRule specifies a recurring formula from which you can compute
+    the sequence of date/datetimes at which the component occurs as well.
+    :param first_event_start: The starting point from which we should compute the recurrence.
+    :param return_range: Returns all DateTimes starts that are within this range.
+    :param make_tz_aware: If this contains a non-none value, we make all timezone naive DateTimes timezone aware to
+    using this Timezone.
+    :return: an Iterator returning either DateTimes or Dates.
+    """
     excluded_times_set: Union[Set[DateTime], Set[Date]] = set()
     iterator = _yield_rdate_list(
         rdate_list=rdate_list,
@@ -120,16 +182,28 @@ def expand_component_in_range(
     make_tz_aware: Optional[Timezone],
 ) -> Union[Iterator[Tuple[DateTime, DateTime]], Iterator[Tuple[Date, Date]]]:
     """
-    Expand a Component according to the variables starting from the first_event_start.
+    Expand a Component with a duration according to the variables starting from the first_event_start.
 
     For us to expand events according to the iCalendar specification, we need to keep track of the start times as
-    we should not return the same event twice.
-    Furthermore, RDate takes priority over RRule.
+    we should not return the same event twice. This is because RDate and RRule might return the same time twice, in
+    which case RDate takes priority over RRule. Furthermore, EXDate (which excludes dates from the other sequences)
+    takes priority over the other two.
 
-    :param return_range_start: Returns all DateTimes starts that are within this range.
-    :param return_range_end: Returns all DateTimes starts
+    :param exdate_list: The list of EXDate definitions of the component. This defines what dates/datetimes should be
+    excluded.
+    :param rdate_list: The list of RDate definitions of the component. RDate defines a sequence of date/datetimes at
+    which the component occurs as well.
+    :param rrule: The RRule definition of the component. RRule specifies a recurring formula from which you can compute
+    the sequence of date/datetimes at which the component occurs as well.
+    :param first_event_start: The starting point from which we should compute the recurrence.
+    :param first_event_duration: The duration of the original component which we should use for the rest of the
+    components.
+    :param return_range: Returns all DateTimes starts that are within this range.
+    :param make_tz_aware: If this contains a non-none value, we make all timezone naive DateTimes timezone aware to
+    using this Timezone.
+    :return: an Iterator returning a tuple with two values of either DateTimes or Dates.
     """
-    # @ToDo(jorrick) improve upon this time filter.
+    # @ToDo(jorrick) improve upon this time filter using intersect.
     excluded_times_set: Union[Set[DateTime], Set[Date]] = _compute_exdates(
         exdate_list=exdate_list, return_range=return_range, make_tz_aware=make_tz_aware
     )

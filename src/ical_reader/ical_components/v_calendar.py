@@ -75,15 +75,15 @@ class VCalendar(Component):
         """
         return Timeline(self, start, end)
 
-    def parse_component_section(self, lines: List[str], line_number: int) -> int:
+    def parse_component(self, lines: List[str], line_number: int) -> int:
         """
         Parse a new component in the RAW string list.
-        :param lines: The RAW string list.
+        :param lines: A list of all the lines in the iCalendar file.
         :param line_number: The line number at which this component starts.
         :return: The line number at which this component ends.
         """
         self._lines = lines
-        return super().parse_component_section(lines=lines, line_number=line_number)
+        return super().parse_component(lines=lines, line_number=line_number)
 
     def get_original_ical_text(self, start_line: int, end_line: int) -> str:
         """
@@ -101,5 +101,5 @@ class VCalendar(Component):
 if __name__ == "__main__":
     import pprint
 
-    pprint.pprint(VCalendar._get_property_mapping_2())
+    pprint.pprint(VCalendar._get_property_mapping())
     pprint.pprint(VCalendar._get_child_component_mapping())

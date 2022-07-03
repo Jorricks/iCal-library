@@ -9,7 +9,7 @@ def get_calendar(lines: List[str]) -> VCalendar:
     new_instance = VCalendar()
     if lines[0] != "BEGIN:VCALENDAR":
         raise ValueError(f"This is not a ICalendar as it started with {lines[0]=}.")
-    new_instance.parse_component_section(lines, line_number=1)
+    new_instance.parse_component(lines, line_number=1)
     return new_instance
 
 
