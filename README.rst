@@ -43,9 +43,10 @@ Quick example
 
 ToDo
 ====
+- Implement code docs.
 - Implement tests. (e.g. verify for the timezone makes sense)
-- Create docs.
 - Create release pipeline.
 - Create first release.
 - Create badges like python-dateutil.
-- Check how recurring events work after you delete one specific item
+- Implement timeline functionality for all items instead of just VEvents.
+- Fix the timeline & expanding functionality to use intersect.

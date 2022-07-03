@@ -29,6 +29,7 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 
+# @ToDo(jorrick) add doc strings here.
 @dataclass(repr=False)
 class Component(ICalBaseClass):
     """
@@ -52,7 +53,8 @@ class Component(ICalBaseClass):
     _parse_line_start: Optional[int] = 0
     _parse_line_end: Optional[int] = 0
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """Overwrite the repr to create a better representation for the item."""
         properties_as_string = ", ".join([f"{name}={value}" for name, value in self.properties.items()])
         return f"{self.__class__.__name__}({properties_as_string})"
 
@@ -113,7 +115,7 @@ class Component(ICalBaseClass):
 
     @classmethod
     @lru_cache()
-    def _get_property_attributes(cls) -> Set[str]:
+    def get_property_ical_names(cls) -> Set[str]:
         return {var_name for var_name, var_type, is_list in cls._get_property_mapping_2().values()}
 
     @staticmethod

@@ -6,6 +6,7 @@ from pendulum import Date, DateTime, Duration
 from ical_reader.base_classes.property import Property
 
 
+# @ToDo(jorrick) add doc strings here.
 class _PeriodFunctionality(Property):
     def _parse_period_values(self) -> List[Tuple[DateTime, DateTime]]:
         list_of_periods: List[Tuple[DateTime, DateTime]] = []
