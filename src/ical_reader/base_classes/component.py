@@ -248,7 +248,7 @@ class Component(ICalBaseClass):
         for child in self.children:
             child.print_tree_structure(indent=indent + 1)
 
-    def parse_property(self, line: str) -> None:
+    def parse_property(self, line: str) -> Property:
         """
         Parse a raw line containing a :class:`Property` definition, instantiate the corresponding Property and set the
         variable.
@@ -262,6 +262,7 @@ class Component(ICalBaseClass):
 
         :param line: The entire line that contains the property string (meaning multi-lines properties are already
         converted to a single line here).
+        :return: The created Property instance based on the *line* that we set for the component.
         """
         property_mapping = self._get_property_mapping()
         result = re.search("([^\r\n;:]+)(;[^\r\n:]+)?:(.*)", line)
@@ -284,10 +285,12 @@ class Component(ICalBaseClass):
                     parent=self, name=name, property_parameters=property_parameters, value=value
                 )
                 setattr(self, var_name, property_instance)
+            return property_instance
         else:
             pythonic_name = name.lower().replace("-", "_")
             property_instance = Property(parent=self, name=name, property_parameters=property_parameters, value=value)
             self._extra_properties[pythonic_name].append(property_instance)
+            return property_instance
 
     def parse_component(self, lines: List[str], line_number: int) -> int:
         """

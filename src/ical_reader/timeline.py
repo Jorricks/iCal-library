@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 class Timeline:
     """
-    This class is a wrapper to make it easy to see what the order is of the start of each component.
+    This class is a wrapper to make it easy to see what the order of each component based on the start date.
 
     Inside this class there are multiple methods to iterate over all the components present. However, one should note
     that often the recurrence properties for components specify only a lower bound and will therefore proceed to

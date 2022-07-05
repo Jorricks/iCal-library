@@ -114,11 +114,17 @@ class VRecurringEvent(AbstractRecurringComponent, VEvent):
     """
     This class represents VEvents that are recurring.
     Inside the AbstractRecurringComponent class we overwrite specific dunder methods and property methods. This way
-     our end users have a very similar interface to an actual VEvent but without us needing to code the exact same
-     thing twice.
+    our end users have a very similar interface to an actual VEvent but without us needing to code the exact same
+    thing twice.
     """
 
     def __init__(self, original_component_instance: VEvent, start: DateTime, end: DateTime):
+        """
+        Instantiate a VEvent for a datetime computed by the recurrence rule properties set the VEvent.
+        :param original_component_instance: The original VEvent instance.
+        :param start: The start of this occurrence.
+        :param end: The end of this occurrence.
+        """
         super(VEvent, self).__init__()
         self._parent = original_component_instance
         self._original = original_component_instance

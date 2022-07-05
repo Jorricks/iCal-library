@@ -30,4 +30,4 @@ class Trigger(Property):
 
     def trigger_relation(self) -> Literal["START", "END"]:
         """Get the trigger relation, whether the duration should be relative to the start or the end of a component."""
-        return "START" if self.get_property_parameter("RELATED", "START") == "START" else "END"  # noqa
+        return "START" if self.get_property_parameter_default("RELATED", "START") == "START" else "END"  # noqa

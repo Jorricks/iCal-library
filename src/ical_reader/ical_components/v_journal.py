@@ -88,11 +88,7 @@ class VJournal(AbstractStartStopComponent):
         )
 
         for event_start_time, event_end_time in iterator:
-            yield VRecurringJournal(
-                original_component_instance=self,
-                start=event_start_time,
-                end=event_end_time,
-            )
+            yield VRecurringJournal(original_component_instance=self, start=event_start_time)
 
 
 @dataclass(repr=False)
@@ -104,12 +100,18 @@ class VRecurringJournal(AbstractRecurringComponent, VJournal):
      thing twice.
     """
 
-    def __init__(self, original_component_instance: VJournal, start: DateTime, end: DateTime):
+    def __init__(self, original_component_instance: VJournal, start: DateTime):
+        """
+        Instantiate a VJournal for a datetime computed by the recurrence rule properties set the VJournal.
+        :param original_component_instance: The original VJournal instance.
+        :param start: The start of this occurrence.
+        :param end: The end of this occurrence.
+        """
         super(VJournal, self).__init__()
         self._parent = original_component_instance
         self._original = original_component_instance
         self._start = start
-        self._end = end
+        self._end = start
 
     def __repr__(self) -> str:
         """Overwrite the repr to create a better representation for the item."""

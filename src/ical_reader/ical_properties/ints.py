@@ -28,3 +28,19 @@ class Repeat(_IntProperty):
     """The REPEAT property defines the number of times the alarm should be repeated, after the initial trigger."""
 
     pass
+
+
+class PercentComplete(_IntProperty):
+    """
+    The PERCENT-COMPLETE property is used by an assignee or delegatee of a to-do to convey the percent completion of
+    a to-do to the "Organizer".
+    """
+
+    @property
+    def percentage(self) -> int:
+        return self.int_value
+
+    @classmethod
+    def get_ical_name_of_class(cls) -> str:
+        """Overwrite the iCal name of this class as it is not *PERCENTCOMPLETE* but *PERCENT-COMPLETE*."""
+        return "PERCENT-COMPLETE"
