@@ -9,7 +9,7 @@ from ical_reader.ical_properties.cal_address import Attendee, Organizer
 from ical_reader.ical_properties.dt import _DTBoth, Completed, Created, Due, LastModified, RecurrenceID
 from ical_reader.ical_properties.geo import GEO
 from ical_reader.ical_properties.ical_duration import ICALDuration
-from ical_reader.ical_properties.ints import Priority, Sequence
+from ical_reader.ical_properties.ints import PercentComplete, Priority, Sequence
 from ical_reader.ical_properties.pass_properties import (
     Attach,
     Categories,
@@ -23,7 +23,6 @@ from ical_reader.ical_properties.pass_properties import (
     Status,
     URL,
 )
-from ical_reader.ical_properties.percentcomplete import PercentComplete
 from ical_reader.ical_utils import property_utils
 
 
@@ -118,6 +117,12 @@ class VRecurringToDo(AbstractRecurringComponent, VToDo):
     """
 
     def __init__(self, original_component_instance: VToDo, start: DateTime, end: DateTime):
+        """
+        Instantiate a VToDo for a datetime computed by the recurrence rule properties set the VToDo.
+        :param original_component_instance: The original VToDo instance.
+        :param start: The start of this occurrence.
+        :param end: The end of this occurrence.
+        """
         super(VToDo, self).__init__()
         self._parent = original_component_instance
         self._original = original_component_instance

@@ -37,7 +37,9 @@ def _compute_exdates(
     """
     full_list: Union[Set[Date], Set[DateTime]] = set()
     for exdate in exdate_list:
-        full_list.update(_handle_tz(time, make_tz_aware) for time in exdate.all_values if return_range.includes(time))
+        full_list.update(
+            _handle_tz(time, make_tz_aware) for time in exdate.excluded_date_times if return_range.includes(time)
+        )
     return full_list
 
 

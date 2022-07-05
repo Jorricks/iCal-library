@@ -15,7 +15,7 @@ class _DTBoth(Property):
         """Return the value as a DateTime or Date value taking into account the optional TZID property parameter."""
         value = dt_utils.parse_date_or_datetime(self.value)
         if isinstance(value, DateTime):
-            tz_id = self.get_property_parameter("TZID", None)
+            tz_id = self.get_property_parameter("TZID")
             if value.tz or not tz_id:
                 return value
             return self.parent.tree_root.get_aware_dt_for_timezone(dt=value, tzid=tz_id)
@@ -32,7 +32,7 @@ class _DTSingular(Property):
     def datetime(self) -> DateTime:
         """Return the value as a DateTime value taking into account the optional TZID property parameter."""
         value = pendulum.parse(self.value, tz=None)
-        tz_id = self.get_property_parameter("TZID", None)
+        tz_id = self.get_property_parameter("TZID")
         if value.tz or not tz_id:
             return value
         return self.parent.tree_root.get_aware_dt_for_timezone(dt=value, tzid=tz_id)

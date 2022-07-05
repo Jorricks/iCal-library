@@ -1,11 +1,16 @@
-from typing import List
+from pathlib import Path
+from typing import List, Union
+from urllib import request
 
 from ical_reader.ical_components.v_calendar import VCalendar
 
 
-# @ToDo(jorrick) implement methods to get it from online.
-def get_calendar(lines: List[str]) -> VCalendar:
-    """Given all the lines of the iCalendar file, return a VCalendar instance."""
+def parse_lines_into_calendar(lines: List[str]) -> VCalendar:
+    """
+    Given the lines of an iCalendar file, return a parsed VCalendar instance.
+    :param lines: The lines of the iCalendar file/website.
+    :return: a VCalendar with all it's iCalendar components like VEvents, VToDos, VTimeZones etc.
+    """
     new_instance = VCalendar()
     if lines[0] != "BEGIN:VCALENDAR":
         raise ValueError(f"This is not a ICalendar as it started with {lines[0]=}.")
@@ -13,25 +18,25 @@ def get_calendar(lines: List[str]) -> VCalendar:
     return new_instance
 
 
-# if __name__ == "__main__":
-#     file_contents = open(path_finder.get_root_folder() / "ical_examples" / "ical.cache").readlines()
-#     # file_contents = open(path_finder.get_root_folder() / "ical_examples" / "example_of_failure.txt").readlines()
-#     calendar = get_calendar([line.rstrip("\n") for line in file_contents])
-#     print(type(calendar.events[0]), str(calendar.events[0])[0:1000])
-#     print(type(calendar.events[0].attendee), calendar.events[0].attendee)
-#     print(calendar.events[0].attendee[95].persons_name)
-#     print([e for e in calendar.events if e.rrule is not None])
-#
-#     from ical_reader.ical_components.v_event import VRecurringEvent
-#
-#     for t, e in calendar.get_limited_timeline(DateTime.utcnow() - timedelta(days=10), DateTime.utcnow()).iterate():
-#         if isinstance(e, VRecurringEvent):
-#             print(e)
+def parse_icalendar_file(file: Union[str, Path]) -> VCalendar:
+    """
+    Parse an iCalendar file and return a parsed VCalendar instance.
+    :param file: A file on the local filesystem that contains the icalendar definition.
+    :return: a VCalendar instance with all it's iCalendar components like VEvents, VToDos, VTimeZones etc.
+    """
+    with open(file, "r") as ical_file:
+        return parse_lines_into_calendar(ical_file.readlines())
 
-"""
-from ical_reader import client
-from utils import path_finder
-file_contents = open(path_finder.get_root_folder() / "ical_examples" / "ical.cache").readlines()
-calendar = client.get_calendar([line.rstrip("\n") for line in file_contents])
-calendar.timeline
-"""
+
+def parse_icalendar_url(url: str, *args, **kwargs) -> VCalendar:
+    """
+    Given a URL to an iCalendar file, return a parsed VCalendar instance.
+    :param url: The URL to the iCalendar file.
+    :param args: Any positional arguments to pass onto the `urllib.request.urlopen` call.
+    :param kwargs: Any keyword arguments to pass onto the `urllib.request.urlopen` call.
+    :return: a VCalendar instance with all it's iCalendar components like VEvents, VToDos, VTimeZones etc.
+    """
+    response = request.urlopen(url, **kwargs)
+    text = response.read().decode("utf-8")
+    lines = text.split("\n")
+    return parse_lines_into_calendar(lines)

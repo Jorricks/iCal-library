@@ -16,13 +16,18 @@ class Property(ICalBaseClass):
     - The property parameters, this is optional and does not need to be present
     - The value of the property
 
-    :param parent: Instance of the :class:`Component` it is a part of.
-    :param name: The properties name, e.g. `RRULE`.
-    :param property_parameters: The property parameters for this definition.
-    :param value: The value of the property.
+    A line containing a property typically has the following format:
+    PROPERTY-NAME;parameterKey=parameterValue,anotherParameterKey=anotherValue:actual-value
     """
 
     def __init__(self, parent: "Component", name: str, property_parameters: Optional[str], value: Optional[str]):
+        """
+        Instantiate a Property class.
+        :param parent: Instance of the :class:`Component` it is a part of.
+        :param name: The properties name, e.g. `RRULE`.
+        :param property_parameters: The property parameters for this definition.
+        :param value: The value of the property.
+        """
         self._parent: "Component" = parent
         self._name: str = name
         self._property_parameters: Optional[str] = property_parameters
@@ -51,7 +56,7 @@ class Property(ICalBaseClass):
         property_parameters_str = self._property_parameters or ""
         return {
             key_and_value.split("=")[0]: key_and_value.split("=")[1]
-            for key_and_value in property_parameters_str.split(";")
+            for key_and_value in property_parameters_str.split(",")
             if key_and_value.count("=") == 1
         }
 
@@ -64,15 +69,14 @@ class Property(ICalBaseClass):
         """
         return key in self.property_parameters
 
-    def get_property_parameter(self, key: str, default: Optional[str] = None) -> Optional[str]:
+    def get_property_parameter(self, key: str) -> Optional[str]:
         """
         Get a property parameter's value with a specific key.
 
         :param key: The identifier of the property parameter.
-        :param default: A value to return when the property parameter is not present.
         :return: The requested property parameter, or if that is not present, the default value.
         """
-        return self.property_parameters.get(key, default)
+        return self.property_parameters.get(key, None)
 
     def get_property_parameter_default(self, key: str, default: str) -> str:
         """
