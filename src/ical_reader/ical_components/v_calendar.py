@@ -1,4 +1,3 @@
-from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
 
 from pendulum import DateTime
@@ -13,28 +12,63 @@ from ical_reader.ical_properties.pass_properties import CalScale, Method, ProdID
 from ical_reader.timeline import Timeline
 
 
-@dataclass
 class VCalendar(Component):
-    """This class represents the VCALENDER component specified in RFC 5545 in '3.6. Calendar Components'."""
+    """
+    This class represents the VCALENDAR component specified in RFC 5545 in '3.6. Calendar Components'.
 
-    # Required properties, only one occurrence allowed.
-    prodid: Optional[ProdID] = None
-    version: Optional[Version] = None
+    The "VCALENDAR" component consists of a sequence of calendar properties and one or more calendar components.
+    The calendar properties are attributes that apply to the calendar object as a whole. The calendar components are
+    collections of properties that express a particular calendar semantic. For example, the calendar component can
+    specify an event, a to-do, a journal entry, time zone information, free/busy time information, or an alarm.
 
-    # Optional properties, must not occur more than once.
-    calscale: Optional[CalScale] = None
-    method: Optional[Method] = None
+    :param name:
+    :param parent:
+    :param prodid:
+    :param version:
+    :param calscale:
+    :param method:
+    :param events:
+    :param todos:
+    :param journals:
+    :param free_busy_list:
+    :param time_zones:
+    """
 
-    # These are Components as well
-    events: List[VEvent] = field(default_factory=list)
-    todos: List[VToDo] = field(default_factory=list)
-    journals: List[VJournal] = field(default_factory=list)
-    free_busy_list: List[VFreeBusy] = field(default_factory=list)
-    time_zones: List[VTimeZone] = field(default_factory=list)
-    _lines: Optional[List[str]] = None
+    def __init__(
+        self,
+        parent: Optional[Component],
+        prodid: Optional[ProdID] = None,
+        version: Optional[Version] = None,
+        calscale: Optional[CalScale] = None,
+        method: Optional[Method] = None,
+        events: Optional[List[VEvent]] = None,
+        todos: Optional[List[VToDo]] = None,
+        journals: Optional[List[VJournal]] = None,
+        free_busy_list: Optional[List[VFreeBusy]] = None,
+        time_zones: Optional[List[VTimeZone]] = None,
+    ):
+        super().__init__("VCALENDAR", parent)
+
+        # Required properties, only one occurrence allowed.
+        self.prodid: Optional[ProdID] = prodid
+        self.version: Optional[Version] = version
+
+        # Optional properties, must not occur more than once.
+        self.calscale: Optional[CalScale] = calscale
+        self.method: Optional[Method] = method
+
+        # These are children Components
+        self.events: List[VEvent] = events or []
+        self.todos: List[VToDo] = todos or []
+        self.journals: List[VJournal] = journals or []
+        self.free_busy_list: List[VFreeBusy] = free_busy_list or []
+        self.time_zones: List[VTimeZone] = time_zones or []
+
+        # Only the VCalender stores the entire list.
+        self._lines: Optional[List[str]] = None
 
     @property
-    def children(self) -> Tuple["Component", ...]:
+    def children(self) -> Tuple[Component, ...]:
         # @ToDo(jorrick) check if this is required.
         return (
             *self.events,

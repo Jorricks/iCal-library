@@ -1,7 +1,6 @@
-import dataclasses
+import inspect
 import re
 from collections import defaultdict
-from dataclasses import dataclass
 from functools import lru_cache
 from typing import ClassVar, Dict, get_args, get_origin, List, Mapping, Optional, Set, Tuple, Type, TYPE_CHECKING, Union
 
@@ -13,7 +12,6 @@ if TYPE_CHECKING:
     from ical_reader.ical_components.v_calendar import VCalendar
 
 
-@dataclass(init=False, repr=False)
 class Component(ICalBaseClass):
     """
     This is the base class for any component (according to the RFC 5545 specification) in ical-reader.
@@ -27,6 +25,9 @@ class Component(ICalBaseClass):
     They can be either optional or required and may occur multiple times in the iCal file.
     - variables that have a type of Optional[x] (and not Optional[List[x]]). These are properties of the instance.
     They can be either optional or required, but may only occur once in the iCal file.
+
+    :param name: the actual name of this property or component. E.g. VEVENT, RRULE, VCUSTOMCOMPONENT, CUSTOMPROPERTY.
+    :param parent: the parent :class:`Component` instance that contains this :class:`Component` instance.
     """
 
     def __init__(self, name: str, parent: Optional["Component"]):
@@ -159,14 +160,13 @@ class Component(ICalBaseClass):
         :return: A class mapping that maps the iCal name (e.g. VEVENT) to another tuple that contains
         the variable name, the child class of :class:`ICalBaseClass` and a boolean whether that child class was wrapped
         in a List.
-
-        @ToDo get rid of dataclasses. Use this in place: https://stackoverflow.com/a/36849919/2277445
         """
         var_mapping: Dict[str, Tuple[str, Type[ICalBaseClass], bool]] = {}
-        for a_field in dataclasses.fields(cls):
-            if a_field.name.startswith("_"):
+        a_field: inspect.Parameter
+        for a_field in inspect.signature(cls.__init__).parameters.values():
+            if a_field.name.startswith("_") or a_field.name in ["self", "parent"]:
                 continue
-            result = Component._extract_type_information(a_field.name, a_field.type, False)
+            result = Component._extract_type_information(a_field.name, a_field.annotation, False)
             if result is None:
                 continue
             ical_name, var_type_info = result

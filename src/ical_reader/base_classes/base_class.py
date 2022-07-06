@@ -11,6 +11,9 @@ class ICalBaseClass:
     :class:`Component` and :class:`Property` are the only ones inheriting this class directly, the rest of the classes
     are inheriting from :class:`Component` and :class:`Property` based on whether they represent an iCal component or
     iCal property.
+
+    :param name: the actual name of this property or component. E.g. VEVENT, RRULE, VCUSTOMCOMPONENT, CUSTOMPROPERTY.
+    :param parent: the parent :class:`Component` instance that contains this :class:`Component` instance.
     """
 
     def __init__(self, name: str, parent: Optional["Component"]):

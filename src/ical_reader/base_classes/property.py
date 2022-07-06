@@ -18,16 +18,14 @@ class Property(ICalBaseClass):
 
     A line containing a property typically has the following format:
     PROPERTY-NAME;parameterKey=parameterValue,anotherParameterKey=anotherValue:actual-value
+
+    :param parent: Instance of the :class:`Component` it is a part of.
+    :param name: The properties name, e.g. `RRULE`.
+    :param property_parameters: The property parameters for this definition.
+    :param value: The value of the property.
     """
 
     def __init__(self, parent: "Component", name: str, property_parameters: Optional[str], value: Optional[str]):
-        """
-        Instantiate a Property class.
-        :param parent: Instance of the :class:`Component` it is a part of.
-        :param name: The properties name, e.g. `RRULE`.
-        :param property_parameters: The property parameters for this definition.
-        :param value: The value of the property.
-        """
         super().__init__(name=name, parent=parent)
         self._property_parameters: Optional[str] = property_parameters
         self._value: Optional[str] = value

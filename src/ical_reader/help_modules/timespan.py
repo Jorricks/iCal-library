@@ -1,5 +1,4 @@
 import functools
-from dataclasses import dataclass
 from typing import Any, Optional, Tuple, TYPE_CHECKING, Union
 
 from pendulum import Date, DateTime
@@ -10,28 +9,20 @@ if TYPE_CHECKING:
     from ical_reader.base_classes.component import Component
 
 
-@dataclass
 @functools.total_ordering
 class Timespan:
     """
     Represents a time span with a beginning and end date.
 
     Contains multiple handy functions when working with a time span like the is_included_in or intersect function.
+    :param begin: The beginning of the timespan.
+    :param end: The end of the timespan.
     """
 
-    begin: DateTime
-    end: DateTime
-
     def __init__(self, begin: Union[Date, DateTime], end: Union[Date, DateTime]):
-        """
-        Init the Timespan class.
-
-        For simplicity, we immediately convert the variables to timezone aware :class:`pendulum.DateTime` instances.
-        :param begin: The beginning of the timespan.
-        :param end: The end of the timespan.
-        """
-        self.begin = dt_utils.convert_time_object_to_aware_datetime(begin)
-        self.end = dt_utils.convert_time_object_to_aware_datetime(end)
+        """For simplicity, we convert the variables to timezone aware :class:`pendulum.DateTime` instances."""
+        self.begin: DateTime = dt_utils.convert_time_object_to_aware_datetime(begin)
+        self.end: DateTime = dt_utils.convert_time_object_to_aware_datetime(end)
 
     @property
     def tuple(self) -> Tuple[DateTime, DateTime]:
@@ -102,23 +93,22 @@ class Timespan:
         """
         Check if the *instant* is included in this timespan.
         :param instant: An instance that represents a moment in time.
+        :return: Boolean of whether the *instant* is included in this timespan.
         """
         dt = dt_utils.convert_time_object_to_aware_datetime(instant)
         return self.begin <= dt < self.end
 
 
-@dataclass
 class TimespanWithParent(Timespan):
+    """
+    Init a Timespan object which represents the length of a specific component(marked as parent).
+    :param parent: The component instance which this timespan represents.
+    :param begin: The beginning of the timespan.
+    :param end: The end of the timespan.
+    """
+
     parent: Optional["Component"]
 
     def __init__(self, parent: Optional["Component"], begin: Union[Date, DateTime], end: Union[Date, DateTime]):
-        """
-        Init a Timespan object which represents the length of a specific component.
-
-        For simplicity, we immediately convert the variables to timezone aware :class:`pendulum.DateTime` instances.
-        :param parent: The component instance which this timespan represents.
-        :param begin: The beginning of the timespan.
-        :param end: The end of the timespan.
-        """
         super().__init__(begin, end)
         self.parent = parent

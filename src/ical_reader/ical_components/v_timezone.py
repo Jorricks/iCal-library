@@ -1,4 +1,3 @@
-from dataclasses import dataclass, field
 from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 from pendulum import Date, DateTime
@@ -13,18 +12,44 @@ from ical_reader.ical_properties.rrule import RRule
 from ical_reader.ical_properties.tz_offset import TZOffsetFrom, TZOffsetTo
 
 
-@dataclass(repr=False)
 class _TimeOffsetPeriod(Component):
-    # Required, must occur only once.
-    dtstart: Optional[DTStart] = None
-    tzoffsetto: Optional[TZOffsetTo] = None
-    tzoffsetfrom: Optional[TZOffsetFrom] = None
-    # Optional, may only occur once.
-    rrule: Optional[RRule] = None
-    # Optional, may occur more than once.
-    comment: Optional[List[Comment]] = None
-    rdate: Optional[List[RDate]] = None
-    tzname: Optional[List[TZName]] = None
+    """
+    A _TimeOffsetPeriod representing either a Standard configuration or a Winter configuration.
+
+    :param name:
+    :param parent:
+    :param dtstart:
+    :param tzoffsetto:
+    :param tzoffsetfrom:
+    :param rrule:
+    :param comment:
+    :param rdate:
+    :param tzname:
+    """
+
+    def __init__(
+        self,
+        name: str,
+        parent: Optional[Component],
+        dtstart: Optional[DTStart] = None,
+        tzoffsetto: Optional[TZOffsetTo] = None,
+        tzoffsetfrom: Optional[TZOffsetFrom] = None,
+        rrule: Optional[RRule] = None,
+        comment: Optional[List[Comment]] = None,
+        rdate: Optional[List[RDate]] = None,
+        tzname: Optional[List[TZName]] = None,
+    ):
+        super().__init__(name, parent)
+        # Required, must occur only once.
+        self.dtstart: Optional[DTStart] = dtstart
+        self.tzoffsetto: Optional[TZOffsetTo] = tzoffsetto
+        self.tzoffsetfrom: Optional[TZOffsetFrom] = tzoffsetfrom
+        # Optional, may only occur once.
+        self.rrule: Optional[RRule] = rrule
+        # Optional, may occur more than once.
+        self.comment: Optional[List[Comment]] = comment
+        self.rdate: Optional[List[RDate]] = rdate
+        self.tzname: Optional[List[TZName]] = tzname
 
     def timezone_aware_start(self) -> DateTime:
         """Return a timezone aware start."""
@@ -51,34 +76,59 @@ class _TimeOffsetPeriod(Component):
             yield rtime, self
 
 
-@dataclass
 class DayLight(_TimeOffsetPeriod):
     """A TimeOffsetPeriod representing a DayLight(a.k.a. Advanced Time, Summer Time or Legal Time) configuration."""
 
-    pass
+    def __init__(self, parent: Optional[Component], **kwargs):
+        super().__init__("DAYLIGHT", parent)
 
 
-@dataclass
 class Standard(_TimeOffsetPeriod):
     """A TimeOffsetPeriod representing a Standard(a.k.a. Winter Time) configuration."""
 
-    pass
+    def __init__(self, parent: Optional[Component], **kwargs):
+        super().__init__("STANDARD", parent)
 
 
-@dataclass
 class VTimeZone(Component):
-    """This class represents the VTIMEZONE component specified in RFC 5545 in '3.6.5. Time Zone Component'."""
+    """
+    This class represents the VTIMEZONE component specified in RFC 5545 in '3.6.5. Time Zone Component'.
 
-    # Required properties, must occur one.
-    tzid: Optional[TZID] = None
-    # Optional properties, may only occur once.
-    last_mod: Optional[LastModified] = None
-    tzurl: Optional[TZURL] = None
-    # Required components, may occur multiple times.
-    standardc: Optional[List[Standard]] = field(default_factory=list)
-    daylightc: Optional[List[DayLight]] = field(default_factory=list)
+    If present, the "VTIMEZONE" calendar component defines the set of Standard Time and Daylight Saving Time
+    observances (or rules) for a particular time zone for a given interval of time. The "VTIMEZONE" calendar component
+    cannot be nested within other calendar components. Multiple "VTIMEZONE" calendar components can exist in an
+    iCalendar object. In this situation, each "VTIMEZONE" MUST represent a unique time zone definition. This is
+    necessary for some classes of events, such as airline flights, that start in one time zone and end in another.
 
-    __storage_of_results: Dict[DateTime, List[Tuple[DateTime, _TimeOffsetPeriod]]] = field(default_factory=dict)
+    :param parent:
+    :param tzid:
+    :param last_mod:
+    :param tzurl:
+    :param standardc:
+    :param daylightc:
+    """
+
+    def __init__(
+        self,
+        parent: Optional[Component],
+        tzid: Optional[TZID] = None,
+        last_mod: Optional[LastModified] = None,
+        tzurl: Optional[TZURL] = None,
+        standardc: Optional[List[Standard]] = None,
+        daylightc: Optional[List[DayLight]] = None,
+    ):
+        super().__init__("VTIMEZONE", parent)
+
+        # Required properties, must occur one.
+        self.tzid: Optional[TZID] = tzid
+        # Optional properties, may only occur once.
+        self.last_mod: Optional[LastModified] = last_mod
+        self.tzurl: Optional[TZURL] = tzurl
+        # Either one of these components must have at least one record. May occur multiple times.
+        self.standardc: List[Standard] = standardc or []
+        self.daylightc: List[DayLight] = daylightc or []
+
+        self.__storage_of_results: Dict[DateTime, List[Tuple[DateTime, _TimeOffsetPeriod]]] = {}
 
     def get_ordered_timezone_overview(self, max_datetime: DateTime) -> List[Tuple[DateTime, _TimeOffsetPeriod]]:
         """

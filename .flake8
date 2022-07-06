@@ -2,3 +2,5 @@
 # Default ignores that we can extend
 ignore=D100,D101,D102,D104,D105,D107,D200,D205,D400,D401,E203,E231,E731,W504,I001,W503
 max-line-length=120
+per-file-ignores =
+     test/*: D103

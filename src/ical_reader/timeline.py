@@ -24,17 +24,15 @@ class Timeline:
     doesn't need to compute the list of components in the range over and over again. The functions themselves(e.g.
     :function:`self.includes` and :function:`self.intersects`) help you  to limit the exact range you want to return
     components for.
+
+    :param v_calendar: The VCalendar object we are iterating over.
+    :param start_date: The minimum ending date of each event that is returned inside this timeline.
+    :param end_date: The maximum starting date of each event that is return inside this timeline.
     """
 
     def __init__(
         self, v_calendar: "VCalendar", start_date: Optional[DateTime] = None, end_date: Optional[DateTime] = None
     ):
-        """
-        Instantiate the Timeline class.
-        :param v_calendar: The VCalendar object we are iterating over.
-        :param start_date: The
-        :param end_date:
-        """
         self.v_calendar: VCalendar = v_calendar
         self._start_date: DateTime = start_date or DateTime(1970, 1, 1)
         self._end_date: DateTime = end_date or DateTime(2100, 1, 1)

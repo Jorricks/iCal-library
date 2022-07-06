@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import Any, List, Optional, TYPE_CHECKING, TypeVar, Union
 
 from pendulum import Date, DateTime, Duration, Period
@@ -25,7 +24,6 @@ T = TypeVar(
 )
 
 
-@dataclass(repr=False)
 class AbstractStartStopComponent(Component, ABC):
     """
     This class helps avoid code repetition with different :class:`Component` classes.
@@ -33,21 +31,47 @@ class AbstractStartStopComponent(Component, ABC):
     This class is inherited by VEvent, VToDo and VJournal as these all have recurring properties like :class:`RRule`,
     :class:`RDate` and :class:`EXDate`. All properties they had in common are part of this class.
     Note: VJournal is the odd one out as these events don't have a duration.
+
+    :param name:
+    :param parent:
+    :param dtstamp:
+    :param uid:
+    :param dtstart:
+    :param rrule:
+    :param summary:
+    :param exdate:
+    :param rdate:
+    :param comment:
     """
 
-    # Required
-    dtstamp: Optional[DTStamp] = None
-    uid: Optional[UID] = None
+    def __init__(
+        self,
+        name: str,
+        parent: Optional[Component],
+        dtstamp: Optional[DTStamp] = None,
+        uid: Optional[UID] = None,
+        dtstart: Optional[DTStart] = None,
+        rrule: Optional[RRule] = None,
+        summary: Optional[Summary] = None,
+        exdate: Optional[List[EXDate]] = None,
+        rdate: Optional[List[RDate]] = None,
+        comment: Optional[List[Comment]] = None,
+    ):
+        super().__init__(name, parent)
 
-    # Optional, may only occur once
-    dtstart: Optional[DTStart] = None
-    rrule: Optional[RRule] = None
-    summary: Optional[Summary] = None
+        # Required
+        self.dtstamp: Optional[DTStamp] = dtstamp
+        self.uid: Optional[UID] = uid
 
-    # Optional, may occur more than once
-    exdate: Optional[List[EXDate]] = None
-    rdate: Optional[List[RDate]] = None
-    comment: Optional[List[Comment]] = None
+        # Optional, may only occur once
+        self.dtstart: Optional[DTStart] = dtstart
+        self.rrule: Optional[RRule] = rrule
+        self.summary: Optional[Summary] = summary
+
+        # Optional, may occur more than once
+        self.exdate: Optional[List[EXDate]] = exdate
+        self.rdate: Optional[List[RDate]] = rdate
+        self.comment: Optional[List[Comment]] = comment
 
     @property
     @abstractmethod
@@ -147,7 +171,6 @@ class AbstractStartStopComponent(Component, ABC):
         return None
 
 
-@dataclass(repr=False)
 class AbstractRecurringComponent(AbstractStartStopComponent, ABC):
     """
     This class extends :class:`AbstractStartStopComponent` to represent a recurring Component.
@@ -192,6 +215,6 @@ class AbstractRecurringComponent(AbstractStartStopComponent, ABC):
         return self._original
 
     @property
-    def parent(self) -> "Component":
+    def parent(self) -> Component:
         """Return the parent of the original component."""
-        return self._original._parent
+        return self._original.parent
