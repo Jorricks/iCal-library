@@ -1,35 +1,19 @@
 import dataclasses
 import re
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from functools import lru_cache
-from typing import (
-    ClassVar,
-    Dict,
-    get_args,
-    get_origin,
-    List,
-    Mapping,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    TYPE_CHECKING,
-    TypeVar,
-    Union,
-)
+from typing import ClassVar, Dict, get_args, get_origin, List, Mapping, Optional, Set, Tuple, Type, TYPE_CHECKING, Union
 
 from ical_reader.base_classes.base_class import ICalBaseClass
 from ical_reader.base_classes.property import Property
+from ical_reader.exceptions import CalendarParentRelationError
 
 if TYPE_CHECKING:
     from ical_reader.ical_components.v_calendar import VCalendar
 
 
-T = TypeVar("T")
-
-
-@dataclass(repr=False)
+@dataclass(init=False, repr=False)
 class Component(ICalBaseClass):
     """
     This is the base class for any component (according to the RFC 5545 specification) in ical-reader.
@@ -45,22 +29,17 @@ class Component(ICalBaseClass):
     They can be either optional or required, but may only occur once in the iCal file.
     """
 
-    _name: Optional[str] = None
-    _parent: Optional["Component"] = None
-    _extra_child_components: Dict[str, List["Component"]] = field(default_factory=lambda: defaultdict(list))
-    _extra_properties: Dict[str, List[Property]] = field(default_factory=lambda: defaultdict(list))
-    _parse_line_start: Optional[int] = 0
-    _parse_line_end: Optional[int] = 0
+    def __init__(self, name: str, parent: Optional["Component"]):
+        super().__init__(name=name, parent=parent)
+        self._parse_line_start: Optional[int] = 0
+        self._parse_line_end: Optional[int] = 0
+        self._extra_child_components: Dict[str, List["Component"]] = defaultdict(list)
+        self._extra_properties: Dict[str, List[Property]] = defaultdict(list)
 
     def __repr__(self) -> str:
         """Overwrite the repr to create a better representation for the item."""
         properties_as_string = ", ".join([f"{name}={value}" for name, value in self.properties.items()])
         return f"{self.__class__.__name__}({properties_as_string})"
-
-    @property
-    def name(self) -> str:
-        """Return the name of the Component."""
-        return self._name
 
     @property
     def extra_child_components(self) -> Dict[str, List["Component"]]:
@@ -73,20 +52,6 @@ class Component(ICalBaseClass):
         return self._extra_properties
 
     @property
-    def parent(self) -> Optional["Component"]:
-        """
-        Return the parent :class:`Component` that contains this :class:`Component`.
-        :return: Return the parent :class:`Component` instance or None in the case there is no parent (for VCalender's).
-        """
-        return self._parent
-
-    def set_parent(self, parent: "Component") -> None:
-        """Set the parent :class:`Component`."""
-        if self._parent is not None:
-            raise ValueError(f"Can not overwrite the parent of {self} to {parent=}")
-        self._parent = parent
-
-    @property
     def tree_root(self) -> "VCalendar":
         """Return the tree root which should always be a VCalendar object."""
         from ical_reader.ical_components.v_calendar import VCalendar
@@ -95,7 +60,9 @@ class Component(ICalBaseClass):
         while instance.parent is not None:
             instance = instance.parent
         if not isinstance(instance, VCalendar):
-            raise TypeError(f"Invalid TreeRoot as it was of type {type(instance)=} instead of VCalendar.")
+            raise CalendarParentRelationError(
+                f"TreeRoot {instance=} is of type {type(instance)=} instead of VCalendar."
+            )
         return instance
 
     @property
@@ -117,13 +84,12 @@ class Component(ICalBaseClass):
         If the child is defined, we add it to one of the other variables according to
         :function:`self._get_child_component_mapping()`.
         """
-        child.set_parent(self)
         child_component_mapping = self._get_child_component_mapping()
-        if child._name in child_component_mapping:
-            var_name, var_type, is_list = child_component_mapping[child._name]
+        if child.name in child_component_mapping:
+            var_name, var_type, is_list = child_component_mapping[child.name]
             getattr(self, var_name).append(child)
             return
-        self._extra_child_components[child._name].append(child)
+        self._extra_child_components[child.name].append(child)
 
     @property
     def original_ical_text(self) -> str:
@@ -193,6 +159,8 @@ class Component(ICalBaseClass):
         :return: A class mapping that maps the iCal name (e.g. VEVENT) to another tuple that contains
         the variable name, the child class of :class:`ICalBaseClass` and a boolean whether that child class was wrapped
         in a List.
+
+        @ToDo get rid of dataclasses. Use this in place: https://stackoverflow.com/a/36849919/2277445
         """
         var_mapping: Dict[str, Tuple[str, Type[ICalBaseClass], bool]] = {}
         for a_field in dataclasses.fields(cls):
@@ -287,9 +255,8 @@ class Component(ICalBaseClass):
                 setattr(self, var_name, property_instance)
             return property_instance
         else:
-            pythonic_name = name.lower().replace("-", "_")
             property_instance = Property(parent=self, name=name, property_parameters=property_parameters, value=value)
-            self._extra_properties[pythonic_name].append(property_instance)
+            self._extra_properties[name].append(property_instance)
             return property_instance
 
     def parse_component(self, lines: List[str], line_number: int) -> int:
@@ -315,10 +282,9 @@ class Component(ICalBaseClass):
                 component_name = current_line[len("BEGIN:") :]
                 if component_name in component_mapping:
                     var_name, var_type, is_list = component_mapping[component_name]
-                    instance: "Component" = var_type()
+                    instance: "Component" = var_type(name=component_name, parent=self)
                 else:
-                    instance: "Component" = Component()
-                instance._name = component_name
+                    instance: "Component" = Component(name=component_name, parent=self)
                 self.add_child(instance)
                 line_number = instance.parse_component(lines=lines, line_number=line_number)
                 continue
@@ -330,7 +296,7 @@ class Component(ICalBaseClass):
                 full_line_without_line_breaks += next_line[1:]
             self.parse_property(full_line_without_line_breaks)
 
-        if current_line != f"END:{self._name or self.get_ical_name_of_class()}":
-            raise ValueError(f"Expected {current_line=} to be equal to END:{self.get_ical_name_of_class()}.")
+        if current_line != f"END:{self.name}":
+            raise ValueError(f"Expected {current_line=} to be equal to END:{self.name}.")
         self._parse_line_end = line_number + 1
         return line_number + 1

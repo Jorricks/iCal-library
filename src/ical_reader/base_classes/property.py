@@ -28,20 +28,13 @@ class Property(ICalBaseClass):
         :param property_parameters: The property parameters for this definition.
         :param value: The value of the property.
         """
-        self._parent: "Component" = parent
-        self._name: str = name
+        super().__init__(name=name, parent=parent)
         self._property_parameters: Optional[str] = property_parameters
         self._value: Optional[str] = value
 
-    @property
-    def parent(self) -> "Component":
-        """Return the instance of the :class:`Component` it is a part of."""
-        return self._parent
-
-    @property
-    def name(self) -> str:
-        """Return the name of the property."""
-        return self._name
+    def __repr__(self) -> str:
+        """Overwrite the repr to create a better representation for the item."""
+        return f"{self.__class__.__name__}({self.as_original_string})"
 
     @property
     @instance_lru_cache()

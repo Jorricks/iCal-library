@@ -6,6 +6,7 @@ setup(
         "python-dateutil>=2.8.0",
     ],
     extras_require={
-        "dev": ["pre-commit", "flake8", "flake8-docstrings", "black", "isort", "pytype"],
+        # @ToDo(jorrick) change this to be all pre-commit based.
+        "dev": ["pre-commit", "flake8", "flake8-docstrings", "black", "isort", "pytype", "pytest"],
     },
 )
