@@ -4,13 +4,13 @@ from typing import Dict, Iterator, List, Optional, Tuple, Union
 from pendulum import Date, DateTime
 
 from ical_reader.base_classes.component import Component
-from ical_reader.help_classes.timespan import Timespan
+from ical_reader.help_modules import dt_utils, property_utils
+from ical_reader.help_modules.timespan import Timespan
 from ical_reader.ical_properties.dt import DTStart, LastModified
 from ical_reader.ical_properties.pass_properties import Comment, TZID, TZName, TZURL
 from ical_reader.ical_properties.periods import RDate
 from ical_reader.ical_properties.rrule import RRule
 from ical_reader.ical_properties.tz_offset import TZOffsetFrom, TZOffsetTo
-from ical_reader.ical_utils import dt_utils, property_utils
 
 
 @dataclass(repr=False)

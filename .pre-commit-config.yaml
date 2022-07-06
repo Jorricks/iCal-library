@@ -31,12 +31,12 @@ repos:
         language: python
         types: [python]
         require_serial: true
-      - id: pytype
-        name: pytype - A static type analyzer for Python code
-        description: Pytype checks and infers types for your Python code - without requiring type annotations.
-        entry: pytype
-        args: ["--config=pytype.cfg", "--jobs auto"]
-        language: python
-        types: [python]
-        require_serial: true
-        verbose: true
+#      - id: pytype
+#        name: pytype - A static type analyzer for Python code
+#        description: Pytype checks and infers types for your Python code - without requiring type annotations.
+#        entry: pytype
+#        args: ["--config=pytype.cfg", "--jobs auto"]
+#        language: python
+#        types: [python]
+#        require_serial: true
+#        verbose: true

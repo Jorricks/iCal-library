@@ -4,9 +4,9 @@ from typing import Iterator, List, Mapping, Optional, Tuple, TYPE_CHECKING
 
 from pendulum import DateTime
 
-from ical_reader.help_classes.timespan import Timespan, TimespanWithParent
+from ical_reader.help_modules.lru_cache import instance_lru_cache
+from ical_reader.help_modules.timespan import Timespan, TimespanWithParent
 from ical_reader.ical_components.v_event import VEvent
-from ical_reader.ical_utils.lru_cache import instance_lru_cache
 
 if TYPE_CHECKING:
     from ical_reader.ical_components.v_calendar import VCalendar

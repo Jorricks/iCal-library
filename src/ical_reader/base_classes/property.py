@@ -1,7 +1,7 @@
 from typing import Dict, Optional, TYPE_CHECKING
 
 from ical_reader.base_classes.base_class import ICalBaseClass
-from ical_reader.ical_utils.lru_cache import instance_lru_cache
+from ical_reader.help_modules.lru_cache import instance_lru_cache
 
 if TYPE_CHECKING:
     from ical_reader.base_classes.component import Component

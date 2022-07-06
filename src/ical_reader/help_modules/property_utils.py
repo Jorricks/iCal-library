@@ -3,10 +3,10 @@ from typing import Iterator, List, Optional, Set, Tuple, Union
 from pendulum import Date, DateTime, Duration
 from pendulum.tz.timezone import Timezone
 
-from ical_reader.help_classes.timespan import Timespan
+from ical_reader.help_modules import dt_utils
+from ical_reader.help_modules.timespan import Timespan
 from ical_reader.ical_properties.periods import EXDate, RDate
 from ical_reader.ical_properties.rrule import RRule
-from ical_reader.ical_utils import dt_utils
 
 
 def _handle_tz(dt: Union[DateTime, Date], make_tz_aware: Optional[Timezone]) -> Union[DateTime, Date]:

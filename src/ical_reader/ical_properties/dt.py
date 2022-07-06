@@ -4,7 +4,7 @@ import pendulum
 from pendulum import Date, DateTime
 
 from ical_reader.base_classes.property import Property
-from ical_reader.ical_utils import dt_utils
+from ical_reader.help_modules import dt_utils
 
 
 class _DTBoth(Property):

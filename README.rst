@@ -43,7 +43,6 @@ Quick example
 
 ToDo
 ====
-- Implement code docs.
 - Implement tests. (e.g. verify for the timezone makes sense)
 - Create release pipeline.
 - Create first release.
@@ -51,3 +50,5 @@ ToDo
 - Implement timeline functionality for all items instead of just VEvents.
 - Fix the timeline & expanding functionality to use intersect.
 - Implement support for quoted property parameters.
+- Implement support for the new Properties for iCalendar (RFC 7986)
+

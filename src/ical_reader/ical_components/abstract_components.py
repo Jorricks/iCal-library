@@ -6,12 +6,12 @@ from pendulum import Date, DateTime, Duration, Period
 
 from ical_reader.base_classes.component import Component
 from ical_reader.base_classes.property import Property
-from ical_reader.help_classes.timespan import TimespanWithParent
+from ical_reader.help_modules.lru_cache import instance_lru_cache
+from ical_reader.help_modules.timespan import TimespanWithParent
 from ical_reader.ical_properties.dt import _DTBoth, DTStamp, DTStart
 from ical_reader.ical_properties.pass_properties import Comment, Summary, UID
 from ical_reader.ical_properties.periods import EXDate, RDate
 from ical_reader.ical_properties.rrule import RRule
-from ical_reader.ical_utils.lru_cache import instance_lru_cache
 
 if TYPE_CHECKING:
     from ical_reader.ical_components.v_event import VEvent  # noqa: F401

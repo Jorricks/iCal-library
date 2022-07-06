@@ -3,7 +3,8 @@ from typing import Iterator, List, Optional
 
 from pendulum import DateTime, Duration
 
-from ical_reader.help_classes.timespan import Timespan
+from ical_reader.help_modules import property_utils
+from ical_reader.help_modules.timespan import Timespan
 from ical_reader.ical_components.abstract_components import AbstractRecurringComponent, AbstractStartStopComponent
 from ical_reader.ical_properties.cal_address import Attendee, Organizer
 from ical_reader.ical_properties.dt import _DTBoth, Created, DTEnd, LastModified, RecurrenceID
@@ -25,7 +26,6 @@ from ical_reader.ical_properties.pass_properties import (
     URL,
 )
 from ical_reader.ical_properties.rrule import RRule
-from ical_reader.ical_utils import property_utils
 
 
 @dataclass(repr=False)

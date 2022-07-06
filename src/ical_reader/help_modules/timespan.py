@@ -4,7 +4,7 @@ from typing import Any, Optional, Tuple, TYPE_CHECKING, Union
 
 from pendulum import Date, DateTime
 
-from ical_reader.ical_utils import dt_utils
+from ical_reader.help_modules import dt_utils
 
 if TYPE_CHECKING:
     from ical_reader.base_classes.component import Component
