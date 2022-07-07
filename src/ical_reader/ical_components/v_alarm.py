@@ -14,12 +14,14 @@ class VAlarm(Component):
     A "VALARM" calendar component is a grouping of component properties that is a reminder or alarm for an event or a
     to-do. For example, it may be used to define a reminder for a pending event or an overdue to-do.
 
-    :param parent:
-    :param action:
-    :param trigger:
-    :param duration:
-    :param repeat:
-    :param attach:
+    :param parent: The Component this item is encapsulated by in the iCalendar data file.
+    :param action: The Action property. Required and must occur exactly once.
+    :param trigger: The Trigger property. Required and must occur exactly once.
+    :param duration: The ICALDuration property. Optional, but may occur at most once. If this item is
+        present, repeat may not be present.
+    :param repeat: The Repeat property. Optional, but may occur at most once. If this item is
+        present, duration may not be present.
+    :param attach: The Attach property. Optional, but may occur at most once.
     """
 
     def __init__(

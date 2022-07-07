@@ -13,7 +13,7 @@ class ICalBaseClass:
     iCal property.
 
     :param name: the actual name of this property or component. E.g. VEVENT, RRULE, VCUSTOMCOMPONENT, CUSTOMPROPERTY.
-    :param parent: the parent :class:`Component` instance that contains this :class:`Component` instance.
+    :param parent: The Component this item is encapsulated by in the iCalendar data file.
     """
 
     def __init__(self, name: str, parent: Optional["Component"]):

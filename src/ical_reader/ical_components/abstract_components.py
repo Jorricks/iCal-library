@@ -32,16 +32,16 @@ class AbstractStartStopComponent(Component, ABC):
     :class:`RDate` and :class:`EXDate`. All properties they had in common are part of this class.
     Note: VJournal is the odd one out as these events don't have a duration.
 
-    :param name:
-    :param parent:
-    :param dtstamp:
-    :param uid:
-    :param dtstart:
-    :param rrule:
-    :param summary:
-    :param exdate:
-    :param rdate:
-    :param comment:
+    :param name: The actual name of this component instance. E.g. VEVENT, RRULE, VCUSTOMCOMPONENT.
+    :param parent: The Component this item is encapsulated by in the iCalendar data file.
+    :param dtstamp: The DTStamp property. Required and must occur exactly once.
+    :param uid: The UID property. Required and must occur exactly once.
+    :param dtstart: The DTStart property. Optional and may occur at most once.
+    :param rrule: The RRule property. Optional and may occur at most once.
+    :param summary: The Summary property. Optional and may occur at most once.
+    :param exdate: The EXDate property. Optional, but may occur multiple times.
+    :param rdate: The RDate property. Optional, but may occur multiple times.
+    :param comment: The Comment property. Optional, but may occur multiple times.
     """
 
     def __init__(

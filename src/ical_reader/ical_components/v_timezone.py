@@ -16,15 +16,15 @@ class _TimeOffsetPeriod(Component):
     """
     A _TimeOffsetPeriod representing either a Standard configuration or a Winter configuration.
 
-    :param name:
-    :param parent:
-    :param dtstart:
-    :param tzoffsetto:
-    :param tzoffsetfrom:
-    :param rrule:
-    :param comment:
-    :param rdate:
-    :param tzname:
+    :param name: The actual name of this component instance. E.g. VEVENT, RRULE, VCUSTOMCOMPONENT.
+    :param parent: The Component this item is encapsulated by in the iCalendar data file.
+    :param dtstart: The DTStart property. Required and must occur exactly once.
+    :param tzoffsetto: The TZOffsetTo property. Required and must occur exactly once.
+    :param tzoffsetfrom: The TZOffsetFrom property. Required and must occur exactly once.
+    :param rrule: The RRule property. Optional, but may occur at most once.
+    :param comment: The Comment property. Optional, but may occur multiple times.
+    :param rdate: The RDate property. Optional, but may occur multiple times.
+    :param tzname: The TZName property. Optional, but may occur multiple times.
     """
 
     def __init__(
@@ -100,12 +100,14 @@ class VTimeZone(Component):
     iCalendar object. In this situation, each "VTIMEZONE" MUST represent a unique time zone definition. This is
     necessary for some classes of events, such as airline flights, that start in one time zone and end in another.
 
-    :param parent:
-    :param tzid:
-    :param last_mod:
-    :param tzurl:
-    :param standardc:
-    :param daylightc:
+    :param parent: The Component this item is encapsulated by in the iCalendar data file.
+    :param tzid: The TZID property. Required and must occur exactly once.
+    :param last_mod: Optional LastModified property. Optional, but may occur at most once.
+    :param tzurl: The TZURL property. Optional, but may occur at most once.
+    :param standardc: Optional list of Standard components. Each component may occur multiple times. Either standardc
+    or daylightc must contain at least one TimeOffsetPeriod.
+    :param daylightc: Optional list of DayLight components. Each component may occur multiple times. Either standardc
+    or daylightc must contain at least one TimeOffsetPeriod.
     """
 
     def __init__(

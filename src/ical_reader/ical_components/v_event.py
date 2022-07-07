@@ -43,38 +43,38 @@ class VEvent(AbstractStartStopComponent):
     the event can have its Time Transparency set to "TRANSPARENT" in order to prevent blocking of the event in
     searches for busy time.
 
-    :param name:
-    :param parent:
-    :param dtstamp:
-    :param uid:
-    :param dtstart:
-    :param rrule:
-    :param summary:
-    :param exdate:
-    :param rdate:
-    :param comment:
-    :param ical_class:
-    :param created:
-    :param description:
-    :param duration:
-    :param geo:
-    :param last_modified:
-    :param location:
-    :param organizer:
-    :param priority:
-    :param sequence:
-    :param status:
-    :param transp:
-    :param url:
-    :param recurrence_id:
-    :param dtend:
-    :param attach:
-    :param attendee:
-    :param categories:
-    :param contact:
-    :param rstatus:
-    :param related:
-    :param resources:
+    :param name: The actual name of this component instance. E.g. VEVENT, RRULE, VCUSTOMCOMPONENT.
+    :param parent: The Component this item is encapsulated by in the iCalendar data file.
+    :param dtstamp: The DTStamp property. Required and must occur exactly once.
+    :param uid: The UID property. Required and must occur exactly once.
+    :param dtstart: The DTStart property. Optional and may occur at most once.
+    :param rrule: The RRule property. Optional and may occur at most once.
+    :param summary: The Summary property. Optional and may occur at most once.
+    :param exdate: The EXDate property. Optional, but may occur multiple times.
+    :param rdate: The RDate property. Optional, but may occur multiple times.
+    :param comment: The Comment property. Optional, but may occur multiple times.
+    :param ical_class: Optional Class property. Optional, but may occur at most once.
+    :param created: The Created property. Optional, but may occur at most once.
+    :param description: The Description property. Optional, but may occur at most once.
+    :param duration: The ICALDuration property. Optional, but may occur at most once.
+    :param geo: The GEO property. Optional, but may occur at most once.
+    :param last_modified: Optional LastModified property. Optional, but may occur at most once.
+    :param location: The Location property. Optional, but may occur at most once.
+    :param organizer: The Organizer property. Optional, but may occur at most once.
+    :param priority: The Priority property. Optional, but may occur at most once.
+    :param sequence: The Sequence property. Optional, but may occur at most once.
+    :param status: The Status property. Optional, but may occur at most once.
+    :param transp: The TimeTransparency property. Optional, but may occur at most once.
+    :param url: The URL property. Optional, but may occur at most once.
+    :param recurrence_id: Optional RecurrenceID property. Optional, but may occur at most once.
+    :param dtend: The DTEnd property. Optional, but may occur at most once.
+    :param attach: The Attach property. Optional, but may occur multiple times.
+    :param attendee: The Attendee property. Optional, but may occur multiple times.
+    :param categories: The Categories property. Optional, but may occur multiple times.
+    :param contact: The Contact property. Optional, but may occur multiple times.
+    :param rstatus: The RequestStatus property. Optional, but may occur multiple times.
+    :param related: The RelatedTo property. Optional, but may occur multiple times.
+    :param resources: The Resources property. Optional, but may occur multiple times.
     """
 
     def __init__(

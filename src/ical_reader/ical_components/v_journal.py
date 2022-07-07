@@ -38,31 +38,31 @@ class VJournal(AbstractStartStopComponent):
     a journal entry of individual telephone contacts for the day or an ordered list of accomplishments for the day.
     The "VJOURNAL" calendar component can also be used to associate a document with a calendar date.
 
-    :param name:
-    :param parent:
-    :param dtstamp:
-    :param uid:
-    :param dtstart:
-    :param rrule:
-    :param summary:
-    :param exdate:
-    :param rdate:
-    :param comment:
-    :param ical_class:
-    :param created:
-    :param last_modified:
-    :param organizer:
-    :param sequence:
-    :param status:
-    :param url:
-    :param recurrence_id:
-    :param attach:
-    :param attendee:
-    :param categories:
-    :param contact:
-    :param description:
-    :param related:
-    :param rstatus:
+    :param name: The actual name of this component instance. E.g. VEVENT, RRULE, VCUSTOMCOMPONENT.
+    :param parent: The Component this item is encapsulated by in the iCalendar data file.
+    :param dtstamp: The DTStamp property. Required and must occur exactly once.
+    :param uid: The UID property. Required and must occur exactly once.
+    :param dtstart: The DTStart property. Optional and may occur at most once.
+    :param rrule: The RRule property. Optional and may occur at most once.
+    :param summary: The Summary property. Optional and may occur at most once.
+    :param exdate: The EXDate property. Optional, but may occur multiple times.
+    :param rdate: The RDate property. Optional, but may occur multiple times.
+    :param comment: The Comment property. Optional, but may occur multiple times.
+    :param ical_class: Optional Class property. Optional, but may occur at most once.
+    :param created: The Created property. Optional, but may occur at most once.
+    :param last_modified: Optional LastModified property. Optional, but may occur at most once.
+    :param organizer: The Organizer property. Optional, but may occur at most once.
+    :param sequence: The Sequence property. Optional, but may occur at most once.
+    :param status: The Status property. Optional, but may occur at most once.
+    :param url: The URL property. Optional, but may occur at most once.
+    :param recurrence_id: Optional RecurrenceID property. Optional, but may occur at most once.
+    :param attach: The Attach property. Optional, but may occur multiple times.
+    :param attendee: The Attendee property. Optional, but may occur multiple times.
+    :param categories: The Categories property. Optional, but may occur multiple times.
+    :param contact: The Contact property. Optional, but may occur multiple times.
+    :param description: The Description property. Optional, but may occur multiple times.
+    :param related: The RelatedTo property. Optional, but may occur multiple times.
+    :param rstatus: The RequestStatus property. Optional, but may occur multiple times.
     """
 
     def __init__(

@@ -15,19 +15,19 @@ class VFreeBusy(Component):
     or busy time information, a reply to a request for free or busy time information, or a published set of busy time
     information.
 
-    :param name:
-    :param parent:
-    :param dtstamp:
-    :param uid:
-    :param contact:
-    :param dtstart:
-    :param dtend:
-    :param organizer:
-    :param url:
-    :param attendee:
-    :param comment:
-    :param freebusy:
-    :param rstatus:
+    :param name: The actual name of this component instance. E.g. VEVENT, RRULE, VCUSTOMCOMPONENT.
+    :param parent: The Component this item is encapsulated by in the iCalendar data file.
+    :param dtstamp: The DTStamp property. Required and must occur exactly once.
+    :param uid: The UID property. Required and must occur exactly once.
+    :param contact: The Contact property. Optional, but may occur at most once.
+    :param dtstart: The DTStart property. Optional, but may occur at most once.
+    :param dtend: The DTEnd property. Optional, but may occur at most once.
+    :param organizer: The Organizer property. Optional, but may occur at most once.
+    :param url: The URL property. Optional, but may occur at most once.
+    :param attendee: The Attendee property. Optional, but may occur multiple times.
+    :param comment: The Comment property. Optional, but may occur multiple times.
+    :param freebusy: The FreeBusyProperty property. Optional, but may occur multiple times.
+    :param rstatus: The RequestStatus property. Optional, but may occur multiple times.
     """
 
     def __init__(

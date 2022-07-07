@@ -21,17 +21,17 @@ class VCalendar(Component):
     collections of properties that express a particular calendar semantic. For example, the calendar component can
     specify an event, a to-do, a journal entry, time zone information, free/busy time information, or an alarm.
 
-    :param name:
-    :param parent:
-    :param prodid:
-    :param version:
-    :param calscale:
-    :param method:
-    :param events:
-    :param todos:
-    :param journals:
-    :param free_busy_list:
-    :param time_zones:
+    :param name: The actual name of this component instance. E.g. VEVENT, RRULE, VCUSTOMCOMPONENT.
+    :param parent: The Component this item is encapsulated by in the iCalendar data file.
+    :param prodid: The ProdID property. Required and must occur exactly once.
+    :param version: The Version property. Required and must occur exactly once.
+    :param calscale: The CalScale property. Optional, but may occur at most once.
+    :param method: The Method property. Optional, but may occur at most once.
+    :param events: Optional list of VEvent components. Each component may occur multiple times.
+    :param todos: Optional list of VToDo components. Each component may occur multiple times.
+    :param journals: Optional list of VJournal components. Each component may occur multiple times.
+    :param free_busy_list: Optional list of VFreeBusy components. Each component may occur multiple times.
+    :param time_zones: Optional list of VTimeZone components. Each component may occur multiple times.
     """
 
     def __init__(

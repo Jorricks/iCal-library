@@ -26,8 +26,8 @@ class Component(ICalBaseClass):
     - variables that have a type of Optional[x] (and not Optional[List[x]]). These are properties of the instance.
     They can be either optional or required, but may only occur once in the iCal file.
 
-    :param name: the actual name of this property or component. E.g. VEVENT, RRULE, VCUSTOMCOMPONENT, CUSTOMPROPERTY.
-    :param parent: the parent :class:`Component` instance that contains this :class:`Component` instance.
+    :param name: The actual name of this component instance. E.g. VEVENT, RRULE, VCUSTOMCOMPONENT.
+    :param parent: The Component this item is encapsulated by in the iCalendar data file.
     """
 
     def __init__(self, name: str, parent: Optional["Component"]):
