@@ -2,6 +2,11 @@ from ical_reader.base_classes.component import Component
 from ical_reader.base_classes.property import Property
 from ical_reader.ical_components.v_calendar import VCalendar
 from ical_reader.ical_components.v_event import VEvent
+from ical_reader.ical_components.v_free_busy import VFreeBusy
+from ical_reader.ical_components.v_journal import VJournal
+from ical_reader.ical_components.v_timezone import VTimeZone
+from ical_reader.ical_components.v_todo import VToDo
+from ical_reader.ical_properties.pass_properties import ProdID, Version
 
 
 def test_repr():
@@ -25,7 +30,7 @@ def test_extra_child_components():
 def test_extra_properties():
     my_component = Component("MORTHY", None)
     my_component.parse_property("RICK:SUMMER")
-    assert set(my_component.properties.keys()) == {"RICK"}
+    assert set(my_component.properties.keys()) == {"rick"}
     print(dir(my_component.properties.values()))
     property = list(my_component.properties.values())[0][0]
     assert property.name == "RICK"
@@ -38,11 +43,53 @@ def test_parent():
     assert some_component.parent == root_component
 
 
-def test_children():
-    root_component = VCalendar(parent=None)
-    an_event = VEvent(parent=root_component)
-    some_component = Component("SOME-COMPONENT", root_component)
-    root_component.add_child(an_event)
-    root_component.add_child(some_component)
-    assert len(root_component.children) == 2
-    assert root_component.children == (an_event, some_component)
+def test_children(calendar_with_all_components_once: VCalendar):
+    assert len(calendar_with_all_components_once.children) == 6
+    type_of_children = [type(child) for child in calendar_with_all_components_once.children]
+    assert type_of_children == [VEvent, VToDo, VJournal, VFreeBusy, VTimeZone, Component]
+
+
+def test_original_ical_text(calendar_with_all_components_once: VCalendar):
+    assert (
+        calendar_with_all_components_once.free_busy_list[0].original_ical_text
+        == """
+BEGIN:VFREEBUSY
+UID:19970901T082949Z-FA43EF@example.com
+ORGANIZER:mailto:jane_doe@example.com
+ATTENDEE:mailto:john_public@example.com
+DTSTART:19971015T050000Z
+DTEND:19971016T050000Z
+DTSTAMP:19970901T083000Z
+END:VFREEBUSY
+    """.strip()
+    )
+
+
+def test_properties(empty_calendar):
+    version_property = Version(empty_calendar, "VERSION", "", "1.1")
+    empty_calendar.version = version_property
+    some_other_property = Property(empty_calendar, "AWESOME", "", "VALUE")
+    empty_calendar._extra_properties["awesome"].append(some_other_property)
+    assert empty_calendar.properties["awesome"] == [some_other_property]
+    assert empty_calendar.properties["version"] == version_property
+    assert set(empty_calendar.properties.keys()) == {
+        "prodid",
+        "version",
+        "calscale",
+        "method",
+        "x_wr_caldesc",
+        "x_wr_timezone",
+        "x_wr_calname",
+        "awesome",
+    }
+
+
+def test_print_tree_structure(capsys):
+    root = VCalendar(prodid=ProdID(None, "A", None, "B"), version=Version(None, "C", None, "D"))
+    an_event = VEvent(parent=root)
+    a_journal = VJournal(parent=root)
+    root.add_child(an_event)
+    root.add_child(a_journal)
+    root.print_tree_structure()
+    captured = capsys.readouterr()
+    assert captured.out == " - VCalendar(B, D)\n   - VEvent()\n   - VJournal(None: )\n"

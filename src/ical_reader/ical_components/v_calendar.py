@@ -1,8 +1,9 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 from pendulum import DateTime
 
 from ical_reader.base_classes.component import Component
+from ical_reader.exceptions import MissingRequiredProperty
 from ical_reader.ical_components.v_event import VEvent
 from ical_reader.ical_components.v_free_busy import VFreeBusy
 from ical_reader.ical_components.v_journal import VJournal
@@ -36,7 +37,6 @@ class VCalendar(Component):
 
     def __init__(
         self,
-        parent: Optional[Component],
         prodid: Optional[ProdID] = None,
         version: Optional[Version] = None,
         calscale: Optional[CalScale] = None,
@@ -47,11 +47,11 @@ class VCalendar(Component):
         free_busy_list: Optional[List[VFreeBusy]] = None,
         time_zones: Optional[List[VTimeZone]] = None,
     ):
-        super().__init__("VCALENDAR", parent)
+        super().__init__("VCALENDAR", None)
 
         # Required properties, only one occurrence allowed.
-        self.prodid: Optional[ProdID] = prodid
-        self.version: Optional[Version] = version
+        self._prodid: Optional[ProdID] = prodid
+        self._version: Optional[Version] = version
 
         # Optional properties, must not occur more than once.
         self.calscale: Optional[CalScale] = calscale
@@ -67,17 +67,33 @@ class VCalendar(Component):
         # Only the VCalender stores the entire list.
         self._lines: Optional[List[str]] = None
 
+    def __repr__(self) -> str:
+        """Overwrite the repr to create a better representation for the item."""
+        return f"VCalendar({self.prodid.value}, {self.version.value})"
+
     @property
-    def children(self) -> Tuple[Component, ...]:
-        # @ToDo(jorrick) check if this is required.
-        return (
-            *self.events,
-            *self.todos,
-            *self.journals,
-            *self.free_busy_list,
-            *self.time_zones,
-            *[child for list_of_children in self._extra_child_components.values() for child in list_of_children],
-        )
+    def prodid(self) -> ProdID:
+        """A getter to ensure the required property is set."""
+        if self._prodid is None:
+            raise MissingRequiredProperty(self, "prodid")
+        return self._prodid
+
+    @prodid.setter
+    def prodid(self, value: ProdID):
+        """A setter to set the required property."""
+        self._prodid = value
+
+    @property
+    def version(self) -> Version:
+        """A getter to ensure the required property is set."""
+        if self._version is None:
+            raise MissingRequiredProperty(self, "version")
+        return self._version
+
+    @version.setter
+    def version(self, value: Version):
+        """A setter to set the required property."""
+        self._version = value
 
     @property
     def calendar_scale(self) -> str:

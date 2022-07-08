@@ -2,14 +2,38 @@ import inspect
 import re
 from collections import defaultdict
 from functools import lru_cache
-from typing import ClassVar, Dict, get_args, get_origin, List, Mapping, Optional, Set, Tuple, Type, TYPE_CHECKING, Union
+from typing import (
+    Callable,
+    ClassVar,
+    Dict,
+    get_args,
+    get_origin,
+    List,
+    Mapping,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    TYPE_CHECKING,
+    Union,
+)
 
 from ical_reader.base_classes.base_class import ICalBaseClass
 from ical_reader.base_classes.property import Property
 from ical_reader.exceptions import CalendarParentRelationError
 
 if TYPE_CHECKING:
+    from ical_reader.ical_components.v_alarm import VAlarm
     from ical_reader.ical_components.v_calendar import VCalendar
+    from ical_reader.ical_components.v_event import VEvent
+    from ical_reader.ical_components.v_free_busy import VFreeBusy
+    from ical_reader.ical_components.v_journal import VJournal
+    from ical_reader.ical_components.v_timezone import DayLight, Standard, VTimeZone
+    from ical_reader.ical_components.v_todo import VToDo
+
+PREDEFINED_COMPONENT_UNION = Union[
+    "VAlarm", "VEvent", "VFreeBusy", "VJournal", "VTimeZone", "Standard", "DayLight", "VToDo"
+]
 
 
 class Component(ICalBaseClass):
@@ -69,12 +93,13 @@ class Component(ICalBaseClass):
     @property
     def children(self) -> List["Component"]:
         """Return all children components."""
-        children = [child for list_of_children in self._extra_child_components.values() for child in list_of_children]
-        children.extend(
+        extras = (child for list_of_children in self._extra_child_components.values() for child in list_of_children)
+        children = [
             item_in_list
             for ical_name, (var_name, var_type, is_list) in self._get_child_component_mapping().items()
             for item_in_list in getattr(self, var_name)
-        )
+        ]
+        children.extend(extras)
         return children
 
     def add_child(self, child: "Component") -> None:
@@ -153,6 +178,10 @@ class Component(ICalBaseClass):
             raise TypeError(f"Unknown type '{a_type}' came by in Component.extract_custom_type.")
 
     @classmethod
+    def _get_init_method_for_var_mapping(cls) -> Callable:
+        return cls.__init__
+
+    @classmethod
     @lru_cache()
     def _get_var_mapping(cls) -> Mapping[str, Tuple[str, Type[ICalBaseClass], bool]]:
         """
@@ -163,8 +192,8 @@ class Component(ICalBaseClass):
         """
         var_mapping: Dict[str, Tuple[str, Type[ICalBaseClass], bool]] = {}
         a_field: inspect.Parameter
-        for a_field in inspect.signature(cls.__init__).parameters.values():
-            if a_field.name.startswith("_") or a_field.name in ["self", "parent"]:
+        for a_field in inspect.signature(cls._get_init_method_for_var_mapping()).parameters.values():
+            if a_field.name.startswith("_") or a_field.name in ["self", "parent", "name"]:
                 continue
             result = Component._extract_type_information(a_field.name, a_field.annotation, False)
             if result is None:
@@ -189,15 +218,24 @@ class Component(ICalBaseClass):
 
     @classmethod
     @lru_cache()
-    def _get_child_component_mapping(cls) -> Mapping[str, Tuple[str, Type["Component"], bool]]:
+    def _get_child_component_mapping(cls) -> Mapping[str, Tuple[str, Type[PREDEFINED_COMPONENT_UNION], bool]]:
         """
         Return the same mapping as :function:`cls._get_var_mapping()` but only return variables related to
         :class:`Component` classes.
         """
+        from ical_reader.ical_components.v_alarm import VAlarm
+        from ical_reader.ical_components.v_event import VEvent
+        from ical_reader.ical_components.v_free_busy import VFreeBusy
+        from ical_reader.ical_components.v_journal import VJournal
+        from ical_reader.ical_components.v_timezone import DayLight, Standard, VTimeZone
+        from ical_reader.ical_components.v_todo import VToDo
+
+        predefined_components = (VAlarm, VEvent, VFreeBusy, VJournal, VTimeZone, Standard, DayLight, VToDo)
+
         return {
             ical_name: var_tuple
             for ical_name, var_tuple in cls._get_var_mapping().items()
-            if issubclass(var_tuple[1], Component)
+            if issubclass(var_tuple[1], predefined_components)
         }
 
     @property
@@ -235,7 +273,7 @@ class Component(ICalBaseClass):
         property_mapping = self._get_property_mapping()
         result = re.search("([^\r\n;:]+)(;[^\r\n:]+)?:(.*)", line)
         if result is None:
-            raise ValueError(f"{result=} should never be None!")
+            raise ValueError(f"{result=} should never be None! {line=} is invalid.")
         name, property_parameters, value = result.group(1), result.group(2), result.group(3)
         if name in property_mapping.keys():
             var_name, var_type, is_list = property_mapping[name]
@@ -256,8 +294,16 @@ class Component(ICalBaseClass):
             return property_instance
         else:
             property_instance = Property(parent=self, name=name, property_parameters=property_parameters, value=value)
-            self._extra_properties[name].append(property_instance)
+            self._extra_properties[name.lower().replace("-", "_")].append(property_instance)
             return property_instance
+
+    def _instantiate_component(self, ical_component_identifier: str) -> "Component":
+        component_mapping = self._get_child_component_mapping()
+        if ical_component_identifier in component_mapping:
+            var_name, var_type, is_list = component_mapping[ical_component_identifier]
+            return var_type(parent=self)
+        else:
+            return Component(name=ical_component_identifier, parent=self)
 
     def parse_component(self, lines: List[str], line_number: int) -> int:
         """
@@ -275,16 +321,11 @@ class Component(ICalBaseClass):
         :return: The line number at which this component ends.
         """
         self._parse_line_start = line_number - 1
-        component_mapping = self._get_child_component_mapping()
         while not (current_line := lines[line_number]).startswith("END:"):
             line_number += 1
             if current_line.startswith("BEGIN:"):
                 component_name = current_line[len("BEGIN:") :]
-                if component_name in component_mapping:
-                    var_name, var_type, is_list = component_mapping[component_name]
-                    instance: "Component" = var_type(name=component_name, parent=self)
-                else:
-                    instance: "Component" = Component(name=component_name, parent=self)
+                instance = self._instantiate_component(component_name)
                 self.add_child(instance)
                 line_number = instance.parse_component(lines=lines, line_number=line_number)
                 continue
@@ -297,6 +338,8 @@ class Component(ICalBaseClass):
             self.parse_property(full_line_without_line_breaks)
 
         if current_line != f"END:{self.name}":
-            raise ValueError(f"Expected {current_line=} to be equal to END:{self.name}.")
+            raise ValueError(
+                f"Expected {current_line=} to be equal to END:{self.name}. It seems {self} was never closed."
+            )
         self._parse_line_end = line_number + 1
         return line_number + 1

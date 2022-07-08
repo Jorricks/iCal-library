@@ -5,6 +5,7 @@ from pendulum import Date, DateTime, Duration, Period
 
 from ical_reader.base_classes.component import Component
 from ical_reader.base_classes.property import Property
+from ical_reader.exceptions import MissingRequiredProperty
 from ical_reader.help_modules.lru_cache import instance_lru_cache
 from ical_reader.help_modules.timespan import TimespanWithParent
 from ical_reader.ical_properties.dt import _DTBoth, DTStamp, DTStart
@@ -60,8 +61,8 @@ class AbstractStartStopComponent(Component, ABC):
         super().__init__(name, parent)
 
         # Required
-        self.dtstamp: Optional[DTStamp] = dtstamp
-        self.uid: Optional[UID] = uid
+        self._dtstamp: Optional[DTStamp] = dtstamp
+        self._uid: Optional[UID] = uid
 
         # Optional, may only occur once
         self.dtstart: Optional[DTStart] = dtstart
@@ -72,6 +73,30 @@ class AbstractStartStopComponent(Component, ABC):
         self.exdate: Optional[List[EXDate]] = exdate
         self.rdate: Optional[List[RDate]] = rdate
         self.comment: Optional[List[Comment]] = comment
+
+    @property
+    def dtstamp(self) -> DTStamp:
+        """A getter to ensure the required property is set."""
+        if self._dtstamp is None:
+            raise MissingRequiredProperty(self, "dtstamp")
+        return self._dtstamp
+
+    @dtstamp.setter
+    def dtstamp(self, value: DTStamp):
+        """A setter to set the required property."""
+        self._dtstamp = value
+
+    @property
+    def uid(self) -> UID:
+        """A getter to ensure the required property is set."""
+        if self._uid is None:
+            raise MissingRequiredProperty(self, "uid")
+        return self._uid
+
+    @uid.setter
+    def uid(self, value: UID):
+        """A setter to set the required property."""
+        self._uid = value
 
     @property
     @abstractmethod
@@ -126,6 +151,8 @@ class AbstractStartStopComponent(Component, ABC):
         return True
 
     def __eq__(self: "AbstractStartStopComponent", other: "AbstractStartStopComponent") -> bool:
+        if type(self) != type(other):
+            return False
         return (
             self.compare_property_value(self.dtstart, other.dtstart)
             and self.compare_property_value(self.ending, other.ending)
@@ -145,9 +172,9 @@ class AbstractStartStopComponent(Component, ABC):
 
     @property
     @instance_lru_cache()
-    def start(self) -> Union[Date, DateTime]:
+    def start(self) -> Optional[Union[Date, DateTime]]:
         """Return the start of this Component as a :class:`Date` or :class:`DateTime` value."""
-        return self.dtstart.datetime_or_date_value
+        return self.dtstart.datetime_or_date_value if self.dtstart else None
 
     @property
     @instance_lru_cache()

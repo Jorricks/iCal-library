@@ -6,6 +6,7 @@ from ical_reader.base_classes.component import Component
 from ical_reader.help_modules import property_utils
 from ical_reader.help_modules.timespan import Timespan
 from ical_reader.ical_components.abstract_components import AbstractRecurringComponent, AbstractStartStopComponent
+from ical_reader.ical_components.v_alarm import VAlarm
 from ical_reader.ical_properties.cal_address import Attendee, Organizer
 from ical_reader.ical_properties.dt import (
     _DTBoth,
@@ -117,6 +118,7 @@ class VToDo(AbstractStartStopComponent):
         rstatus: Optional[List[RequestStatus]] = None,
         related: Optional[List[RelatedTo]] = None,
         resources: Optional[List[Resources]] = None,
+        alarms: Optional[List[VAlarm]] = None,
     ):
         super().__init__(
             name="VTODO",
@@ -159,9 +161,15 @@ class VToDo(AbstractStartStopComponent):
         self.related: Optional[List[RelatedTo]] = related
         self.resources: Optional[List[Resources]] = resources
 
+        # This is a child component
+        self.alarms: List[VAlarm] = alarms or []
+
     def __repr__(self) -> str:
         """Overwrite the repr to create a better representation for the item."""
-        return f"VAlarm({self.start} - {self.end}: {self.summary.value})"
+        return (
+            f"VToDo({self.dtstart.value if self.dtstart else ''} - {self.due.value if self.due else ''}: "
+            f"{self.summary.value if self.summary else ''})"
+        )
 
     @property
     def ending(self) -> Optional[_DTBoth]:
@@ -187,6 +195,12 @@ class VToDo(AbstractStartStopComponent):
         :return: Yield all recurring VToDo instances related to this VToDo in the given *return_range*.
         """
         yield self
+
+        start = self.start
+        duration = self.computed_duration
+        if not start or not duration:
+            return None
+
         iterator = property_utils.expand_component_in_range(
             exdate_list=self.exdate or [],
             rdate_list=self.rdate or [],
@@ -225,4 +239,4 @@ class VRecurringToDo(AbstractRecurringComponent, VToDo):
 
     def __repr__(self) -> str:
         """Overwrite the repr to create a better representation for the item."""
-        return f"RVToDo({self._start} - {self._end}: {self.original.summary.value})"
+        return f"RVToDo({self._start} - {self._end}: {self.original.summary.value if self.original.summary else ''})"

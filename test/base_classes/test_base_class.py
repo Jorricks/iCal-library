@@ -1,5 +1,7 @@
 from ical_reader.base_classes.base_class import ICalBaseClass
 from ical_reader.base_classes.component import Component
+from ical_reader.ical_components.v_calendar import VCalendar
+from ical_reader.ical_properties.dt import RecurrenceID
 
 
 def test_name():
@@ -21,3 +23,5 @@ def test_get_ical_name_of_class():
         pass
 
     assert SomeOtherClass.get_ical_name_of_class() == "SOMEOTHERCLASS"
+    assert VCalendar.get_ical_name_of_class() == "VCALENDAR"
+    assert RecurrenceID.get_ical_name_of_class() == "RECURRENCE-ID"

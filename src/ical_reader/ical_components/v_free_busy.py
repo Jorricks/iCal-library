@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from ical_reader.base_classes.component import Component
+from ical_reader.exceptions import MissingRequiredProperty
 from ical_reader.ical_properties.cal_address import Attendee, Organizer
 from ical_reader.ical_properties.dt import DTEnd, DTStamp, DTStart
 from ical_reader.ical_properties.pass_properties import Comment, Contact, RequestStatus, UID, URL
@@ -48,8 +49,8 @@ class VFreeBusy(Component):
         super().__init__("VFREEBUSY", parent)
 
         # Required
-        self.dtstamp: Optional[DTStamp] = dtstamp
-        self.uid: Optional[UID] = uid
+        self._dtstamp: Optional[DTStamp] = dtstamp
+        self._uid: Optional[UID] = uid
 
         # Optional, may only occur once
         self.contact: Optional[Contact] = contact
@@ -63,3 +64,31 @@ class VFreeBusy(Component):
         self.comment: Optional[List[Comment]] = comment
         self.freebusy: Optional[List[FreeBusyProperty]] = freebusy
         self.rstatus: Optional[List[RequestStatus]] = rstatus
+
+    def __repr__(self) -> str:
+        """Overwrite the repr to create a better representation for the item."""
+        return f"VFreeBusy({self.dtstart.value if self.dtstart else ''}, {self.dtend.value if self.dtend else ''})"
+
+    @property
+    def dtstamp(self) -> DTStamp:
+        """A getter to ensure the required property is set."""
+        if self._dtstamp is None:
+            raise MissingRequiredProperty(self, "dtstamp")
+        return self._dtstamp
+
+    @dtstamp.setter
+    def dtstamp(self, value: DTStamp):
+        """A setter to set the required property."""
+        self._dtstamp = value
+
+    @property
+    def uid(self) -> UID:
+        """A getter to ensure the required property is set."""
+        if self._uid is None:
+            raise MissingRequiredProperty(self, "uid")
+        return self._uid
+
+    @uid.setter
+    def uid(self, value: UID):
+        """A setter to set the required property."""
+        self._uid = value

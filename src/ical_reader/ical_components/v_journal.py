@@ -127,7 +127,7 @@ class VJournal(AbstractStartStopComponent):
 
     def __repr__(self) -> str:
         """Overwrite the repr to create a better representation for the item."""
-        return f"VJournal({self.start}: {self.summary.value})"
+        return f"VJournal({self.start}: {self.summary.value if self.summary else ''})"
 
     @property
     def ending(self) -> Optional[_DTBoth]:
@@ -153,6 +153,12 @@ class VJournal(AbstractStartStopComponent):
         :return: Yield all recurring VJournal instances related to this VJournal in the given *return_range*.
         """
         yield self
+
+        start = self.start
+        duration = self.computed_duration
+        if not start or not duration:
+            return None
+
         iterator = property_utils.expand_component_in_range(
             exdate_list=self.exdate or [],
             rdate_list=self.rdate or [],
@@ -187,4 +193,4 @@ class VRecurringJournal(AbstractRecurringComponent, VJournal):
 
     def __repr__(self) -> str:
         """Overwrite the repr to create a better representation for the item."""
-        return f"RVJournal({self._start}: {self.original.summary.value})"
+        return f"RVJournal({self._start}: {self.original.summary.value if self.original.summary else ''})"

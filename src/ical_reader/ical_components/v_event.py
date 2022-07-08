@@ -6,6 +6,7 @@ from ical_reader.base_classes.component import Component
 from ical_reader.help_modules import property_utils
 from ical_reader.help_modules.timespan import Timespan
 from ical_reader.ical_components.abstract_components import AbstractRecurringComponent, AbstractStartStopComponent
+from ical_reader.ical_components.v_alarm import VAlarm
 from ical_reader.ical_properties.cal_address import Attendee, Organizer
 from ical_reader.ical_properties.dt import _DTBoth, Created, DTEnd, DTStamp, DTStart, LastModified, RecurrenceID
 from ical_reader.ical_properties.geo import GEO
@@ -110,6 +111,7 @@ class VEvent(AbstractStartStopComponent):
         rstatus: Optional[List[RequestStatus]] = None,
         related: Optional[List[RelatedTo]] = None,
         resources: Optional[List[Resources]] = None,
+        alarms: Optional[List[VAlarm]] = None,
     ):
         super().__init__(
             name="VEVENT",
@@ -151,6 +153,9 @@ class VEvent(AbstractStartStopComponent):
         self.related: Optional[List[RelatedTo]] = related
         self.resources: Optional[List[Resources]] = resources
 
+        # This is a child component
+        self.alarms: List[VAlarm] = alarms or []
+
     def __repr__(self) -> str:
         """Overwrite the repr to create a better representation for the item."""
         if self.dtstart and self.dtend:
@@ -182,12 +187,18 @@ class VEvent(AbstractStartStopComponent):
         :return: Yield all recurring VEvent instances related to this VEvent in the given *return_range*.
         """
         yield self
+
+        start = self.start
+        duration = self.computed_duration
+        if not start or not duration:
+            return None
+
         iterator = property_utils.expand_component_in_range(
             exdate_list=self.exdate or [],
             rdate_list=self.rdate or [],
             rrule=self.rrule,
-            first_event_start=self.start,
-            first_event_duration=self.computed_duration,
+            first_event_start=start,
+            first_event_duration=duration,
             return_range=return_range,
             make_tz_aware=None,
         )

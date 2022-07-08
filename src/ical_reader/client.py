@@ -25,7 +25,7 @@ def parse_icalendar_file(file: Union[str, Path]) -> VCalendar:
     :return: a VCalendar instance with all it's iCalendar components like VEvents, VToDos, VTimeZones etc.
     """
     with open(file, "r") as ical_file:
-        return parse_lines_into_calendar(ical_file.readlines())
+        return parse_lines_into_calendar([line.strip("\n") for line in ical_file.readlines()])
 
 
 def parse_icalendar_url(url: str, *args, **kwargs) -> VCalendar:

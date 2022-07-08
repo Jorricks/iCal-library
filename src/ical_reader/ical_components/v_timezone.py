@@ -1,8 +1,9 @@
-from typing import Dict, Iterator, List, Optional, Tuple, Union
+from typing import Callable, Dict, Iterator, List, Optional, Tuple, Union
 
 from pendulum import Date, DateTime
 
 from ical_reader.base_classes.component import Component
+from ical_reader.exceptions import MissingRequiredProperty
 from ical_reader.help_modules import dt_utils, property_utils
 from ical_reader.help_modules.timespan import Timespan
 from ical_reader.ical_properties.dt import DTStart, LastModified
@@ -51,6 +52,10 @@ class _TimeOffsetPeriod(Component):
         self.rdate: Optional[List[RDate]] = rdate
         self.tzname: Optional[List[TZName]] = tzname
 
+    def __repr__(self) -> str:
+        """Overwrite the repr to create a better representation for the item."""
+        return f"{self.__class__.__name__}({self.dtstart.value}: {self.tzoffsetto.value})"
+
     def timezone_aware_start(self) -> DateTime:
         """Return a timezone aware start."""
         dt: DateTime = dt_utils.convert_time_object_to_datetime(self.dtstart.datetime_or_date_value)
@@ -80,14 +85,22 @@ class DayLight(_TimeOffsetPeriod):
     """A TimeOffsetPeriod representing a DayLight(a.k.a. Advanced Time, Summer Time or Legal Time) configuration."""
 
     def __init__(self, parent: Optional[Component], **kwargs):
-        super().__init__("DAYLIGHT", parent)
+        super().__init__("DAYLIGHT", parent, **kwargs)
+
+    @classmethod
+    def _get_init_method_for_var_mapping(cls) -> Callable:
+        return _TimeOffsetPeriod.__init__
 
 
 class Standard(_TimeOffsetPeriod):
     """A TimeOffsetPeriod representing a Standard(a.k.a. Winter Time) configuration."""
 
     def __init__(self, parent: Optional[Component], **kwargs):
-        super().__init__("STANDARD", parent)
+        super().__init__("STANDARD", parent, **kwargs)
+
+    @classmethod
+    def _get_init_method_for_var_mapping(cls) -> Callable:
+        return _TimeOffsetPeriod.__init__
 
 
 class VTimeZone(Component):
@@ -122,7 +135,7 @@ class VTimeZone(Component):
         super().__init__("VTIMEZONE", parent)
 
         # Required properties, must occur one.
-        self.tzid: Optional[TZID] = tzid
+        self._tzid: Optional[TZID] = tzid
         # Optional properties, may only occur once.
         self.last_mod: Optional[LastModified] = last_mod
         self.tzurl: Optional[TZURL] = tzurl
@@ -131,6 +144,22 @@ class VTimeZone(Component):
         self.daylightc: List[DayLight] = daylightc or []
 
         self.__storage_of_results: Dict[DateTime, List[Tuple[DateTime, _TimeOffsetPeriod]]] = {}
+
+    def __repr__(self) -> str:
+        """Overwrite the repr to create a better representation for the item."""
+        return f"VTimeZone({self.tzid.value})"
+
+    @property
+    def tzid(self) -> TZID:
+        """A getter to ensure the required property is set."""
+        if self._tzid is None:
+            raise MissingRequiredProperty(self, "tzid")
+        return self._tzid
+
+    @tzid.setter
+    def tzid(self, value: TZID):
+        """A setter to set the required property."""
+        self._tzid = value
 
     def get_ordered_timezone_overview(self, max_datetime: DateTime) -> List[Tuple[DateTime, _TimeOffsetPeriod]]:
         """
