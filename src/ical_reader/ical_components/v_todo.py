@@ -5,8 +5,8 @@ from pendulum import DateTime, Duration
 from ical_reader.base_classes.component import Component
 from ical_reader.help_modules import property_utils
 from ical_reader.help_modules.timespan import Timespan
-from ical_reader.ical_components import VAlarm
 from ical_reader.ical_components.abstract_components import AbstractRecurringComponent, AbstractStartStopComponent
+from ical_reader.ical_components.v_alarm import VAlarm
 from ical_reader.ical_properties.cal_address import Attendee, Organizer
 from ical_reader.ical_properties.dt import (
     _DTBoth,
