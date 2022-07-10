@@ -1,16 +1,14 @@
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
 from pendulum import DateTime
 
 from ical_reader.base_classes.component import Component
 from ical_reader.exceptions import MissingRequiredProperty
-from ical_reader.ical_components.v_event import VEvent
-from ical_reader.ical_components.v_free_busy import VFreeBusy
-from ical_reader.ical_components.v_journal import VJournal
-from ical_reader.ical_components.v_timezone import VTimeZone
-from ical_reader.ical_components.v_todo import VToDo
+from ical_reader.ical_components import VEvent, VFreeBusy, VJournal, VTimeZone, VToDo
 from ical_reader.ical_properties.pass_properties import CalScale, Method, ProdID, Version
-from ical_reader.timeline import Timeline
+
+if TYPE_CHECKING:
+    from ical_reader.timeline import Timeline
 
 
 class VCalendar(Component):
@@ -22,8 +20,6 @@ class VCalendar(Component):
     collections of properties that express a particular calendar semantic. For example, the calendar component can
     specify an event, a to-do, a journal entry, time zone information, free/busy time information, or an alarm.
 
-    :param name: The actual name of this component instance. E.g. VEVENT, RRULE, VCUSTOMCOMPONENT.
-    :param parent: The Component this item is encapsulated by in the iCalendar data file.
     :param prodid: The ProdID property. Required and must occur exactly once.
     :param version: The Version property. Required and must occur exactly once.
     :param calscale: The CalScale property. Optional, but may occur at most once.
@@ -112,17 +108,21 @@ class VCalendar(Component):
         return self.get_timezone(tzid).convert_naive_datetime_to_aware(dt)
 
     @property
-    def timeline(self) -> Timeline:
+    def timeline(self) -> "Timeline":
         """Return a timeline of VEvents from 1970-00-00T00:00:00 to 2100-00-00T00:00:00."""
+        from ical_reader.timeline import Timeline
+
         return Timeline(self)
 
-    def get_limited_timeline(self, start: Optional[DateTime], end: Optional[DateTime]) -> Timeline:
+    def get_limited_timeline(self, start: Optional[DateTime], end: Optional[DateTime]) -> "Timeline":
         """
         Return a timeline of VEvents limited by *start* and *end*
 
         :param start: Only include events in the timeline with a starting date later than this value.
         :param end: Only include events in the timeline with a starting date earlier than this value.
         """
+        from ical_reader.timeline import Timeline
+
         return Timeline(self, start, end)
 
     def parse_component(self, lines: List[str], line_number: int) -> int:

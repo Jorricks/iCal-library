@@ -5,8 +5,8 @@ from pendulum import DateTime, Duration
 from ical_reader.base_classes.component import Component
 from ical_reader.help_modules import property_utils
 from ical_reader.help_modules.timespan import Timespan
+from ical_reader.ical_components import VAlarm
 from ical_reader.ical_components.abstract_components import AbstractRecurringComponent, AbstractStartStopComponent
-from ical_reader.ical_components.v_alarm import VAlarm
 from ical_reader.ical_properties.cal_address import Attendee, Organizer
 from ical_reader.ical_properties.dt import _DTBoth, Created, DTEnd, DTStamp, DTStart, LastModified, RecurrenceID
 from ical_reader.ical_properties.geo import GEO
@@ -161,7 +161,7 @@ class VEvent(AbstractStartStopComponent):
         if self.dtstart and self.dtend:
             return f"VEvent({self.start} - {self.end}: {self.summary.value if self.summary else ''})"
         else:
-            return "VEvent()"
+            return f"VEvent({self.summary.value if self.summary else ''})"
 
     @property
     def ending(self) -> Optional[_DTBoth]:

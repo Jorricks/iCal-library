@@ -23,13 +23,17 @@ from ical_reader.base_classes.property import Property
 from ical_reader.exceptions import CalendarParentRelationError
 
 if TYPE_CHECKING:
-    from ical_reader.ical_components.v_alarm import VAlarm
-    from ical_reader.ical_components.v_calendar import VCalendar
-    from ical_reader.ical_components.v_event import VEvent
-    from ical_reader.ical_components.v_free_busy import VFreeBusy
-    from ical_reader.ical_components.v_journal import VJournal
-    from ical_reader.ical_components.v_timezone import DayLight, Standard, VTimeZone
-    from ical_reader.ical_components.v_todo import VToDo
+    from ical_reader.ical_components import (
+        DayLight,
+        Standard,
+        VAlarm,
+        VCalendar,
+        VEvent,
+        VFreeBusy,
+        VJournal,
+        VTimeZone,
+        VToDo,
+    )
 
 PREDEFINED_COMPONENT_UNION = Union[
     "VAlarm", "VEvent", "VFreeBusy", "VJournal", "VTimeZone", "Standard", "DayLight", "VToDo"
@@ -66,6 +70,12 @@ class Component(ICalBaseClass):
         properties_as_string = ", ".join([f"{name}={value}" for name, value in self.properties.items()])
         return f"{self.__class__.__name__}({properties_as_string})"
 
+    def __eq__(self: "Component", other: "Component") -> bool:
+        """Return whether the current instance and the other instance are the same."""
+        if type(self) != type(other):
+            return False
+        return self.properties == other.properties and self.children == other.children
+
     @property
     def extra_child_components(self) -> Dict[str, List["Component"]]:
         """Return all children components that are considered as `x-comp` or `iana-comp` components."""
@@ -79,7 +89,7 @@ class Component(ICalBaseClass):
     @property
     def tree_root(self) -> "VCalendar":
         """Return the tree root which should always be a VCalendar object."""
-        from ical_reader.ical_components.v_calendar import VCalendar
+        from ical_reader.ical_components import VCalendar
 
         instance = self
         while instance.parent is not None:
@@ -223,12 +233,16 @@ class Component(ICalBaseClass):
         Return the same mapping as :function:`cls._get_var_mapping()` but only return variables related to
         :class:`Component` classes.
         """
-        from ical_reader.ical_components.v_alarm import VAlarm
-        from ical_reader.ical_components.v_event import VEvent
-        from ical_reader.ical_components.v_free_busy import VFreeBusy
-        from ical_reader.ical_components.v_journal import VJournal
-        from ical_reader.ical_components.v_timezone import DayLight, Standard, VTimeZone
-        from ical_reader.ical_components.v_todo import VToDo
+        from ical_reader.ical_components import (
+            DayLight,
+            Standard,
+            VAlarm,
+            VEvent,
+            VFreeBusy,
+            VJournal,
+            VTimeZone,
+            VToDo,
+        )
 
         predefined_components = (VAlarm, VEvent, VFreeBusy, VJournal, VTimeZone, Standard, DayLight, VToDo)
 

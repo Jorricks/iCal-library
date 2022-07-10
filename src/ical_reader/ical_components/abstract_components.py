@@ -14,9 +14,7 @@ from ical_reader.ical_properties.periods import EXDate, RDate
 from ical_reader.ical_properties.rrule import RRule
 
 if TYPE_CHECKING:
-    from ical_reader.ical_components.v_event import VEvent  # noqa: F401
-    from ical_reader.ical_components.v_journal import VJournal  # noqa: F401
-    from ical_reader.ical_components.v_todo import VToDo  # noqa: F401
+    from ical_reader.ical_components import VEvent, VJournal, VToDo  # noqa: F401
 
 T = TypeVar(
     "T",
@@ -151,6 +149,7 @@ class AbstractStartStopComponent(Component, ABC):
         return True
 
     def __eq__(self: "AbstractStartStopComponent", other: "AbstractStartStopComponent") -> bool:
+        """Return whether the current instance and the other instance are the same."""
         if type(self) != type(other):
             return False
         return (

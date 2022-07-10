@@ -1,15 +1,12 @@
 import heapq
 from collections import defaultdict
-from typing import Iterator, List, Mapping, Optional, Tuple, TYPE_CHECKING
+from typing import Iterator, List, Mapping, Optional, Tuple
 
 from pendulum import DateTime
 
 from ical_reader.help_modules.lru_cache import instance_lru_cache
 from ical_reader.help_modules.timespan import Timespan, TimespanWithParent
-from ical_reader.ical_components.v_event import VEvent
-
-if TYPE_CHECKING:
-    from ical_reader.ical_components.v_calendar import VCalendar
+from ical_reader.ical_components import VCalendar, VEvent
 
 
 class Timeline:
@@ -31,7 +28,7 @@ class Timeline:
     """
 
     def __init__(
-        self, v_calendar: "VCalendar", start_date: Optional[DateTime] = None, end_date: Optional[DateTime] = None
+        self, v_calendar: VCalendar, start_date: Optional[DateTime] = None, end_date: Optional[DateTime] = None
     ):
         self.v_calendar: VCalendar = v_calendar
         self._start_date: DateTime = start_date or DateTime(1970, 1, 1)

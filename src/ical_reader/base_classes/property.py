@@ -34,6 +34,12 @@ class Property(ICalBaseClass):
         """Overwrite the repr to create a better representation for the item."""
         return f"{self.__class__.__name__}({self.as_original_string})"
 
+    def __eq__(self: "Property", other: "Property") -> bool:
+        """Return whether the current instance and the other instance are the same."""
+        if type(self) != type(other):
+            return False
+        return self.as_original_string == other.as_original_string
+
     @property
     @instance_lru_cache()
     def property_parameters(self) -> Dict[str, str]:

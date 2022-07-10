@@ -8,7 +8,7 @@ class ICALDuration(Property):
 
     @property
     def duration(self) -> pendulum.Duration:
-        """Return the value as a parsed pendulum.Duration."""
+        """Return the value as a parsed pendulum.Duration. Example value: PT1H0M0S."""
         parsed_value: pendulum.Duration = pendulum.parse(self.value)
         if not isinstance(parsed_value, pendulum.Duration):
             raise TypeError(f"Invalid value passed for Duration: {self.value=}")
