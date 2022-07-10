@@ -1,11 +1,6 @@
 from ical_reader.base_classes.component import Component
 from ical_reader.base_classes.property import Property
-from ical_reader.ical_components.v_calendar import VCalendar
-from ical_reader.ical_components.v_event import VEvent
-from ical_reader.ical_components.v_free_busy import VFreeBusy
-from ical_reader.ical_components.v_journal import VJournal
-from ical_reader.ical_components.v_timezone import VTimeZone
-from ical_reader.ical_components.v_todo import VToDo
+from ical_reader.ical_components import VCalendar, VEvent, VFreeBusy, VJournal, VTimeZone, VToDo
 from ical_reader.ical_properties.pass_properties import ProdID, Version
 
 

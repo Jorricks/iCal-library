@@ -1,6 +1,6 @@
 from ical_reader.base_classes.base_class import ICalBaseClass
 from ical_reader.base_classes.component import Component
-from ical_reader.ical_components.v_calendar import VCalendar
+from ical_reader.ical_components import VCalendar
 from ical_reader.ical_properties.dt import RecurrenceID
 
 

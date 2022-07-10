@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from ical_reader import client
-from ical_reader.ical_components.v_calendar import VCalendar
+from ical_reader.ical_components import VCalendar
 
 
 @pytest.fixture

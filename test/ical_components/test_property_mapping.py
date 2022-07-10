@@ -1,10 +1,14 @@
-from ical_reader.ical_components.v_alarm import VAlarm
-from ical_reader.ical_components.v_calendar import VCalendar
-from ical_reader.ical_components.v_event import VEvent
-from ical_reader.ical_components.v_free_busy import VFreeBusy
-from ical_reader.ical_components.v_journal import VJournal
-from ical_reader.ical_components.v_timezone import DayLight, Standard, VTimeZone
-from ical_reader.ical_components.v_todo import VToDo
+from ical_reader.ical_components import (
+    DayLight,
+    Standard,
+    VAlarm,
+    VCalendar,
+    VEvent,
+    VFreeBusy,
+    VJournal,
+    VTimeZone,
+    VToDo,
+)
 from ical_reader.ical_properties.cal_address import Attendee, Organizer
 from ical_reader.ical_properties.dt import Completed, Created, DTEnd, DTStamp, DTStart, Due, LastModified, RecurrenceID
 from ical_reader.ical_properties.geo import GEO
