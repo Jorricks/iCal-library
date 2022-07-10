@@ -12,19 +12,15 @@ jobs:
         name: Check out source-code repository
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: "3.8"
 
-      - name: Install python dependencies
-        run: |
-          python -m pip install --upgrade pip setuptools wheel build
-      - name: Build the distribution
-        run: python -m build
-
-      - name: Publish to PyPI
-        if: github.repository == 'jorrick/ical-reader'
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+      - name: Install Flit
+        run: pip install flit
+      - name: Install Dependencies
+        run: flit install --symlink
+      - name: Publish
+        env:
+          FLIT_USERNAME: __token__
+          FLIT_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}

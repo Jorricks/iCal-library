@@ -8,6 +8,14 @@ It is the fastest iCalender python library out there and has excellent support f
 
     There are many items on which we can improve, please file an issue if you encounter any issue or have a feature request.
 
+# Features
+- Easy python interface. It's as simple as '`client.load_ics_file("<my_file>").timeline`' to show all your events of that week.
+- Timeline support. Show exactly what is planned for a specific week.
+- ***Fully functional*** support for recurring iCal components. E.g. Any recurring event will show up as intended within the timeline interface.
+- Very fast parsing due to lazy evaluation of iCal properties.
+- Debugger supported. Any issues? Open up a debugger and inspect all values.
+- Minimal dependencies. Only `python-dateutil` and `pendulum`.
+
 
 ## Installation
 To use iCal Reader, first install it using pip:
