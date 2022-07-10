@@ -1,5 +1,4 @@
-Contributing to ICal-Reader
-=======================
+# Contributing to ICal-Reader
 
 As an open source project, ICal-Reader welcomes contributions of many forms.
 This document summarizes the process.
