@@ -20,14 +20,14 @@ def root_folder() -> Path:
 
 @pytest.fixture
 def calendar_with_all_components_once(root_folder: Path) -> VCalendar:
-    return client.parse_icalendar_file(root_folder / "test" / "resources" / "iCalendar-with-all-components-once.ics")
+    return client.parse_icalendar_file(root_folder / "tests" / "resources" / "iCalendar-with-all-components-once.ics")
 
 
 @pytest.fixture
 def calendar_with_reoccurring_events_once(root_folder: Path) -> VCalendar:
-    return client.parse_icalendar_file(root_folder / "test" / "resources" / "iCalendar-with-reoccurring-events.ics")
+    return client.parse_icalendar_file(root_folder / "tests" / "resources" / "iCalendar-with-reoccurring-events.ics")
 
 
 @pytest.fixture
 def empty_calendar(root_folder: Path) -> VCalendar:
-    return client.parse_icalendar_file(root_folder / "test" / "resources" / "iCalender-without-anything.ics")
+    return client.parse_icalendar_file(root_folder / "tests" / "resources" / "iCalender-without-anything.ics")
