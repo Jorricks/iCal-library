@@ -12,12 +12,13 @@ class Property(ICalBaseClass):
     This is the base class for any property (according to the RFC 5545 specification) in ical-reader.
 
     A property always exists of three parts:
-    - The name of the property
-    - The property parameters, this is optional and does not need to be present
-    - The value of the property
+
+    - The name of the property.
+    - The property parameters, this is optional and does not need to be present.
+    - The value of the property.
 
     A line containing a property typically has the following format:
-    PROPERTY-NAME;parameterKey=parameterValue,anotherParameterKey=anotherValue:actual-value
+    `PROPERTY-NAME;parameterKey=parameterValue,anotherParameterKey=anotherValue:actual-value`
 
     :param parent: Instance of the :class:`Component` it is a part of.
     :param name: The properties name, e.g. `RRULE`.

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Union
+from typing import Any, List, Union
 from urllib import request
 
 from ical_reader.ical_components import VCalendar
@@ -28,7 +28,7 @@ def parse_icalendar_file(file: Union[str, Path]) -> VCalendar:
         return parse_lines_into_calendar([line.strip("\n") for line in ical_file.readlines()])
 
 
-def parse_icalendar_url(url: str, **kwargs) -> VCalendar:
+def parse_icalendar_url(url: str, **kwargs: Any) -> VCalendar:
     """
     Given a URL to an iCalendar file, return a parsed VCalendar instance.
     :param url: The URL to the iCalendar file.

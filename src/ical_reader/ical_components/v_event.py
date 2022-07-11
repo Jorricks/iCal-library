@@ -5,7 +5,10 @@ from pendulum import DateTime, Duration
 from ical_reader.base_classes.component import Component
 from ical_reader.help_modules import property_utils
 from ical_reader.help_modules.timespan import Timespan
-from ical_reader.ical_components.abstract_components import AbstractRecurringComponent, AbstractStartStopComponent
+from ical_reader.ical_components.abstract_components import (
+    AbstractComponentWithDuration,
+    AbstractRecurringComponentWithDuration,
+)
 from ical_reader.ical_components.v_alarm import VAlarm
 from ical_reader.ical_properties.cal_address import Attendee, Organizer
 from ical_reader.ical_properties.dt import _DTBoth, Created, DTEnd, DTStamp, DTStart, LastModified, RecurrenceID
@@ -33,7 +36,7 @@ from ical_reader.ical_properties.periods import EXDate, RDate
 from ical_reader.ical_properties.rrule import RRule
 
 
-class VEvent(AbstractStartStopComponent):
+class VEvent(AbstractComponentWithDuration):
     """
     This class represents the VEVENT component specified in RFC 5545 in '3.6.1. Event Component'.
 
@@ -168,7 +171,7 @@ class VEvent(AbstractStartStopComponent):
         """
         Return the ending of the event.
 
-        Note: This is an abstract method from :class:`AbstractStartStopComponent` that we have to implement.
+        Note: This is an abstract method from :class:`AbstractComponentWithDuration` that we have to implement.
         """
         return self.dtend
 
@@ -176,7 +179,7 @@ class VEvent(AbstractStartStopComponent):
         """
         Return the duration of the event.
 
-        Note: This is an abstract method from :class:`AbstractStartStopComponent` that we have to implement.
+        Note: This is an abstract method from :class:`AbstractComponentWithDuration` that we have to implement.
         """
         return self.duration.duration if self.duration else None
 
@@ -211,12 +214,12 @@ class VEvent(AbstractStartStopComponent):
             )
 
 
-class VRecurringEvent(AbstractRecurringComponent, VEvent):
+class VRecurringEvent(AbstractRecurringComponentWithDuration, VEvent):
     """
     This class represents VEvents that are recurring.
-    Inside the AbstractRecurringComponent class we overwrite specific dunder methods and property methods. This way
-    our end users have a very similar interface to an actual VEvent but without us needing to code the exact same
-    thing twice.
+    Inside the AbstractRecurringComponentWithDuration class we overwrite specific dunder methods and property methods.
+    This way our end users have a very similar interface to an actual VEvent but without us needing to code the exact
+    same thing twice.
 
     :param original_component_instance: The original VEvent instance.
     :param start: The start of this occurrence.

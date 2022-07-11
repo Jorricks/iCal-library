@@ -1,7 +1,7 @@
 import hashlib
 import os
 from pathlib import Path
-from typing import Union
+from typing import Any, Union
 from urllib import request
 
 from pendulum import DateTime, Duration
@@ -41,7 +41,7 @@ class CacheClient:
             return self.cache_location / hashlib.md5(self.url.encode()).hexdigest()
         return self.cache_location
 
-    def get_icalendar(self, **kwargs) -> VCalendar:
+    def get_icalendar(self, **kwargs: Any) -> VCalendar:
         """
         Get a parsed VCalendar instance. If there is an active cache, return that, otherwise fetch and cache the result.
         :param kwargs: Any keyword arguments to pass onto the `urllib.request.urlopen` call.

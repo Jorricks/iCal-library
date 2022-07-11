@@ -45,16 +45,17 @@ class Component(ICalBaseClass):
     This is the base class for any component (according to the RFC 5545 specification) in ical-reader.
 
     Inside all components (so also all classes inheriting this class, e.g. VEvent) there are four kind of variables:
-    - variables that start with _. These are specific to the class and not directly related to a property or
-     component from iCalendar.
-    - variables that have a type of List[x] and a default value of List. These are child components/properties of
+
+    - variables that start with `_`. These are metadata of the class and not parsed as a property or
+     component from the iCalendar data file.
+    - variables that have a type of `List[x]` and a default value of List. These are child components/properties of
     the instance. These components/properties may or may not be required to be present in the iCal file.
-    - variables that have a type of Optional[List[x]]. These are components/properties of the instance.
+    - variables that have a type of `Optional[List[x]]`. These are components/properties of the instance.
     They can be either optional or required and may occur multiple times in the iCal file.
-    - variables that have a type of Optional[x] (and not Optional[List[x]]). These are properties of the instance.
+    - variables that have a type of `Optional[x]` (and not `Optional[List[x]]`). These are properties of the instance.
     They can be either optional or required, but may only occur once in the iCal file.
 
-    :param name: The actual name of this component instance. E.g. VEVENT, RRULE, VCUSTOMCOMPONENT.
+    :param name: The actual name of this component instance. E.g. `VEVENT`, `RRULE`, `VCUSTOMCOMPONENT`.
     :param parent: The Component this item is encapsulated by in the iCalendar data file.
     """
 

@@ -43,13 +43,11 @@ After traversing the code of the other libraries I decided I wanted to build my 
 - No strict evaluation that could lead to errors while parsing the file.
 - Lazy evaluation for iCalendar properties to speed up the process.
 
-
-
 ## ToDo
 - Create badges like python-dateutil.
 - Implement timeline functionality for all items instead of just VEvents.
-- Improve the dataclass usage. Either use it fully or not at all.
 - Fix the timeline & expanding functionality to use intersect.
+- Implement a context manager (like Airflow DAGs) for Components.
 - Implement support for quoted property parameters.
 - Implement support for the new Properties for iCalendar (RFC 7986)
 

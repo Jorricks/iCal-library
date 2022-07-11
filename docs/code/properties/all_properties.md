@@ -1,0 +1,50 @@
+# All properties
+
+This is a list of all properties
+
+::: ical_reader.ical_properties.Action
+::: ical_reader.ical_properties.Attach
+::: ical_reader.ical_properties.Attendee
+::: ical_reader.ical_properties.CalScale
+::: ical_reader.ical_properties.Categories
+::: ical_reader.ical_properties.Class
+::: ical_reader.ical_properties.Comment
+::: ical_reader.ical_properties.Completed
+::: ical_reader.ical_properties.Contact
+::: ical_reader.ical_properties.Created
+::: ical_reader.ical_properties.DTEnd
+::: ical_reader.ical_properties.DTStamp
+::: ical_reader.ical_properties.DTStart
+::: ical_reader.ical_properties.Description
+::: ical_reader.ical_properties.Due
+::: ical_reader.ical_properties.EXDate
+::: ical_reader.ical_properties.FreeBusyProperty
+::: ical_reader.ical_properties.GEO
+::: ical_reader.ical_properties.ICALDuration
+::: ical_reader.ical_properties.LastModified
+::: ical_reader.ical_properties.Location
+::: ical_reader.ical_properties.Method
+::: ical_reader.ical_properties.Organizer
+::: ical_reader.ical_properties.PercentComplete
+::: ical_reader.ical_properties.Priority
+::: ical_reader.ical_properties.ProdID
+::: ical_reader.ical_properties.RDate
+::: ical_reader.ical_properties.RRule
+::: ical_reader.ical_properties.RecurrenceID
+::: ical_reader.ical_properties.RelatedTo
+::: ical_reader.ical_properties.Repeat
+::: ical_reader.ical_properties.RequestStatus
+::: ical_reader.ical_properties.Resources
+::: ical_reader.ical_properties.Sequence
+::: ical_reader.ical_properties.Status
+::: ical_reader.ical_properties.Summary
+::: ical_reader.ical_properties.TZID
+::: ical_reader.ical_properties.TZName
+::: ical_reader.ical_properties.TZOffsetFrom
+::: ical_reader.ical_properties.TZOffsetTo
+::: ical_reader.ical_properties.TZURL
+::: ical_reader.ical_properties.TimeTransparency
+::: ical_reader.ical_properties.Trigger
+::: ical_reader.ical_properties.UID
+::: ical_reader.ical_properties.URL
+::: ical_reader.ical_properties.Version

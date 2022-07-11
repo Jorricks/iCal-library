@@ -1,10 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional, TYPE_CHECKING, TypeVar, Union
+from typing import Any, List, Optional, Union
 
 from pendulum import Date, DateTime, Duration, Period
 
 from ical_reader.base_classes.component import Component
-from ical_reader.base_classes.property import Property
 from ical_reader.exceptions import MissingRequiredProperty
 from ical_reader.help_modules.lru_cache import instance_lru_cache
 from ical_reader.help_modules.timespan import TimespanWithParent
@@ -13,19 +12,11 @@ from ical_reader.ical_properties.pass_properties import Comment, Summary, UID
 from ical_reader.ical_properties.periods import EXDate, RDate
 from ical_reader.ical_properties.rrule import RRule
 
-if TYPE_CHECKING:
-    from ical_reader.ical_components import VEvent, VJournal, VToDo  # noqa: F401
 
-T = TypeVar(
-    "T",
-    "VEvent",
-    "VToDo",
-)
-
-
-class AbstractStartStopComponent(Component, ABC):
+class AbstractComponentWithDuration(Component, ABC):
     """
-    This class helps avoid code repetition with different :class:`Component` classes.
+    This class helps avoid code repetition with different :class:`Component` classes that have a duration and have
+    recurring properties.
 
     This class is inherited by VEvent, VToDo and VJournal as these all have recurring properties like :class:`RRule`,
     :class:`RDate` and :class:`EXDate`. All properties they had in common are part of this class.
@@ -115,48 +106,15 @@ class AbstractStartStopComponent(Component, ABC):
         """
         pass
 
-    @staticmethod
-    def compare_property_value(own: Property, others: Property) -> bool:
-        """
-        Compare two properties for whether they are the same.
-        :param own: The instance own property.
-        :param others: A property of another :class:`Component` instance.
-        :return: Boolean of whether they are the same.
-        """
-        if not own and others or own and not others:
-            return False
-        if own and others and own.as_original_string != others.as_original_string:
-            return False
-        return True
-
-    @staticmethod
-    def compare_property_list(own: List[Property], others: List[Property]) -> bool:
-        """
-        Compare a list of two properties for whether they are the same.
-        :param own: The list of properties from the :class:`Component` instance itself.
-        :param others: A list of properties from the other :class:`Component` instance.
-        :return: Boolean of whether they are the same.
-        """
-        if not own and others or own and not others:
-            return False
-        if not own and not others:
-            return True
-        if len(own) != len(others):
-            return False
-        for i in range(len(own)):
-            if own[i].as_original_string != others[i].as_original_string:
-                return False
-        return True
-
-    def __eq__(self: "AbstractStartStopComponent", other: "AbstractStartStopComponent") -> bool:
+    def __eq__(self: "AbstractComponentWithDuration", other: "AbstractComponentWithDuration") -> bool:
         """Return whether the current instance and the other instance are the same."""
         if type(self) != type(other):
             return False
         return (
-            self.compare_property_value(self.dtstart, other.dtstart)
-            and self.compare_property_value(self.ending, other.ending)
-            and self.compare_property_value(self.summary, other.summary)
-            and self.compare_property_list(self.comment, other.comment)
+            self.dtstart == other.dtstart
+            and self.ending == other.ending
+            and self.summary == other.summary
+            and self.comment == other.comment
         )
 
     @property
@@ -187,7 +145,7 @@ class AbstractStartStopComponent(Component, ABC):
 
     @property
     @instance_lru_cache()
-    def computed_duration(self: "AbstractStartStopComponent") -> Optional[Duration]:
+    def computed_duration(self: "AbstractComponentWithDuration") -> Optional[Duration]:
         """Return the duration of this Component as a :class:`Date` or :class:`DateTime` value."""
         if a_duration := self.get_duration():
             return a_duration
@@ -197,9 +155,9 @@ class AbstractStartStopComponent(Component, ABC):
         return None
 
 
-class AbstractRecurringComponent(AbstractStartStopComponent, ABC):
+class AbstractRecurringComponentWithDuration(AbstractComponentWithDuration, ABC):
     """
-    This class extends :class:`AbstractStartStopComponent` to represent a recurring Component.
+    This class extends :class:`AbstractComponentWithDuration` to represent a recurring Component.
 
     This class is inherited by VRecurringEvent, VRecurringToDo and VRecurringJournal. When we compute the recurrence
     based on the :class:`RRule`, :class:`RDate` and :class:`EXDate` properties, we create new occurrences of that
@@ -236,7 +194,7 @@ class AbstractRecurringComponent(AbstractStartStopComponent, ABC):
         return self._end
 
     @property
-    def original(self) -> AbstractStartStopComponent:
+    def original(self) -> AbstractComponentWithDuration:
         """Return the original component that created this recurring component."""
         return self._original
 

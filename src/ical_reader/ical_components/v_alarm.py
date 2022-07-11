@@ -14,6 +14,7 @@ class VAlarm(Component):
 
     A "VALARM" calendar component is a grouping of component properties that is a reminder or alarm for an event or a
     to-do. For example, it may be used to define a reminder for a pending event or an overdue to-do.
+    The "VALARM" calendar component MUST only appear within either a "VEVENT" or "VTODO" calendar component
 
     :param parent: The Component this item is encapsulated by in the iCalendar data file.
     :param action: The Action property. Required and must occur exactly once.

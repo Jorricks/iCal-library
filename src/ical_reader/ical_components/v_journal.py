@@ -5,7 +5,10 @@ from pendulum import DateTime, Duration
 from ical_reader.base_classes.component import Component
 from ical_reader.help_modules import property_utils
 from ical_reader.help_modules.timespan import Timespan
-from ical_reader.ical_components.abstract_components import AbstractRecurringComponent, AbstractStartStopComponent
+from ical_reader.ical_components.abstract_components import (
+    AbstractComponentWithDuration,
+    AbstractRecurringComponentWithDuration,
+)
 from ical_reader.ical_properties.cal_address import Attendee, Organizer
 from ical_reader.ical_properties.dt import _DTBoth, Created, DTStamp, DTStart, LastModified, RecurrenceID
 from ical_reader.ical_properties.ints import Sequence
@@ -27,7 +30,7 @@ from ical_reader.ical_properties.periods import EXDate, RDate
 from ical_reader.ical_properties.rrule import RRule
 
 
-class VJournal(AbstractStartStopComponent):
+class VJournal(AbstractComponentWithDuration):
     """
     This class represents the VJOURNAL component specified in RFC 5545 in '3.6.3. Journal Component'.
 
@@ -134,7 +137,7 @@ class VJournal(AbstractStartStopComponent):
         """
         Return the start time of the journal. This is because the Journal does not have a duration.
 
-        Note: This is an abstract method from :class:`AbstractStartStopComponent` that we have to implement.
+        Note: This is an abstract method from :class:`AbstractComponentWithDuration` that we have to implement.
         """
         return self.dtstart
 
@@ -142,7 +145,7 @@ class VJournal(AbstractStartStopComponent):
         """
         Return an empty Duration as a Journal does not have a duration.
 
-        Note: This is an abstract method from :class:`AbstractStartStopComponent` that we have to implement.
+        Note: This is an abstract method from :class:`AbstractComponentWithDuration` that we have to implement.
         """
         return Duration()
 
@@ -173,12 +176,12 @@ class VJournal(AbstractStartStopComponent):
             yield VRecurringJournal(original_component_instance=self, start=event_start_time)
 
 
-class VRecurringJournal(AbstractRecurringComponent, VJournal):
+class VRecurringJournal(AbstractRecurringComponentWithDuration, VJournal):
     """
     This class represents VJournal that are recurring.
-    Inside the AbstractRecurringComponent class we overwrite specific dunder methods and property methods. This way
-    our end users have a very similar interface to an actual VJournal but without us needing to code the exact same
-    thing twice.
+    Inside the AbstractRecurringComponentWithDuration class we overwrite specific dunder methods and property methods.
+    This way our end users have a very similar interface to an actual VJournal but without us needing to code the exact
+    same thing twice.
 
     :param original_component_instance: The original VJournal instance.
     :param start: The start of this occurrence.
