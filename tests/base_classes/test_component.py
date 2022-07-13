@@ -4,26 +4,26 @@ from ical_reader.ical_components import VCalendar, VEvent, VFreeBusy, VJournal, 
 from ical_reader.ical_properties.pass_properties import ProdID, Version
 
 
-def test_repr():
-    my_component = Component("MORTHY", None)
-    my_component._extra_properties["prop"].append(Property(my_component, "PROP", None, "GHI"))
-    assert repr(my_component) == "Component(prop=[Property(PROP:GHI)])"
+def test_repr(calendar_instance):
+    with calendar_instance:
+        my_component = Component("MORTHY")
+        my_component._extra_properties["prop"].append(Property(name="PROP", property_parameters=None, value="GHI"))
+        assert repr(my_component) == "Component(prop=[Property(PROP:GHI)])"
 
 
-def test_extra_child_components():
-    my_component = Component("MORTHY", None)
-    component_1 = Component("RICK", None)
-    component_2 = Component("SUMMER", None)
-    my_component.add_child(component_1)
-    my_component.add_child(component_2)
+def test_extra_child_components(calendar_instance):
+    with calendar_instance:
+        with Component("MORTHY", None) as my_component:
+            component_1 = Component("RICK", None)
+            component_2 = Component("SUMMER", None)
     assert my_component.extra_child_components == {
         "RICK": [component_1],
         "SUMMER": [component_2],
     }
 
 
-def test_extra_properties():
-    my_component = Component("MORTHY", None)
+def test_extra_properties(calendar_instance):
+    my_component = Component("MORTHY", parent=calendar_instance)
     my_component.parse_property("RICK:SUMMER")
     assert set(my_component.properties.keys()) == {"rick"}
     print(dir(my_component.properties.values()))
@@ -32,10 +32,12 @@ def test_extra_properties():
     assert property.value == "SUMMER"
 
 
-def test_parent():
-    root_component = Component("ROOT-COMPONENT", None)
-    some_component = Component("SOME-COMPONENT", root_component)
-    assert some_component.parent == root_component
+def test_parent(calendar_instance):
+    some_component = Component("SOME-COMPONENT", calendar_instance)
+    assert some_component.parent is calendar_instance
+    with calendar_instance:
+        a = Property(name="PROP", value="bcdef")
+        assert a.parent is calendar_instance
 
 
 def test_children(calendar_with_all_components_once: VCalendar):
@@ -61,9 +63,9 @@ END:VFREEBUSY
 
 
 def test_properties(empty_calendar):
-    version_property = Version(empty_calendar, "VERSION", "", "1.1")
+    version_property = Version(name="VERSION", value="1.1")
     empty_calendar.version = version_property
-    some_other_property = Property(empty_calendar, "AWESOME", "", "VALUE")
+    some_other_property = Property(name="AWESOME", value="VALUE")
     empty_calendar._extra_properties["awesome"].append(some_other_property)
     assert empty_calendar.properties["awesome"] == [some_other_property]
     assert empty_calendar.properties["version"] == version_property
@@ -80,7 +82,7 @@ def test_properties(empty_calendar):
 
 
 def test_print_tree_structure(capsys):
-    root = VCalendar(prodid=ProdID(None, "A", None, "B"), version=Version(None, "C", None, "D"))
+    root = VCalendar(prodid=ProdID(name="A", value="B"), version=Version(name="C", value="D"))
     an_event = VEvent(parent=root)
     a_journal = VJournal(parent=root)
     root.add_child(an_event)

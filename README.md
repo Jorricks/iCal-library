@@ -47,7 +47,7 @@ After traversing the code of the other libraries I decided I wanted to build my 
 - Create badges like python-dateutil.
 - Implement timeline functionality for all items instead of just VEvents.
 - Fix the timeline & expanding functionality to use intersect.
-- Implement a context manager (like Airflow DAGs) for Components.
+- Implement a custom list to automatically set parents.
 - Implement support for quoted property parameters.
 - Implement support for the new Properties for iCalendar (RFC 7986)
 

@@ -70,6 +70,8 @@ extra:
 # Extensions
 markdown_extensions:
   - admonition
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
   - pymdownx.details
   - pymdownx.superfences
   - attr_list

@@ -8,3 +8,5 @@ Then [ICalBaseClass](ical_reader.base_classes.ICalBaseClass) is extended by both
 
 ::: ical_reader.base_classes.Component
 
+
+::: ical_reader.help_modules.component_context.ComponentContext

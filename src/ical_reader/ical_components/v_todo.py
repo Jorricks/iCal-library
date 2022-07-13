@@ -89,7 +89,6 @@ class VToDo(AbstractComponentWithDuration):
 
     def __init__(
         self,
-        parent: Optional[Component],
         dtstamp: Optional[DTStamp] = None,
         uid: Optional[UID] = None,
         dtstart: Optional[DTStart] = None,
@@ -122,10 +121,10 @@ class VToDo(AbstractComponentWithDuration):
         related: Optional[List[RelatedTo]] = None,
         resources: Optional[List[Resources]] = None,
         alarms: Optional[List[VAlarm]] = None,
+        parent: Optional[Component] = None,
     ):
         super().__init__(
             name="VTODO",
-            parent=parent,
             dtstamp=dtstamp,
             uid=uid,
             dtstart=dtstart,
@@ -134,35 +133,36 @@ class VToDo(AbstractComponentWithDuration):
             exdate=exdate,
             rdate=rdate,
             comment=comment,
+            parent=parent,
         )
 
         # Optional, may only occur once
         # As class is a reserved keyword in python, we prefixed it with `ical_`.
-        self.ical_class: Optional[Class] = ical_class
-        self.completed: Optional[Completed] = completed
-        self.created: Optional[Created] = created
-        self.description: Optional[Description] = description
-        self.duration: Optional[ICALDuration] = duration
-        self.geo: Optional[GEO] = geo
-        self.last_modified: Optional[LastModified] = last_modified
-        self.location: Optional[Location] = location
-        self.organizer: Optional[Organizer] = organizer
-        self.percent: Optional[PercentComplete] = percent
-        self.priority: Optional[Priority] = priority
-        self.sequence: Optional[Sequence] = sequence
-        self.status: Optional[Status] = status
-        self.url: Optional[URL] = url
-        self.recurrence_id: Optional[RecurrenceID] = recurrence_id
-        self.due: Optional[Due] = due
+        self.ical_class: Optional[Class] = self.as_parent(ical_class)
+        self.completed: Optional[Completed] = self.as_parent(completed)
+        self.created: Optional[Created] = self.as_parent(created)
+        self.description: Optional[Description] = self.as_parent(description)
+        self.duration: Optional[ICALDuration] = self.as_parent(duration)
+        self.geo: Optional[GEO] = self.as_parent(geo)
+        self.last_modified: Optional[LastModified] = self.as_parent(last_modified)
+        self.location: Optional[Location] = self.as_parent(location)
+        self.organizer: Optional[Organizer] = self.as_parent(organizer)
+        self.percent: Optional[PercentComplete] = self.as_parent(percent)
+        self.priority: Optional[Priority] = self.as_parent(priority)
+        self.sequence: Optional[Sequence] = self.as_parent(sequence)
+        self.status: Optional[Status] = self.as_parent(status)
+        self.url: Optional[URL] = self.as_parent(url)
+        self.recurrence_id: Optional[RecurrenceID] = self.as_parent(recurrence_id)
+        self.due: Optional[Due] = self.as_parent(due)
 
         # Optional, may occur more than once
-        self.attach: Optional[List[Attach]] = attach
-        self.attendee: Optional[List[Attendee]] = attendee
-        self.categories: Optional[List[Categories]] = categories
-        self.contact: Optional[List[Contact]] = contact
-        self.rstatus: Optional[List[RequestStatus]] = rstatus
-        self.related: Optional[List[RelatedTo]] = related
-        self.resources: Optional[List[Resources]] = resources
+        self.attach: Optional[List[Attach]] = self.as_parent(attach)
+        self.attendee: Optional[List[Attendee]] = self.as_parent(attendee)
+        self.categories: Optional[List[Categories]] = self.as_parent(categories)
+        self.contact: Optional[List[Contact]] = self.as_parent(contact)
+        self.rstatus: Optional[List[RequestStatus]] = self.as_parent(rstatus)
+        self.related: Optional[List[RelatedTo]] = self.as_parent(related)
+        self.resources: Optional[List[Resources]] = self.as_parent(resources)
 
         # This is a child component
         self.alarms: List[VAlarm] = alarms or []
@@ -235,7 +235,7 @@ class VRecurringToDo(AbstractRecurringComponentWithDuration, VToDo):
     """
 
     def __init__(self, original_component_instance: VToDo, start: DateTime, end: DateTime):
-        super(VToDo, self).__init__("VTODO", original_component_instance)
+        super(VToDo, self).__init__("VTODO", parent=original_component_instance)
         self._original = original_component_instance
         self._start = start
         self._end = end

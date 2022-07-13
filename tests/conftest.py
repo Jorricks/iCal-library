@@ -5,6 +5,7 @@ import pytest
 
 from ical_reader import client
 from ical_reader.ical_components import VCalendar
+from ical_reader.ical_properties import ProdID
 
 
 @pytest.fixture
@@ -16,6 +17,13 @@ def root_folder() -> Path:
         if folder.name == "":
             raise ValueError(f"Could not find the root folder starting from {starting_place=}.")
     return folder.resolve()
+
+
+@pytest.fixture
+def calendar_instance() -> VCalendar:
+    return VCalendar(
+        prodid=ProdID("-//Google Inc//Google Calendar 70.9054//EN"),
+    )
 
 
 @pytest.fixture

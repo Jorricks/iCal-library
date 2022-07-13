@@ -17,7 +17,6 @@ class VFreeBusy(Component):
     information.
 
     :param name: The actual name of this component instance. E.g. VEVENT, RRULE, VCUSTOMCOMPONENT.
-    :param parent: The Component this item is encapsulated by in the iCalendar data file.
     :param dtstamp: The DTStamp property. Required and must occur exactly once.
     :param uid: The UID property. Required and must occur exactly once.
     :param contact: The Contact property. Optional, but may occur at most once.
@@ -29,11 +28,11 @@ class VFreeBusy(Component):
     :param comment: The Comment property. Optional, but may occur multiple times.
     :param freebusy: The FreeBusyProperty property. Optional, but may occur multiple times.
     :param rstatus: The RequestStatus property. Optional, but may occur multiple times.
+    :param parent: The Component this item is encapsulated by in the iCalendar data file.
     """
 
     def __init__(
         self,
-        parent: Optional[Component],
         dtstamp: Optional[DTStamp] = None,
         uid: Optional[UID] = None,
         contact: Optional[Contact] = None,
@@ -45,25 +44,26 @@ class VFreeBusy(Component):
         comment: Optional[List[Comment]] = None,
         freebusy: Optional[List[FreeBusyProperty]] = None,
         rstatus: Optional[List[RequestStatus]] = None,
+        parent: Optional[Component] = None,
     ):
-        super().__init__("VFREEBUSY", parent)
+        super().__init__("VFREEBUSY", parent=parent)
 
         # Required
-        self._dtstamp: Optional[DTStamp] = dtstamp
-        self._uid: Optional[UID] = uid
+        self._dtstamp: Optional[DTStamp] = self.as_parent(dtstamp)
+        self._uid: Optional[UID] = self.as_parent(uid)
 
         # Optional, may only occur once
-        self.contact: Optional[Contact] = contact
-        self.dtstart: Optional[DTStart] = dtstart
-        self.dtend: Optional[DTEnd] = dtend
-        self.organizer: Optional[Organizer] = organizer
-        self.url: Optional[URL] = url
+        self.contact: Optional[Contact] = self.as_parent(contact)
+        self.dtstart: Optional[DTStart] = self.as_parent(dtstart)
+        self.dtend: Optional[DTEnd] = self.as_parent(dtend)
+        self.organizer: Optional[Organizer] = self.as_parent(organizer)
+        self.url: Optional[URL] = self.as_parent(url)
 
         # Optional, may occur more than once
-        self.attendee: Optional[List[Attendee]] = attendee
-        self.comment: Optional[List[Comment]] = comment
-        self.freebusy: Optional[List[FreeBusyProperty]] = freebusy
-        self.rstatus: Optional[List[RequestStatus]] = rstatus
+        self.attendee: Optional[List[Attendee]] = self.as_parent(attendee)
+        self.comment: Optional[List[Comment]] = self.as_parent(comment)
+        self.freebusy: Optional[List[FreeBusyProperty]] = self.as_parent(freebusy)
+        self.rstatus: Optional[List[RequestStatus]] = self.as_parent(rstatus)
 
     def __repr__(self) -> str:
         """Overwrite the repr to create a better representation for the item."""

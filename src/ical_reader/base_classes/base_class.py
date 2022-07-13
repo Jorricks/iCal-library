@@ -17,7 +17,9 @@ class ICalBaseClass:
     """
 
     def __init__(self, name: str, parent: Optional["Component"]):
-        self._name: str = name
+        self._name = name
+        if self._name is None:
+            raise ValueError("Name of a Component or Property should not be None. Please specify it.")
         self._parent: Optional["Component"] = parent
 
     @property
@@ -27,6 +29,14 @@ class ICalBaseClass:
         :return: Return the parent :class:`Component` instance or None in the case there is no parent (for VCalender's).
         """
         return self._parent
+
+    @parent.setter
+    def parent(self, value: "Component"):
+        """
+        Setter for the parent :class:`Component`. This allows us to set the parent at a later moment.
+        :param value: The parent :class:`Component`.
+        """
+        self._parent = value
 
     @property
     def name(self) -> str:

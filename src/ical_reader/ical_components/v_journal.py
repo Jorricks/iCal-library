@@ -42,7 +42,6 @@ class VJournal(AbstractComponentWithDuration):
     The "VJOURNAL" calendar component can also be used to associate a document with a calendar date.
 
     :param name: The actual name of this component instance. E.g. VEVENT, RRULE, VCUSTOMCOMPONENT.
-    :param parent: The Component this item is encapsulated by in the iCalendar data file.
     :param dtstamp: The DTStamp property. Required and must occur exactly once.
     :param uid: The UID property. Required and must occur exactly once.
     :param dtstart: The DTStart property. Optional and may occur at most once.
@@ -66,11 +65,11 @@ class VJournal(AbstractComponentWithDuration):
     :param description: The Description property. Optional, but may occur multiple times.
     :param related: The RelatedTo property. Optional, but may occur multiple times.
     :param rstatus: The RequestStatus property. Optional, but may occur multiple times.
+    :param parent: The Component this item is encapsulated by in the iCalendar data file.
     """
 
     def __init__(
         self,
-        parent: Optional[Component],
         dtstamp: Optional[DTStamp] = None,
         uid: Optional[UID] = None,
         dtstart: Optional[DTStart] = None,
@@ -94,10 +93,10 @@ class VJournal(AbstractComponentWithDuration):
         description: Optional[List[Description]] = None,
         related: Optional[List[RelatedTo]] = None,
         rstatus: Optional[List[RequestStatus]] = None,
+        parent: Optional[Component] = None,
     ):
         super().__init__(
             name="VJOURNAL",
-            parent=parent,
             dtstamp=dtstamp,
             uid=uid,
             dtstart=dtstart,
@@ -106,27 +105,28 @@ class VJournal(AbstractComponentWithDuration):
             exdate=exdate,
             rdate=rdate,
             comment=comment,
+            parent=parent,
         )
 
         # Optional, may only occur once
         # As class is a reserved keyword in python, we prefixed it with `ical_`.
-        self.ical_class: Optional[Class] = ical_class
-        self.created: Optional[Created] = created
-        self.last_modified: Optional[LastModified] = last_modified
-        self.organizer: Optional[Organizer] = organizer
-        self.sequence: Optional[Sequence] = sequence
-        self.status: Optional[Status] = status
-        self.url: Optional[URL] = url
-        self.recurrence_id: Optional[RecurrenceID] = recurrence_id
+        self.ical_class: Optional[Class] = self.as_parent(ical_class)
+        self.created: Optional[Created] = self.as_parent(created)
+        self.last_modified: Optional[LastModified] = self.as_parent(last_modified)
+        self.organizer: Optional[Organizer] = self.as_parent(organizer)
+        self.sequence: Optional[Sequence] = self.as_parent(sequence)
+        self.status: Optional[Status] = self.as_parent(status)
+        self.url: Optional[URL] = self.as_parent(url)
+        self.recurrence_id: Optional[RecurrenceID] = self.as_parent(recurrence_id)
 
         # Optional, may occur more than once
-        self.attach: Optional[List[Attach]] = attach
-        self.attendee: Optional[List[Attendee]] = attendee
-        self.categories: Optional[List[Categories]] = categories
-        self.contact: Optional[List[Contact]] = contact
-        self.description: Optional[List[Description]] = description
-        self.related: Optional[List[RelatedTo]] = related
-        self.rstatus: Optional[List[RequestStatus]] = rstatus
+        self.attach: Optional[List[Attach]] = self.as_parent(attach)
+        self.attendee: Optional[List[Attendee]] = self.as_parent(attendee)
+        self.categories: Optional[List[Categories]] = self.as_parent(categories)
+        self.contact: Optional[List[Contact]] = self.as_parent(contact)
+        self.description: Optional[List[Description]] = self.as_parent(description)
+        self.related: Optional[List[RelatedTo]] = self.as_parent(related)
+        self.rstatus: Optional[List[RequestStatus]] = self.as_parent(rstatus)
 
     def __repr__(self) -> str:
         """Overwrite the repr to create a better representation for the item."""
@@ -189,7 +189,7 @@ class VRecurringJournal(AbstractRecurringComponentWithDuration, VJournal):
     """
 
     def __init__(self, original_component_instance: VJournal, start: DateTime):
-        super(VJournal, self).__init__("VJOURNAL", original_component_instance)
+        super(VJournal, self).__init__("VJOURNAL", parent=original_component_instance)
         self._original = original_component_instance
         self._start = start
         self._end = start

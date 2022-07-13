@@ -47,15 +47,15 @@ class VCalendar(Component):
         free_busy_list: Optional[List[VFreeBusy]] = None,
         time_zones: Optional[List[VTimeZone]] = None,
     ):
-        super().__init__("VCALENDAR", None)
+        super().__init__("VCALENDAR")
 
         # Required properties, only one occurrence allowed.
-        self._prodid: Optional[ProdID] = prodid
-        self._version: Optional[Version] = version
+        self._prodid: Optional[ProdID] = self.as_parent(prodid)
+        self._version: Optional[Version] = self.as_parent(version)
 
         # Optional properties, must not occur more than once.
-        self.calscale: Optional[CalScale] = calscale
-        self.method: Optional[Method] = method
+        self.calscale: Optional[CalScale] = self.as_parent(calscale)
+        self.method: Optional[Method] = self.as_parent(method)
 
         # These are children Components
         self.events: List[VEvent] = events or []

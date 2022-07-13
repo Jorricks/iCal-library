@@ -1,6 +1,7 @@
 from typing import Dict, Optional, TYPE_CHECKING
 
 from ical_reader.base_classes.base_class import ICalBaseClass
+from ical_reader.help_modules.component_context import ComponentContext
 from ical_reader.help_modules.lru_cache import instance_lru_cache
 
 if TYPE_CHECKING:
@@ -20,14 +21,27 @@ class Property(ICalBaseClass):
     A line containing a property typically has the following format:
     `PROPERTY-NAME;parameterKey=parameterValue,anotherParameterKey=anotherValue:actual-value`
 
-    :param parent: Instance of the :class:`Component` it is a part of.
+    Any property that is predefined according to the RFC 5545 should inherit this class, e.g. UID, RRule.
+    Only x-properties or iana-properties should instantiate the Property class directly.
+
+    :param value: The value of the property.
     :param name: The properties name, e.g. `RRULE`.
     :param property_parameters: The property parameters for this definition.
-    :param value: The value of the property.
+    :param parent: Instance of the :class:`Component` it is a part of.
     """
 
-    def __init__(self, parent: "Component", name: str, property_parameters: Optional[str], value: Optional[str]):
-        super().__init__(name=name, parent=parent)
+    def __init__(
+        self,
+        value: Optional[str],
+        name: Optional[str] = None,
+        property_parameters: Optional[str] = None,
+        parent: "Component" = None,
+    ):
+        name = name if self.__class__ == Property else self.__class__.get_ical_name_of_class()
+        super().__init__(name=name, parent=parent or ComponentContext.get_current_component())
+        if parent is None and self.parent is not None:
+            self.parent.set_property(self)
+
         self._property_parameters: Optional[str] = property_parameters
         self._value: Optional[str] = value
 

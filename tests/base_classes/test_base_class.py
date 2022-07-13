@@ -4,12 +4,12 @@ from ical_reader.ical_components import VCalendar
 from ical_reader.ical_properties.dt import RecurrenceID
 
 
-def test_name():
-    assert ICalBaseClass(name="ABC", parent=None).name == "ABC"
+def test_name(calendar_instance):
+    assert ICalBaseClass(name="ABC", parent=calendar_instance).name == "ABC"
 
 
-def test_parent():
-    another_component = Component("ANOTHER-COMPONENT", None)
+def test_parent(calendar_instance):
+    another_component = Component(name="ANOTHER-COMPONENT", parent=calendar_instance)
     assert ICalBaseClass(name="ABC", parent=another_component).parent == another_component
 
 

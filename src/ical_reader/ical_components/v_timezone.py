@@ -18,7 +18,6 @@ class _TimeOffsetPeriod(Component):
     A _TimeOffsetPeriod representing either a Standard configuration or a Winter configuration.
 
     :param name: The actual name of this component instance. E.g. VEVENT, RRULE, VCUSTOMCOMPONENT.
-    :param parent: The Component this item is encapsulated by in the iCalendar data file.
     :param dtstart: The DTStart property. Required and must occur exactly once.
     :param tzoffsetto: The TZOffsetTo property. Required and must occur exactly once.
     :param tzoffsetfrom: The TZOffsetFrom property. Required and must occur exactly once.
@@ -26,12 +25,12 @@ class _TimeOffsetPeriod(Component):
     :param comment: The Comment property. Optional, but may occur multiple times.
     :param rdate: The RDate property. Optional, but may occur multiple times.
     :param tzname: The TZName property. Optional, but may occur multiple times.
+    :param parent: The Component this item is encapsulated by in the iCalendar data file.
     """
 
     def __init__(
         self,
         name: str,
-        parent: Optional[Component],
         dtstart: Optional[DTStart] = None,
         tzoffsetto: Optional[TZOffsetTo] = None,
         tzoffsetfrom: Optional[TZOffsetFrom] = None,
@@ -39,18 +38,19 @@ class _TimeOffsetPeriod(Component):
         comment: Optional[List[Comment]] = None,
         rdate: Optional[List[RDate]] = None,
         tzname: Optional[List[TZName]] = None,
+        parent: Optional[Component] = None,
     ):
-        super().__init__(name, parent)
+        super().__init__(name, parent=parent)
         # Required, must occur only once.
-        self.dtstart: Optional[DTStart] = dtstart
-        self.tzoffsetto: Optional[TZOffsetTo] = tzoffsetto
-        self.tzoffsetfrom: Optional[TZOffsetFrom] = tzoffsetfrom
+        self.dtstart: Optional[DTStart] = self.as_parent(dtstart)
+        self.tzoffsetto: Optional[TZOffsetTo] = self.as_parent(tzoffsetto)
+        self.tzoffsetfrom: Optional[TZOffsetFrom] = self.as_parent(tzoffsetfrom)
         # Optional, may only occur once.
-        self.rrule: Optional[RRule] = rrule
+        self.rrule: Optional[RRule] = self.as_parent(rrule)
         # Optional, may occur more than once.
-        self.comment: Optional[List[Comment]] = comment
-        self.rdate: Optional[List[RDate]] = rdate
-        self.tzname: Optional[List[TZName]] = tzname
+        self.comment: Optional[List[Comment]] = self.as_parent(comment)
+        self.rdate: Optional[List[RDate]] = self.as_parent(rdate)
+        self.tzname: Optional[List[TZName]] = self.as_parent(tzname)
 
     def __repr__(self) -> str:
         """Overwrite the repr to create a better representation for the item."""
@@ -84,8 +84,8 @@ class _TimeOffsetPeriod(Component):
 class DayLight(_TimeOffsetPeriod):
     """A TimeOffsetPeriod representing a DayLight(a.k.a. Advanced Time, Summer Time or Legal Time) configuration."""
 
-    def __init__(self, parent: Optional[Component], **kwargs):
-        super().__init__("DAYLIGHT", parent, **kwargs)
+    def __init__(self, parent: Optional[Component] = None, **kwargs):
+        super().__init__("DAYLIGHT", parent=parent, **kwargs)
 
     @classmethod
     def _get_init_method_for_var_mapping(cls) -> Callable:
@@ -95,8 +95,8 @@ class DayLight(_TimeOffsetPeriod):
 class Standard(_TimeOffsetPeriod):
     """A TimeOffsetPeriod representing a Standard(a.k.a. Winter Time) configuration."""
 
-    def __init__(self, parent: Optional[Component], **kwargs):
-        super().__init__("STANDARD", parent, **kwargs)
+    def __init__(self, parent: Optional[Component] = None, **kwargs):
+        super().__init__("STANDARD", parent=parent, **kwargs)
 
     @classmethod
     def _get_init_method_for_var_mapping(cls) -> Callable:
@@ -125,20 +125,20 @@ class VTimeZone(Component):
 
     def __init__(
         self,
-        parent: Optional[Component],
         tzid: Optional[TZID] = None,
         last_mod: Optional[LastModified] = None,
         tzurl: Optional[TZURL] = None,
         standardc: Optional[List[Standard]] = None,
         daylightc: Optional[List[DayLight]] = None,
+        parent: Optional[Component] = None,
     ):
-        super().__init__("VTIMEZONE", parent)
+        super().__init__("VTIMEZONE", parent=parent)
 
         # Required properties, must occur one.
-        self._tzid: Optional[TZID] = tzid
+        self._tzid: Optional[TZID] = self.as_parent(tzid)
         # Optional properties, may only occur once.
-        self.last_mod: Optional[LastModified] = last_mod
-        self.tzurl: Optional[TZURL] = tzurl
+        self.last_mod: Optional[LastModified] = self.as_parent(last_mod)
+        self.tzurl: Optional[TZURL] = self.as_parent(tzurl)
         # Either one of these components must have at least one record. May occur multiple times.
         self.standardc: List[Standard] = standardc or []
         self.daylightc: List[DayLight] = daylightc or []

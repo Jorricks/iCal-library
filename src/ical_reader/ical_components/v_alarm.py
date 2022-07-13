@@ -16,7 +16,6 @@ class VAlarm(Component):
     to-do. For example, it may be used to define a reminder for a pending event or an overdue to-do.
     The "VALARM" calendar component MUST only appear within either a "VEVENT" or "VTODO" calendar component
 
-    :param parent: The Component this item is encapsulated by in the iCalendar data file.
     :param action: The Action property. Required and must occur exactly once.
     :param trigger: The Trigger property. Required and must occur exactly once.
     :param duration: The ICALDuration property. Optional, but may occur at most once. If this item is
@@ -24,29 +23,30 @@ class VAlarm(Component):
     :param repeat: The Repeat property. Optional, but may occur at most once. If this item is
         present, duration may not be present.
     :param attach: The Attach property. Optional, but may occur at most once.
+    :param parent: The Component this item is encapsulated by in the iCalendar data file.
     """
 
     def __init__(
         self,
-        parent: Optional[Component],
         action: Optional[Action] = None,
         trigger: Optional[Trigger] = None,
         duration: Optional[ICALDuration] = None,
         repeat: Optional[Repeat] = None,
         attach: Optional[Attach] = None,
+        parent: Optional[Component] = None,
     ):
-        super().__init__("VALARM", parent)
+        super().__init__("VALARM", parent=parent)
 
         # Required
-        self._action: Optional[Action] = action
-        self._trigger: Optional[Trigger] = trigger
+        self._action: Optional[Action] = self.as_parent(action)
+        self._trigger: Optional[Trigger] = self.as_parent(trigger)
 
         # Both optional and may only occur once. But if one occurs, the other also has to occur.
-        self.duration: Optional[ICALDuration] = duration
-        self.repeat: Optional[Repeat] = repeat
+        self.duration: Optional[ICALDuration] = self.as_parent(duration)
+        self.repeat: Optional[Repeat] = self.as_parent(repeat)
 
         # Optional, may only occur once
-        self.attach: Optional[Attach] = attach
+        self.attach: Optional[Attach] = self.as_parent(attach)
 
     def __repr__(self) -> str:
         """Overwrite the repr to create a better representation for the item."""

@@ -15,29 +15,19 @@ from typing import (
     Tuple,
     Type,
     TYPE_CHECKING,
+    TypeVar,
     Union,
 )
 
 from ical_reader.base_classes.base_class import ICalBaseClass
 from ical_reader.base_classes.property import Property
 from ical_reader.exceptions import CalendarParentRelationError
+from ical_reader.help_modules.component_context import ComponentContext
 
 if TYPE_CHECKING:
-    from ical_reader.ical_components import (
-        DayLight,
-        Standard,
-        VAlarm,
-        VCalendar,
-        VEvent,
-        VFreeBusy,
-        VJournal,
-        VTimeZone,
-        VToDo,
-    )
+    from ical_reader.ical_components import VCalendar
 
-PREDEFINED_COMPONENT_UNION = Union[
-    "VAlarm", "VEvent", "VFreeBusy", "VJournal", "VTimeZone", "Standard", "DayLight", "VToDo"
-]
+T = TypeVar("T")
 
 
 class Component(ICalBaseClass):
@@ -55,12 +45,20 @@ class Component(ICalBaseClass):
     - variables that have a type of `Optional[x]` (and not `Optional[List[x]]`). These are properties of the instance.
     They can be either optional or required, but may only occur once in the iCal file.
 
+    Any Component that is predefined according to the RFC 5545 should inherit this class, e.g. VCalendar, VEVENT.
+    Only x-components or iana-components should instantiate the Component class directly.
+
     :param name: The actual name of this component instance. E.g. `VEVENT`, `RRULE`, `VCUSTOMCOMPONENT`.
     :param parent: The Component this item is encapsulated by in the iCalendar data file.
     """
 
-    def __init__(self, name: str, parent: Optional["Component"]):
-        super().__init__(name=name, parent=parent)
+    def __init__(self, name: str, parent: Optional["Component"] = None):
+        name = name if self.__class__ == Component else self.__class__.get_ical_name_of_class()
+        super().__init__(name=name, parent=parent or ComponentContext.get_current_component())
+        if parent is None and self.parent is not None:
+            self.parent.__add_child_without_setting_the_parent(self)
+        if self.parent is None and self.name != "VCALENDAR":
+            raise ValueError("We should always set a Parent on __init__ of Components.")
         self._parse_line_start: Optional[int] = 0
         self._parse_line_end: Optional[int] = 0
         self._extra_child_components: Dict[str, List["Component"]] = defaultdict(list)
@@ -76,6 +74,34 @@ class Component(ICalBaseClass):
         if type(self) != type(other):
             return False
         return self.properties == other.properties and self.children == other.children
+
+    def __enter__(self):
+        """Enter the context manager. Check ComponentContext for more info."""
+        ComponentContext.push_context_managed_component(self)
+        return self
+
+    def __exit__(self, _type, _value, _tb):
+        """Exit the context manager. Check ComponentContext for more info."""
+        ComponentContext.pop_context_managed_component()
+
+    def _set_self_as_parent_for_ical_component(self, prop_or_comp: ICalBaseClass) -> None:
+        """Verifies the parent is not already set to a different component, if not sets the parent."""
+        if prop_or_comp.parent is None:
+            prop_or_comp.parent = self
+        elif prop_or_comp.parent != self:
+            raise ValueError(
+                "Trying to overwrite a parent. Please do not re-use property instance across different components."
+            )
+
+    def as_parent(self, value: T) -> T:
+        """We set self as Parent for Properties and Components but also Properties and Components in lists."""
+        if isinstance(value, ICalBaseClass):
+            self._set_self_as_parent_for_ical_component(value)
+        elif isinstance(value, list):  # checking for list over Iterable is ~8,5x faster.
+            for item in value:
+                if isinstance(item, ICalBaseClass):
+                    self._set_self_as_parent_for_ical_component(item)
+        return value
 
     @property
     def extra_child_components(self) -> Dict[str, List["Component"]]:
@@ -113,9 +139,9 @@ class Component(ICalBaseClass):
         children.extend(extras)
         return children
 
-    def add_child(self, child: "Component") -> None:
+    def __add_child_without_setting_the_parent(self, child: "Component") -> None:
         """
-        Add a children component.
+        Just add a child component and do not also set the parent.
 
         If the child is an undefined `x-comp` or `iana-comp` component, we add it to _extra_child_components.
         If the child is defined, we add it to one of the other variables according to
@@ -127,6 +153,17 @@ class Component(ICalBaseClass):
             getattr(self, var_name).append(child)
             return
         self._extra_child_components[child.name].append(child)
+
+    def add_child(self, child: "Component") -> None:
+        """
+        Add a children component and set its parent.
+
+        If the child is an undefined `x-comp` or `iana-comp` component, we add it to _extra_child_components.
+        If the child is defined, we add it to one of the other variables according to
+        :function:`self._get_child_component_mapping()`.
+        """
+        self.as_parent(child)
+        self.__add_child_without_setting_the_parent(child)
 
     @property
     def original_ical_text(self) -> str:
@@ -190,6 +227,11 @@ class Component(ICalBaseClass):
 
     @classmethod
     def _get_init_method_for_var_mapping(cls) -> Callable:
+        """
+        We generate _get_var_mapping based on `cls.__init__`. This var mapping is later used to list all properties,
+        all components but also all the types of the items. This is a function so that it can be overwritten for
+        the recurring components.
+        """
         return cls.__init__
 
     @classmethod
@@ -219,7 +261,7 @@ class Component(ICalBaseClass):
     def _get_property_mapping(cls) -> Mapping[str, Tuple[str, Type[Property], bool]]:
         """
         Return the same mapping as :function:`cls._get_var_mapping()` but only return variables related to
-        :class:`Property` classes.
+        :class:`Property` classes. Example: `{"RRULE": tuple("rrule", Type[RRule], False), ...}`
         """
         return {
             ical_name: var_tuple
@@ -229,28 +271,15 @@ class Component(ICalBaseClass):
 
     @classmethod
     @lru_cache()
-    def _get_child_component_mapping(cls) -> Mapping[str, Tuple[str, Type[PREDEFINED_COMPONENT_UNION], bool]]:
+    def _get_child_component_mapping(cls) -> Mapping[str, Tuple[str, Type["Component"], bool]]:
         """
         Return the same mapping as :function:`cls._get_var_mapping()` but only return variables related to
         :class:`Component` classes.
         """
-        from ical_reader.ical_components import (
-            DayLight,
-            Standard,
-            VAlarm,
-            VEvent,
-            VFreeBusy,
-            VJournal,
-            VTimeZone,
-            VToDo,
-        )
-
-        predefined_components = (VAlarm, VEvent, VFreeBusy, VJournal, VTimeZone, Standard, DayLight, VToDo)
-
         return {
             ical_name: var_tuple
             for ical_name, var_tuple in cls._get_var_mapping().items()
-            if issubclass(var_tuple[1], predefined_components)
+            if issubclass(var_tuple[1], Component)
         }
 
     @property
@@ -263,11 +292,47 @@ class Component(ICalBaseClass):
         }
         return {**standard_properties, **self._extra_properties}
 
-    def print_tree_structure(self, indent: int = 0):
+    def print_tree_structure(self, indent: int = 0) -> None:
         """Print the tree structure of all components starting with this instance."""
         print(f"{'  ' * indent} - {self}")
         for child in self.children:
             child.print_tree_structure(indent=indent + 1)
+
+    def set_property(
+        self,
+        property_instance: Property,
+        property_map_info: Optional[Tuple[str, Type[Property], bool]] = None,
+        property_map_was_checked: bool = False,
+    ) -> None:
+        """
+        Setting a property for a Component instance.
+
+        If the `property_map_info` is equal to None, we either have not yet looked up all the properties or it is an
+        x-prop/iana-prop. This can be decided based on property_map_was_checked. This avoids extra (expensive) lookups
+        in our self._get_property_mapping.
+
+        :param property_instance: The Property we wish to set.
+        :param property_map_info: A tuple containing the variable name for this Component instance, the type of the
+        Property and whether the variable can occur multiple times for the same property. If it equals None, this either
+        means it is an x-prop/iana-prop or that the property_map was not checked yet.
+        :param property_map_was_checked: Whether the `property_map_info` was passed or not. If True, and
+        `property_map_info` is `None`, we know that it is an iana property. If False, we still need to consult
+        `_get_property_mapping`.
+        """
+        if property_map_info is None and property_map_was_checked is False:
+            property_map_info = self._get_property_mapping().get(property_instance.name)
+        var_name, var_type, is_list = property_map_info or [None, None, None]
+        if var_name is not None and is_list is not None:
+            if is_list is True:
+                if getattr(self, var_name) is None:
+                    setattr(self, var_name, [property_instance])
+                else:
+                    current_value: List[Property] = getattr(self, var_name)
+                    current_value.append(property_instance)
+            else:
+                setattr(self, var_name, property_instance)
+        else:
+            self._extra_properties[property_instance.name.lower().replace("-", "_")].append(property_instance)
 
     def parse_property(self, line: str) -> Property:
         """
@@ -291,32 +356,20 @@ class Component(ICalBaseClass):
             raise ValueError(f"{result=} should never be None! {line=} is invalid.")
         name, property_parameters, value = result.group(1), result.group(2), result.group(3)
         if name in property_mapping.keys():
-            var_name, var_type, is_list = property_mapping[name]
-            if is_list:
-                property_instance = var_type(
-                    parent=self, name=name, property_parameters=property_parameters, value=value
-                )
-                if getattr(self, var_name) is None:
-                    setattr(self, var_name, [property_instance])
-                else:
-                    current_value: List[Property] = getattr(self, var_name)
-                    current_value.append(property_instance)
-            else:
-                property_instance = var_type(
-                    parent=self, name=name, property_parameters=property_parameters, value=value
-                )
-                setattr(self, var_name, property_instance)
-            return property_instance
+            property_map_info = property_mapping[name]
+            var_name, var_type, is_list = property_map_info
+            property_instance = var_type(name=name, property_parameters=property_parameters, value=value, parent=self)
+            self.set_property(property_instance, property_map_info, property_map_was_checked=True)
         else:
-            property_instance = Property(parent=self, name=name, property_parameters=property_parameters, value=value)
-            self._extra_properties[name.lower().replace("-", "_")].append(property_instance)
-            return property_instance
+            property_instance = Property(name=name, property_parameters=property_parameters, value=value, parent=self)
+            self.set_property(property_instance, None, property_map_was_checked=True)
+        return property_instance
 
     def _instantiate_component(self, ical_component_identifier: str) -> "Component":
         component_mapping = self._get_child_component_mapping()
         if ical_component_identifier in component_mapping:
             var_name, var_type, is_list = component_mapping[ical_component_identifier]
-            return var_type(parent=self)
+            return var_type(parent=self)  # type: ignore
         else:
             return Component(name=ical_component_identifier, parent=self)
 

@@ -23,7 +23,6 @@ class AbstractComponentWithDuration(Component, ABC):
     Note: VJournal is the odd one out as these events don't have a duration.
 
     :param name: The actual name of this component instance. E.g. VEVENT, RRULE, VCUSTOMCOMPONENT.
-    :param parent: The Component this item is encapsulated by in the iCalendar data file.
     :param dtstamp: The DTStamp property. Required and must occur exactly once.
     :param uid: The UID property. Required and must occur exactly once.
     :param dtstart: The DTStart property. Optional and may occur at most once.
@@ -32,12 +31,12 @@ class AbstractComponentWithDuration(Component, ABC):
     :param exdate: The EXDate property. Optional, but may occur multiple times.
     :param rdate: The RDate property. Optional, but may occur multiple times.
     :param comment: The Comment property. Optional, but may occur multiple times.
+    :param parent: The Component this item is encapsulated by in the iCalendar data file.
     """
 
     def __init__(
         self,
         name: str,
-        parent: Optional[Component],
         dtstamp: Optional[DTStamp] = None,
         uid: Optional[UID] = None,
         dtstart: Optional[DTStart] = None,
@@ -46,8 +45,9 @@ class AbstractComponentWithDuration(Component, ABC):
         exdate: Optional[List[EXDate]] = None,
         rdate: Optional[List[RDate]] = None,
         comment: Optional[List[Comment]] = None,
+        parent: Optional[Component] = None,
     ):
-        super().__init__(name, parent)
+        super().__init__(name, parent=parent)
 
         # Required
         self._dtstamp: Optional[DTStamp] = dtstamp
@@ -182,6 +182,10 @@ class AbstractRecurringComponentWithDuration(AbstractComponentWithDuration, ABC)
         if name in self._original.get_property_ical_names():
             return object.__getattribute__(self._original, name)
         return object.__getattribute__(self, name)
+
+    def __setattr__(self, key: str, value: Any) -> None:
+        """Overwrite the custom __setattr__ from Components to set it back to the standard behavior."""
+        object.__setattr__(self, key, value)
 
     @property
     def start(self) -> DateTime:
