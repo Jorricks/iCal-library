@@ -4,16 +4,16 @@ Sometimes properties have a lot in common. Instead of constantly redefining all 
 
 This is the list of all help classes.
 
-::: ical_reader.ical_properties.ints._IntProperty
+::: ical_library.ical_properties.ints._IntProperty
 
-::: ical_reader.ical_properties.dt._DTBoth
+::: ical_library.ical_properties.dt._DTBoth
 
-::: ical_reader.ical_properties.dt._DTSingular
+::: ical_library.ical_properties.dt._DTSingular
 
-::: ical_reader.ical_properties.cal_address._CalAddress
+::: ical_library.ical_properties.cal_address._CalAddress
 
-::: ical_reader.ical_properties.periods._PeriodFunctionality
+::: ical_library.ical_properties.periods._PeriodFunctionality
 
-::: ical_reader.ical_properties.periods._ExOrRDate
+::: ical_library.ical_properties.periods._ExOrRDate
 
-::: ical_reader.ical_properties.tz_offset._TZOffset
+::: ical_library.ical_properties.tz_offset._TZOffset

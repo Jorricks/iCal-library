@@ -1,7 +1,7 @@
-from ical_reader.base_classes.component import Component
-from ical_reader.base_classes.property import Property
-from ical_reader.ical_components import VCalendar, VEvent, VFreeBusy, VJournal, VTimeZone, VToDo
-from ical_reader.ical_properties.pass_properties import ProdID, Version
+from ical_library.base_classes.component import Component
+from ical_library.base_classes.property import Property
+from ical_library.ical_components import VCalendar, VEvent, VFreeBusy, VJournal, VTimeZone, VToDo
+from ical_library.ical_properties.pass_properties import ProdID, Version
 
 
 def test_repr(calendar_instance):

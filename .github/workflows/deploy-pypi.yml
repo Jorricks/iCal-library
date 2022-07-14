@@ -1,4 +1,4 @@
-name: Publish ical-reader to PyPI
+name: Publish iCalLibrary to PyPI
 on:
   release:
     types: [published]

@@ -1,5 +1,5 @@
 # Property base class 
 
-All Properties are extending the [Property](ical_reader.base_classes.Property) class. Let's first start with the base class and then list all the other properties.
+All Properties are extending the [Property](ical_library.base_classes.Property) class. Let's first start with the base class and then list all the other properties.
 
-::: ical_reader.base_classes.Property
+::: ical_library.base_classes.Property

@@ -23,8 +23,9 @@ The steps are different per host, some of them are listed here:
 1. Follow one of the above-mentioned tutorial to get the iCalendar URL.
 2. Verify that when you open the URL in your browser, it shows a page or downloads a file that begins with `BEGIN:VCALENDAR`.
 3. Use the `client.parse_icalendar_url()` to get it directly.
+
 ```python
-from ical_reader import client
+from ical_library import client
 
 calendar = client.parse_icalendar_url("https://calendar.google.com/calendar/ical/xxxxxx/private-xxxxxx/basic.ics")
 print(calendar.events)
@@ -38,7 +39,7 @@ your application.
 ```python
 from pathlib import Path
 from pendulum import Duration
-from ical_reader.cache_client import CacheClient
+from ical_library.cache_client import CacheClient
 
 cache_client = CacheClient(
     url="https://calendar.google.com/calendar/ical/xxxxxx/private-xxxxxx/basic.ics",

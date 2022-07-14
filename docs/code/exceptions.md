@@ -2,8 +2,8 @@
 
 These are all the custom exceptions you might encounter when using `ical-reader`.
 
-::: ical_reader.CalendarParentRelationError
+::: ical_library.CalendarParentRelationError
 
-::: ical_reader.VEventExpansionFailed
+::: ical_library.VEventExpansionFailed
 
-::: ical_reader.MissingRequiredProperty
+::: ical_library.MissingRequiredProperty

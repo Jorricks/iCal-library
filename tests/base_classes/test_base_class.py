@@ -1,7 +1,7 @@
-from ical_reader.base_classes.base_class import ICalBaseClass
-from ical_reader.base_classes.component import Component
-from ical_reader.ical_components import VCalendar
-from ical_reader.ical_properties.dt import RecurrenceID
+from ical_library.base_classes.base_class import ICalBaseClass
+from ical_library.base_classes.component import Component
+from ical_library.ical_components import VCalendar
+from ical_library.ical_properties.dt import RecurrenceID
 
 
 def test_name(calendar_instance):

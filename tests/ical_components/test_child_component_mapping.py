@@ -1,6 +1,6 @@
 import pytest
 
-from ical_reader.ical_components import (
+from ical_library.ical_components import (
     DayLight,
     Standard,
     VAlarm,

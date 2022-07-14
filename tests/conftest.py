@@ -3,9 +3,9 @@ from pathlib import Path
 
 import pytest
 
-from ical_reader import client
-from ical_reader.ical_components import VCalendar
-from ical_reader.ical_properties import ProdID
+from ical_library import client
+from ical_library.ical_components import VCalendar
+from ical_library.ical_properties import ProdID
 
 
 @pytest.fixture
