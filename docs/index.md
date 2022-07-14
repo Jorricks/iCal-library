@@ -7,7 +7,7 @@
 </p>
 <p align="center">
 <a href="https://github.com/Jorricks/iCalLibrary/actions/workflows/validate.yml" target="_blank">
-    <img src="https://github.com/Jorricks/iCalLibrary/actions/workflows/validate.yml/badge.svg" alt="Test">
+    <img src="https://img.shields.io/github/workflow/status/Jorricks/iCalLibrary/Validate" alt="GitHub Workflow Test Status">
 </a>
 <a href="https://codecov.io/gh/Jorricks/iCalLibrary" target="_blank">
     <img src="https://img.shields.io/codecov/c/github/Jorricks/iCalLibrary/main" alt="Coverage">
