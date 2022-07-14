@@ -1,12 +1,12 @@
 # Project information
-site_name: iCal Reader
-site_url: https://jorricks.github.io/ical-reader
+site_name: iCalLibrary
+site_url: https://jorricks.github.io/iCalLibrary
 site_author: Jorrick Sleijster
 site_description: ICal Reader - Fast, yet simple, iCalendar reader with excellent recurrence support
 
 # Repository
-repo_name: jorricks/ical-reader
-repo_url: https://github.com/jorricks/ical-reader
+repo_name: jorricks/iCalLibrary
+repo_url: https://github.com/jorricks/iCalLibrary
 
 
 # Copyright
@@ -61,7 +61,7 @@ plugins:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/Jorricks/ical-reader
+      link: https://github.com/Jorricks/iCalLibrary
     - icon: fontawesome/brands/python
       link: https://pypi.org/user/jorricks/
     - icon: fontawesome/brands/linkedin

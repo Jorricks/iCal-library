@@ -1,9 +1,7 @@
-# Contributing to ICal-Reader
+# Contributing to iCalLibrary
 
-As an open source project, ICal-Reader welcomes contributions of many forms.
+As an open source project, iCalLibrary welcomes contributions of many forms.
 This document summarizes the process.
-
-ICal-Reader has a [Code of Conduct](./code_of_conduct.md).
 
 Examples of contributions include:
 

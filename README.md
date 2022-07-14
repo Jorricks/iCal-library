@@ -1,30 +1,30 @@
 <p align="center">
-  <a href="https://jorricks.github.io/ical-reader"><img src="docs/icallibrary.png" alt="iCalLibrary" width="600px"></a>
+  <a href="https://jorricks.github.io/iCalLibrary"><img src="docs/icallibrary.png" alt="iCalLibrary" width="600px"></a>
 </p>
 <p align="center">
     <em>Fast, yet simple, iCalendar reader&writer with excellent recurrence support. <a href="https://www.ietf.org/rfc/rfc5545.txt">RFC 5545</a> compliant.</em>
 </p>
 <p align="center">
-<a href="https://github.com/Jorricks/ical-reader/actions/workflows/validate.yml" target="_blank">
-    <img src="https://github.com/Jorricks/ical-reader/actions/workflows/validate.yml/badge.svg" alt="Test">
+<a href="https://github.com/Jorricks/iCalLibrary/actions/workflows/validate.yml" target="_blank">
+    <img src="https://github.com/Jorricks/iCalLibrary/actions/workflows/validate.yml/badge.svg" alt="Test">
 </a>
-<a href="https://codecov.io/gh/Jorricks/ical-reader" target="_blank">
-    <img src="https://img.shields.io/codecov/c/github/Jorricks/ical-reader/main" alt="Coverage">
+<a href="https://codecov.io/gh/Jorricks/iCalLibrary" target="_blank">
+    <img src="https://img.shields.io/codecov/c/github/Jorricks/iCalLibrary/main" alt="Coverage">
 </a>
 </p>
 
-[//]: # (<a href="https://pypi.org/project/ical-reader" target="_blank">)
-[//]: # (    <img src="https://img.shields.io/pypi/v/ical-reader?color=%2334D058&label=pypi%20package" alt="Package version">)
+[//]: # (<a href="https://pypi.org/project/iCalLibrary" target="_blank">)
+[//]: # (    <img src="https://img.shields.io/pypi/v/iCalLibrary?color=%2334D058&label=pypi%20package" alt="Package version">)
 [//]: # (</a>)
-[//]: # (<a href="https://pypi.org/project/ical-reader" target="_blank">)
-[//]: # (    <img src="https://img.shields.io/pypi/pyversions/ical-reader.svg?color=%2334D058" alt="Supported Python versions">)
+[//]: # (<a href="https://pypi.org/project/iCalLibrary" target="_blank">)
+[//]: # (    <img src="https://img.shields.io/pypi/pyversions/iCalLibrary.svg?color=%2334D058" alt="Supported Python versions">)
 [//]: # (</a>)
 
 ---
 
-**Documentation**: [https://jorricks.github.io/ical-reader/](https://jorricks.github.io/ical-reader/)
+**Documentation**: [https://jorricks.github.io/iCalLibrary/](https://jorricks.github.io/iCalLibrary/)
 
-**Source Code**: [https://github.com/Jorricks/ical-reader](https://github.com/Jorricks/ical-reader)
+**Source Code**: [https://github.com/Jorricks/iCalLibrary](https://github.com/Jorricks/iCalLibrary)
 
 
 ## Features
@@ -46,13 +46,13 @@ iCalLibrary uses two major libraries for their date and time utilities:
 
 ## Installation
 
-To use iCal Reader, first install it using pip:
+To use iCalLibrary, first install it using pip:
 
-    pip install ical-reader
+    pip install iCalLibrary
 
 
 ## Example
-A simple example. Please look [in the docs](https://jorricks.github.io/ical-reader/) for more examples.
+A simple example. Please look [in the docs](https://jorricks.github.io/iCalLibrary/) for more examples.
 
 ```python3
 from ical_library import client

@@ -1,6 +1,6 @@
 # Exceptions
 
-These are all the custom exceptions you might encounter when using `ical-reader`.
+These are all the custom exceptions you might encounter when using `iCalLibrary`.
 
 ::: ical_library.CalendarParentRelationError
 

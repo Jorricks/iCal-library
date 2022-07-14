@@ -43,7 +43,7 @@ from ical_library.cache_client import CacheClient
 
 cache_client = CacheClient(
     url="https://calendar.google.com/calendar/ical/xxxxxx/private-xxxxxx/basic.ics",
-    cache_location=Path.home() / "ical-reader-cache",
+    cache_location=Path.home() / "ical-library-cache",
     cache_ttl=Duration(hours=1),
     verbose=True,
 )

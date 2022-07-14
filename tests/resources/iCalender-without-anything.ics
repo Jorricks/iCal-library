@@ -3,7 +3,7 @@ PRODID:-//Google Inc//Google Calendar 70.9054//EN
 VERSION:2.0
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
-X-WR-CALNAME:Test iCal reader
+X-WR-CALNAME:Test iCalLibrary
 X-WR-TIMEZONE:Europe/Amsterdam
-X-WR-CALDESC:Calendar to test iCal Reader
+X-WR-CALDESC:Calendar to test iCalLibrary
 END:VCALENDAR

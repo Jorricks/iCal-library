@@ -1,28 +1,28 @@
 # iCalLibrary
 <p align="center">
-  <a href="https://jorricks.github.io/ical-reader"><img src="icallibrary.png" alt="iCalLibrary" width="600px"></a>
+  <a href="https://jorricks.github.io/iCalLibrary"><img src="icallibrary.png" alt="iCalLibrary" width="600px"></a>
 </p>
 <p align="center">
     <em>Fast, yet simple, iCalendar reader&writer with excellent recurrence support. <a href="https://www.ietf.org/rfc/rfc5545.txt">RFC 5545</a> compliant.</em>
 </p>
 <p align="center">
-<a href="https://github.com/Jorricks/ical-reader/actions/workflows/validate.yml" target="_blank">
-    <img src="https://github.com/Jorricks/ical-reader/actions/workflows/validate.yml/badge.svg" alt="Test">
+<a href="https://github.com/Jorricks/iCalLibrary/actions/workflows/validate.yml" target="_blank">
+    <img src="https://github.com/Jorricks/iCalLibrary/actions/workflows/validate.yml/badge.svg" alt="Test">
 </a>
-<a href="https://codecov.io/gh/Jorricks/ical-reader" target="_blank">
-    <img src="https://img.shields.io/codecov/c/github/Jorricks/ical-reader/main" alt="Coverage">
+<a href="https://codecov.io/gh/Jorricks/iCalLibrary" target="_blank">
+    <img src="https://img.shields.io/codecov/c/github/Jorricks/iCalLibrary/main" alt="Coverage">
 </a>
 </p>
 
 ---
 
-**Documentation**: [https://jorricks.github.io/ical-reader/](https://jorricks.github.io/ical-reader/)
+**Documentation**: [https://jorricks.github.io/iCalLibrary/](https://jorricks.github.io/iCalLibrary/)
 
-**Source Code**: [https://github.com/Jorricks/ical-reader](https://github.com/Jorricks/ical-reader)
+**Source Code**: [https://github.com/Jorricks/iCalLibrary](https://github.com/Jorricks/iCalLibrary)
 
 ---
 
-**iCal Reader** is a Python library for anyone who wishes to read any iCalendar file.
+**iCalLibrary** is a Python library for anyone who wishes to read any iCalendar file.
 
 It is one of the fastest iCalender python library out there and has excellent support for recurring events. Now there is truly no reason to miss an event, ever.
 
@@ -40,11 +40,11 @@ It is one of the fastest iCalender python library out there and has excellent su
 
 
 ## Installation
-To use iCal Reader, first install it using pip:
+To use iCalLibrary, first install it using pip:
 
 <!-- termynal -->
 ```
-$ pip install ical-reader
+$ pip install iCalLibrary
 ---> 100%
 Installed
 ```
@@ -59,7 +59,7 @@ iCalLibrary uses two major libraries for their date and time utilities:
 
 
 ## Example
-A simple example. Please look [in the docs](https://jorricks.github.io/ical-reader/) for more examples.
+A simple example. Please look [in the docs](https://jorricks.github.io/iCalLibrary/) for more examples.
 
 ```python
 from ical_library import client
@@ -75,7 +75,7 @@ print(calendar.time_zones)
 
 ???+ info "During experimentation, it is recommended to use a Python Debugger."
 
-    iCal Reader is fully Debugger compliant, meaning it is very easy to use a debugger with this project. It will be much faster to see all the different attributes and functions from inside a Python debugger. If you are unsure whether your IDE supports it, take a look [here](https://wiki.python.org/moin/PythonDebuggingTools) under the sections 'IDEs with Debug Capabilities'.
+    iCalLibrary is fully Debugger compliant, meaning it is very easy to use a debugger with this project. It will be much faster to see all the different attributes and functions from inside a Python debugger. If you are unsure whether your IDE supports it, take a look [here](https://wiki.python.org/moin/PythonDebuggingTools) under the sections 'IDEs with Debug Capabilities'.
 
 
 ## Limitations
