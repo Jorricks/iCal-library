@@ -39,3 +39,8 @@ def calendar_with_reoccurring_events_once(root_folder: Path) -> VCalendar:
 @pytest.fixture
 def empty_calendar(root_folder: Path) -> VCalendar:
     return client.parse_icalendar_file(root_folder / "tests" / "resources" / "iCalender-without-anything.ics")
+
+
+@pytest.fixture
+def berlin_timezone_calendar(root_folder: Path) -> VCalendar:
+    return client.parse_icalendar_file(root_folder / "tests" / "resources" / "iCalendar-with-berlin-timezone.ics")
