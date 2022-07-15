@@ -30,10 +30,16 @@
 ## Features
 - Easy python interface. It's as simple as '`client.load_ics_file("<my_file>").timeline`' to show all your events of that week.
 - Timeline support. Show exactly what is planned for a specific week.
-- ***Fully functional*** support for recurring iCal components. E.g. Any recurring event will show up as intended within the timeline interface.
+- ***Fully functional*** support for recurring iCal components. E.g. Any recurring event will show up as intended within the timeline interface. This includes:
+  - Recurring components/events based on RRule.
+  - Recurring components/events based on RDate.
+  - Excluding components/events based on EXDate.
+  - Any combination of the above three.
+  - Redefined/changed components/events correctly show the latest version. 
 - Very fast parsing due to lazy evaluation of iCal properties.
 - Debugger supported. Any issues? Open up a debugger and inspect all values.
 - Minimal dependencies. Only `python-dateutil` and `pendulum`.
+- Fully typed code base.
 
 
 ## Requirements
@@ -81,8 +87,8 @@ After traversing the code of the other libraries I decided I wanted to build my 
 - Lazy evaluation for iCalendar properties to speed up the process.
 
 ## Features on the horizon
-- Implement timeline functionality for all items instead of just VEvents.
-- Set the timeline & expanding functionality to use Timespan.intersect.
-- Implement a custom list to automatically set parents.
 - Implement support for quoted property parameters.
+- Do a first release <3.
 - Implement support for the new Properties for iCalendar (RFC 7986)
+- Support CalDev.
+
