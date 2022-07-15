@@ -24,6 +24,9 @@ class Timespan:
         self.begin: DateTime = dt_utils.convert_time_object_to_aware_datetime(begin)
         self.end: DateTime = dt_utils.convert_time_object_to_aware_datetime(end)
 
+    def __repr__(self) -> str:
+        return f"Timespan({self.begin}, {self.end})"
+
     @property
     def tuple(self) -> Tuple[DateTime, DateTime]:
         """
@@ -41,8 +44,14 @@ class Timespan:
         if not isinstance(time, DateTime):
             return Date(self.end.year, self.end.month, self.end.day)
         elif time.tz is None:  # At this point we know it is a DateTime object.
-            return self.end.replace(tzinfo=None)
+            return self.end.replace(tzinfo=None)  # type: ignore
         return self.end.in_timezone(time.tz)
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, Timespan):
+            return self.tuple == other.tuple
+        else:
+            return NotImplemented
 
     def __lt__(self, other: Any) -> bool:
         if isinstance(other, Timespan):
@@ -74,7 +83,7 @@ class Timespan:
         :param other: Another timespan.
         :return: Boolean whether the *other* timespan is included within this timespan.
         """
-        return other.begin <= self.begin and self.end < other.end
+        return other.begin <= self.begin and self.end <= other.end
 
     def intersects(self, other: "Timespan") -> bool:
         """
@@ -106,8 +115,6 @@ class TimespanWithParent(Timespan):
     :param begin: The beginning of the timespan.
     :param end: The end of the timespan.
     """
-
-    parent: Optional["Component"]
 
     def __init__(self, parent: Optional["Component"], begin: Union[Date, DateTime], end: Union[Date, DateTime]):
         super().__init__(begin, end)

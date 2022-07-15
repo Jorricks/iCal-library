@@ -1,6 +1,6 @@
 from typing import Callable, Dict, Iterator, List, Optional, Tuple, Union
 
-from pendulum import Date, DateTime
+from pendulum import Date, DateTime, Duration
 
 from ical_library.base_classes.component import Component
 from ical_library.exceptions import MissingRequiredProperty
@@ -190,9 +190,7 @@ class VTimeZone(Component):
 
         dt_object: DateTime
         time_offset_period: _TimeOffsetPeriod
-        for i, (dt_object, time_offset_period) in enumerate(self.get_ordered_timezone_overview(DateTime(2100, 1, 1))):
-            if i == 0 and dt < dt_object.replace(tzinfo=None):
+        for i, (dt_object, time_offset_period) in enumerate(self.get_ordered_timezone_overview(dt + Duration(years=1))):
+            if dt < dt_object.replace(tzinfo=None):
                 return dt.in_timezone(time_offset_period.tzoffsetfrom.as_timezone_object())
-            if dt > dt_object.replace(tzinfo=None):
-                return dt.in_timezone(time_offset_period.tzoffsetto.as_timezone_object())
         return dt

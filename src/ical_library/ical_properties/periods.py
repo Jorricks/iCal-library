@@ -4,6 +4,7 @@ import pendulum
 from pendulum import Date, DateTime, Duration
 
 from ical_library.base_classes.property import Property
+from ical_library.help_modules import dt_utils
 
 
 class _PeriodFunctionality(Property):
@@ -51,7 +52,7 @@ class _PeriodFunctionality(Property):
         if isinstance(second_instance, DateTime):
             return first_instance, second_instance
         elif isinstance(second_instance, Duration):
-            computed_datetime: DateTime = first_instance + second_instance
+            computed_datetime: DateTime = first_instance + second_instance  # type: ignore  # Pendulum at fault
             return first_instance, computed_datetime
         else:
             raise TypeError(f"Expected {period_str=} to contain a DateTime or Duration as second argument.")
@@ -189,3 +190,28 @@ class RDate(_ExOrRDate):
             return self._parse_period_values()
         else:
             raise ValueError(f"{self.kind=} should be one in ['DATE-TIME', 'DATE', 'PERIOD'].")
+
+    def compute_max_end_date(self, component_duration: Duration) -> DateTime:
+        """
+        To speed up the computation of the Timelines range, it's good to know the ending of the last recurring event
+        of a recurrence property. This does not need to be perfect, it should just be an estimate (so we don't check
+        EXDate and such).
+        :param component_duration: The duration of the component which has the recurring properties.
+        :return: An estimate of the maximum end date across all occurrences. This value should always be at least the
+        actual highest recurrence end date
+        """
+        max_value: Optional[DateTime] = None
+        for value in self.all_values:
+            if isinstance(value, Date):  # This covers both Date and DateTime
+                dt: DateTime = dt_utils.convert_time_object_to_datetime(value)
+                dt: DateTime = dt + component_duration  # type: ignore  # Pendulum at fault here.
+                dt = dt_utils.convert_time_object_to_aware_datetime(dt)
+                if max_value is None or dt > max_value:
+                    max_value = dt
+            elif isinstance(value, tuple) and len(value) == 2:
+                dt: DateTime = dt_utils.convert_time_object_to_aware_datetime(value[1])
+                if max_value is None or dt > max_value:
+                    max_value = dt
+            else:
+                raise ValueError(f"Unexpected value encountered: {value}.")
+        return max_value or DateTime.max

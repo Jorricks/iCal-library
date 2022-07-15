@@ -1,13 +1,13 @@
-from typing import Iterator, List, Optional
+from typing import Iterator, List, Optional, Union
 
-from pendulum import DateTime, Duration
+from pendulum import Date, DateTime, Duration
 
 from ical_library.base_classes.component import Component
 from ical_library.help_modules import property_utils
-from ical_library.help_modules.timespan import Timespan
+from ical_library.help_modules.timespan import Timespan, TimespanWithParent
 from ical_library.ical_components.abstract_components import (
-    AbstractComponentWithDuration,
-    AbstractRecurringComponentWithDuration,
+    AbstractComponentWithRecurringProperties,
+    AbstractRecurrence,
 )
 from ical_library.ical_properties.cal_address import Attendee, Organizer
 from ical_library.ical_properties.dt import _DTBoth, Created, DTStamp, DTStart, LastModified, RecurrenceID
@@ -30,7 +30,7 @@ from ical_library.ical_properties.periods import EXDate, RDate
 from ical_library.ical_properties.rrule import RRule
 
 
-class VJournal(AbstractComponentWithDuration):
+class VJournal(AbstractComponentWithRecurringProperties):
     """
     This class represents the VJOURNAL component specified in RFC 5545 in '3.6.3. Journal Component'.
 
@@ -117,7 +117,6 @@ class VJournal(AbstractComponentWithDuration):
         self.sequence: Optional[Sequence] = self.as_parent(sequence)
         self.status: Optional[Status] = self.as_parent(status)
         self.url: Optional[URL] = self.as_parent(url)
-        self.recurrence_id: Optional[RecurrenceID] = self.as_parent(recurrence_id)
 
         # Optional, may occur more than once
         self.attach: Optional[List[Attach]] = self.as_parent(attach)
@@ -137,7 +136,7 @@ class VJournal(AbstractComponentWithDuration):
         """
         Return the start time of the journal. This is because the Journal does not have a duration.
 
-        Note: This is an abstract method from :class:`AbstractComponentWithDuration` that we have to implement.
+        Note: This is an abstract method from :class:`AbstractComponentWithRecurringProperties` we have to implement.
         """
         return self.dtstart
 
@@ -145,17 +144,22 @@ class VJournal(AbstractComponentWithDuration):
         """
         Return an empty Duration as a Journal does not have a duration.
 
-        Note: This is an abstract method from :class:`AbstractComponentWithDuration` that we have to implement.
+        Note: This is an abstract method from :class:`AbstractComponentWithRecurringProperties` we have to implement.
         """
         return Duration()
 
-    def expand_component_in_range(self: "VJournal", return_range: Timespan) -> Iterator["VJournal"]:
+    def expand_component_in_range(
+        self, return_range: Timespan, starts_to_exclude: Union[List[Date], List[DateTime]]
+    ) -> Iterator[TimespanWithParent]:
         """
         Expand this VJournal in range according to its recurring *RDate*, *EXDate* and *RRule* properties.
         :param return_range: The timespan range on which we should return VJournal instances.
+        :param starts_to_exclude: List of start Dates or list of start DateTimes of which we already know we should
+        exclude them from our recurrence computation (as they have been completely redefined in another element).
         :return: Yield all recurring VJournal instances related to this VJournal in the given *return_range*.
         """
-        yield self
+        yield self.timespan
+        starts_to_exclude.append(self.start)
 
         start = self.start
         duration = self.computed_duration
@@ -168,18 +172,19 @@ class VJournal(AbstractComponentWithDuration):
             rrule=self.rrule,
             first_event_start=self.start,
             first_event_duration=self.computed_duration,
+            starts_to_exclude=starts_to_exclude,
             return_range=return_range,
             make_tz_aware=None,
         )
 
         for event_start_time, event_end_time in iterator:
-            yield VRecurringJournal(original_component_instance=self, start=event_start_time)
+            yield VRecurringJournal(original_component_instance=self, start=event_start_time).timespan
 
 
-class VRecurringJournal(AbstractRecurringComponentWithDuration, VJournal):
+class VRecurringJournal(AbstractRecurrence, VJournal):
     """
     This class represents VJournal that are recurring.
-    Inside the AbstractRecurringComponentWithDuration class we overwrite specific dunder methods and property methods.
+    Inside the AbstractRecurrence class we overwrite specific dunder methods and property methods.
     This way our end users have a very similar interface to an actual VJournal but without us needing to code the exact
     same thing twice.
 
@@ -189,10 +194,10 @@ class VRecurringJournal(AbstractRecurringComponentWithDuration, VJournal):
     """
 
     def __init__(self, original_component_instance: VJournal, start: DateTime):
-        super(VJournal, self).__init__("VJOURNAL", parent=original_component_instance)
         self._original = original_component_instance
         self._start = start
         self._end = start
+        super(VJournal, self).__init__("VJOURNAL", parent=original_component_instance)
 
     def __repr__(self) -> str:
         """Overwrite the repr to create a better representation for the item."""

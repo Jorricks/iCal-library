@@ -1,13 +1,13 @@
-from typing import Iterator, List, Optional
+from typing import Iterator, List, Optional, Union
 
-from pendulum import DateTime, Duration
+from pendulum import Date, DateTime, Duration
 
 from ical_library.base_classes.component import Component
 from ical_library.help_modules import property_utils
-from ical_library.help_modules.timespan import Timespan
+from ical_library.help_modules.timespan import Timespan, TimespanWithParent
 from ical_library.ical_components.abstract_components import (
-    AbstractComponentWithDuration,
-    AbstractRecurringComponentWithDuration,
+    AbstractComponentWithRecurringProperties,
+    AbstractRecurrence,
 )
 from ical_library.ical_components.v_alarm import VAlarm
 from ical_library.ical_properties.cal_address import Attendee, Organizer
@@ -36,7 +36,7 @@ from ical_library.ical_properties.periods import EXDate, RDate
 from ical_library.ical_properties.rrule import RRule
 
 
-class VEvent(AbstractComponentWithDuration):
+class VEvent(AbstractComponentWithRecurringProperties):
     """
     This class represents the VEVENT component specified in RFC 5545 in '3.6.1. Event Component'.
 
@@ -123,6 +123,7 @@ class VEvent(AbstractComponentWithDuration):
             dtstart=dtstart,
             rrule=rrule,
             summary=summary,
+            recurrence_id=recurrence_id,
             exdate=exdate,
             rdate=rdate,
             comment=comment,
@@ -144,7 +145,6 @@ class VEvent(AbstractComponentWithDuration):
         self.status: Optional[Status] = self.as_parent(status)
         self.transp: Optional[TimeTransparency] = self.as_parent(transp)
         self.url: Optional[URL] = self.as_parent(url)
-        self.recurrence_id: Optional[RecurrenceID] = self.as_parent(recurrence_id)
         self.dtend: Optional[DTEnd] = self.as_parent(dtend)
 
         # Optional, may occur more than once
@@ -171,7 +171,7 @@ class VEvent(AbstractComponentWithDuration):
         """
         Return the ending of the event.
 
-        Note: This is an abstract method from :class:`AbstractComponentWithDuration` that we have to implement.
+        Note: This is an abstract method from :class:`AbstractComponentWithRecurringProperties` we have to implement.
         """
         return self.dtend
 
@@ -179,17 +179,22 @@ class VEvent(AbstractComponentWithDuration):
         """
         Return the duration of the event.
 
-        Note: This is an abstract method from :class:`AbstractComponentWithDuration` that we have to implement.
+        Note: This is an abstract method from :class:`AbstractComponentWithRecurringProperties` we have to implement.
         """
         return self.duration.duration if self.duration else None
 
-    def expand_component_in_range(self: "VEvent", return_range: Timespan) -> Iterator["VEvent"]:
+    def expand_component_in_range(
+        self, return_range: Timespan, starts_to_exclude: Union[List[Date], List[DateTime]]
+    ) -> Iterator[TimespanWithParent]:
         """
         Expand this VEvent in range according to its recurring *RDate*, *EXDate* and *RRule* properties.
         :param return_range: The timespan range on which we should return VEvent instances.
+        :param starts_to_exclude: List of start Dates or list of start DateTimes of which we already know we should
+        exclude them from our recurrence computation (as they have been completely redefined in another element).
         :return: Yield all recurring VEvent instances related to this VEvent in the given *return_range*.
         """
-        yield self
+        yield self.timespan
+        starts_to_exclude.append(self.start)
 
         start = self.start
         duration = self.computed_duration
@@ -202,6 +207,7 @@ class VEvent(AbstractComponentWithDuration):
             rrule=self.rrule,
             first_event_start=start,
             first_event_duration=duration,
+            starts_to_exclude=starts_to_exclude,
             return_range=return_range,
             make_tz_aware=None,
         )
@@ -211,13 +217,13 @@ class VEvent(AbstractComponentWithDuration):
                 original_component_instance=self,
                 start=event_start_time,
                 end=event_end_time,
-            )
+            ).timespan
 
 
-class VRecurringEvent(AbstractRecurringComponentWithDuration, VEvent):
+class VRecurringEvent(AbstractRecurrence, VEvent):
     """
     This class represents VEvents that are recurring.
-    Inside the AbstractRecurringComponentWithDuration class we overwrite specific dunder methods and property methods.
+    Inside the AbstractRecurrence class we overwrite specific dunder methods and property methods.
     This way our end users have a very similar interface to an actual VEvent but without us needing to code the exact
     same thing twice.
 
@@ -227,10 +233,10 @@ class VRecurringEvent(AbstractRecurringComponentWithDuration, VEvent):
     """
 
     def __init__(self, original_component_instance: VEvent, start: DateTime, end: DateTime):
-        super(VEvent, self).__init__("VEVENT", parent=original_component_instance)
         self._original = original_component_instance
         self._start = start
         self._end = end
+        super(VEvent, self).__init__("VEVENT", parent=original_component_instance)
 
     def __repr__(self) -> str:
         """Overwrite the repr to create a better representation for the item."""

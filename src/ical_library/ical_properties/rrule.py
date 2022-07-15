@@ -3,7 +3,7 @@ from typing import Dict, Iterator, List, Literal, Optional, Tuple, Union
 import pendulum
 from dateutil import rrule as base_for_time_periods
 from dateutil.rrule import rrule, weekday
-from pendulum import Date, DateTime
+from pendulum import Date, DateTime, Duration
 
 from ical_library.base_classes.property import Property
 from ical_library.help_modules import dt_utils
@@ -130,9 +130,10 @@ class RRule(Property):
         for a_day in value.split(","):
             a_day = a_day.strip()
             nth_occurence: Optional[int] = int(a_day[:-2]) if len(a_day) > 2 else None
-            if a_day[-2:] not in ("SU", "MO", "TU", "WE", "TH", "FR", "SA"):
+            day_of_week: str = a_day[-2:]
+            if day_of_week not in ("SU", "MO", "TU", "WE", "TH", "FR", "SA"):
                 raise ValueError
-            list_of_days.append((nth_occurence, a_day))  # type: ignore
+            list_of_days.append((nth_occurence, day_of_week))  # type: ignore
         return list_of_days
 
     @property
@@ -142,11 +143,17 @@ class RRule(Property):
         :return: None or a tuple of weekday instances which is a type native to dateutil.
         """
         day_list: List[weekday] = []
-        for optional_nth_occurrence, weekday_str in self.by_day():
-            if optional_nth_occurrence is not None:
-                day_list.append(getattr(base_for_time_periods, weekday_str)(optional_nth_occurrence))
-            else:
-                day_list.append(getattr(base_for_time_periods, weekday_str))
+        by_day = self.by_day()
+        if by_day is None:
+            return None
+        for optional_nth_occurrence, weekday_str in by_day:
+            try:
+                if optional_nth_occurrence is not None:
+                    day_list.append(getattr(base_for_time_periods, weekday_str)(optional_nth_occurrence))
+                else:
+                    day_list.append(getattr(base_for_time_periods, weekday_str))
+            except Exception as exc:
+                raise ValueError(f"{optional_nth_occurrence=}, {weekday_str=}") from exc
         return tuple(day_list)
 
     @property
@@ -227,6 +234,24 @@ class RRule(Property):
         :return: None or an integer in the range of 1 to 366 or -366 to -1 or None.
         """
         return self.convert_str_to_optional_integer_tuple(self.value_as_dict.get("BYEASTER"))
+
+    def compute_max_end_date(self, starting_datetime: Union[Date, DateTime], component_duration: Duration) -> DateTime:
+        """
+        To speed up the computation of the Timelines range, it's good to know the ending of the last recurring event
+        of a recurrence property. This does not need to be perfect, it should just be an estimate (so we don't check
+        EXDate and such).
+        :param starting_datetime: The starting datetime from which we start computing the next occurrences.
+        :param component_duration: The duration of the component which has the recurring properties.
+        :return: An estimate of the maximum end date across all occurrences. This value should always be at least the
+        actual highest recurrence end date
+        """
+        if self.until:
+            return dt_utils.convert_time_object_to_aware_datetime(self.until) + component_duration  # type: ignore
+        elif self.count:
+            if self.count < 1000:
+                *_, last = self.sequence_iterator(starting_datetime=starting_datetime, max_datetime=DateTime.max)
+                return dt_utils.convert_time_object_to_aware_datetime(last) + component_duration  # type: ignore
+        return DateTime.max
 
     def sequence_iterator(
         self, starting_datetime: Union[Date, DateTime], max_datetime: Union[Date, DateTime]

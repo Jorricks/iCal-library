@@ -1,12 +1,14 @@
 import heapq
 from collections import defaultdict
-from typing import Iterator, List, Mapping, Optional, Tuple
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 
-from pendulum import DateTime
+from pendulum import Date, DateTime
 
+from ical_library.base_classes.component import Component
 from ical_library.help_modules.lru_cache import instance_lru_cache
 from ical_library.help_modules.timespan import Timespan, TimespanWithParent
-from ical_library.ical_components import VCalendar, VEvent
+from ical_library.ical_components import VCalendar, VFreeBusy
+from ical_library.ical_components.abstract_components import AbstractComponentWithRecurringProperties
 
 
 class Timeline:
@@ -19,7 +21,7 @@ class Timeline:
     You should set these upper bounds to the absolute minimum start date and absolute maximum end date that you would
     ever need. So if you need to do 10 different queries, this start and end date should range all of these, so it
     doesn't need to compute the list of components in the range over and over again. The functions themselves(e.g.
-    :function:`self.includes` and :function:`self.intersects`) help you  to limit the exact range you want to return
+    :function:`self.includes` and :function:`self.intersects`) help you to limit the exact range you want to return
     components for.
 
     :param v_calendar: The VCalendar object we are iterating over.
@@ -34,9 +36,8 @@ class Timeline:
         self._start_date: DateTime = start_date or DateTime(1970, 1, 1)
         self._end_date: DateTime = end_date or DateTime(2100, 1, 1)
 
-    # @ToDo improve upon the time filtering here by using intersect.
-    # @ToDo also allow ToDo & Journal expansions.
-    # @ToDo inside the RRule, compute an estimated end_date so we can skip many right away.
+    def __repr__(self) -> str:
+        return f"Timeline({self._start_date}, {self._end_date})"
 
     @property
     def start_date(self) -> DateTime:
@@ -66,79 +67,84 @@ class Timeline:
         return Timespan(self.start_date, self.end_date)
 
     @staticmethod
-    def de_duplicate_events(list_of_events: List[VEvent]) -> List[VEvent]:
+    def __get_items_to_exclude_from_recurrence(
+        all_components: List[Component],
+    ) -> Dict[str, Union[List[Date], List[DateTime]]]:
         """
         Deduplicate recurring components. Sometimes it happens that recurring events are changed and this will cause
         them to both be present as a standard component and in the recurrence.
-        :param list_of_events: The list of all components that we should deduplicate.
+        :param all_components: The list of all component children of the VCalendar instance.
         :return: A deduplicated list of components.
         """
-        event_dict: Mapping[Tuple[Tuple[DateTime, DateTime], str], List[VEvent]] = defaultdict(list)
-        for event in list_of_events:
-            event_dict[(event.timespan.tuple, event.summary.value if event.summary else "")].append(event)
-        for keys, events in event_dict.items():
-            if len(events) == 1:
-                continue
-            for i, event_a in list(enumerate(events)):
-                if event_a.recurrence_id is not None:
-                    del events[i]
-        return [event for event_list in event_dict.values() for event in event_list]
+        start_date_to_timespan_dict: Dict[str, Union[List[Date], List[DateTime]]] = defaultdict(list)
+        for component in all_components:
+            if isinstance(component, AbstractComponentWithRecurringProperties) and component.recurrence_id is not None:
+                start_date_to_timespan_dict[component.uid.value].append(component.recurrence_id.datetime_or_date_value)
+        return start_date_to_timespan_dict
 
-    def explode_recurring_events(self) -> List[VEvent]:
+    def __explode_recurring_components(self) -> List[TimespanWithParent]:
         """
-        Get a de-duplicated list of all components, including the recurring components. This means that we add all
-        child component of the :class:`VCalendar` (except for the :class:`VTimeZone` instances) to a list and then add
-        all extra occurrences (as recurring components) according to the recurrence properties: :class:`RRule`,
-        :class:`RDate` and :class:`EXDate`.
+        Get a de-duplicated list of all components with a start date, including the recurring components. This means
+        that we add all child component of the :class:`VCalendar` (except for the :class:`VTimeZone` instances) to a
+        list and then add all extra occurrences (as recurring components) according to the recurrence properties:
+        :class:`RRule`, :class:`RDate` and :class:`EXDate`.
         :return: A de-duplicated list of all components, including the recurring occurrences of the components.
         """
-        list_of_v_events: List[VEvent] = []
-        for e in self.v_calendar.events:
+        list_of_timestamps_with_parents: List[TimespanWithParent] = []
+        all_children = self.v_calendar.children
+        uid_to_datetime_to_exclude = self.__get_items_to_exclude_from_recurrence(all_children)
+        for c in all_children:
             # Do some initial filtering.
-            if not e.start or not e.end:
-                continue
-            intersects = e.timespan.intersects(self.get_timespan())
-            if not (intersects or e.rrule or e.rdate):
-                continue
+            if isinstance(c, AbstractComponentWithRecurringProperties):
+                if c.max_recurring_timespan.intersects(self.get_timespan()):
+                    values_to_exclude = uid_to_datetime_to_exclude.get(c.uid.value)
+                    list_of_timestamps_with_parents.extend(
+                        c.expand_component_in_range(self.get_timespan(), values_to_exclude)
+                    )
+            elif isinstance(c, VFreeBusy):
+                if c.timespan.intersects(self.get_timespan()):
+                    list_of_timestamps_with_parents.append(c.timespan)
+            else:
+                # There is no way to extend iana-props or x-props for now. If you feel like implementing this, please
+                # let me know and open a PR :).
+                pass
+        return list_of_timestamps_with_parents
 
-            list_of_v_events.extend(e.expand_component_in_range(self.get_timespan()))
-        return self.de_duplicate_events(list_of_v_events)
+    def iterate(self) -> Iterator[Tuple[TimespanWithParent, Component]]:
+        """
+        Iterate over the `self.__explode_recurring_components()` in chronological order.
 
-    def iterate(self) -> Iterator[Tuple[TimespanWithParent, VEvent]]:
-        """Iterate over the `self.explode_recurring_events()` in chronological order."""
-        # Using a heap is faster than sorting if the number of events (n) is
-        # much bigger than the number of events we extract from the iterator (k).
-        # Complexity: O(n + k log n).
-        heap: List[TimespanWithParent] = [e.timespan for e in self.explode_recurring_events()]
+        Implementation detail: Using a heap is faster than sorting if the number of events (n) is much bigger than the
+        number of events we extract from the iterator (k). Complexity: O(n + k log n).
+        """
+        heap: List[TimespanWithParent] = self.__explode_recurring_components()
         heapq.heapify(heap)
         while heap:
-            popped = heapq.heappop(heap)
-            if not isinstance(popped.parent, VEvent):
-                raise TypeError("Expected only VEvents here!")
+            popped: TimespanWithParent = heapq.heappop(heap)
             yield popped, popped.parent
 
-    def includes(self, start: DateTime, stop: DateTime) -> Iterator[VEvent]:
-        """Iterate (in chronological order) over every event that is in the specified timespan."""
+    def includes(self, start: DateTime, stop: DateTime) -> Iterator[Component]:
+        """Iterate (in chronological order) over every component that is in the specified timespan."""
         query_timespan = Timespan(start, stop)
         for timespan, event in self.iterate():
             if timespan.is_included_in(query_timespan):
                 yield event
 
-    def overlapping(self, start: DateTime, stop: DateTime) -> Iterator[VEvent]:
-        """Iterate (in chronological order) over every event that has an intersection with the timespan."""
+    def overlapping(self, start: DateTime, stop: DateTime) -> Iterator[Component]:
+        """Iterate (in chronological order) over every component that has an intersection with the timespan."""
         query_timespan = Timespan(start, stop)
         for timespan, event in self.iterate():
             if timespan.intersects(query_timespan):
                 yield event
 
-    def start_after(self, instant: DateTime) -> Iterator[VEvent]:
-        """Iterate (in chronological order) on every event larger than instant in chronological order."""
+    def start_after(self, instant: DateTime) -> Iterator[Component]:
+        """Iterate (in chronological order) on every component larger than instant in chronological order."""
         for timespan, event in self.iterate():
             if timespan.begin > instant:
                 yield event
 
-    def at(self, instant: DateTime) -> Iterator[VEvent]:
-        """Iterate (in chronological order) over all events that are occurring during `instant`."""
+    def at(self, instant: DateTime) -> Iterator[Component]:
+        """Iterate (in chronological order) over all component that are occurring during `instant`."""
         for timespan, event in self.iterate():
             if timespan.includes(instant):
                 yield event

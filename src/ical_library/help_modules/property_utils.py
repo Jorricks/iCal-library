@@ -23,7 +23,9 @@ def _handle_tz(dt: Union[DateTime, Date], make_tz_aware: Optional[Timezone]) -> 
 def _compute_exdates(
     exdate_list: List[EXDate],
     return_range: Timespan,
+    first_event_duration: Duration,
     make_tz_aware: Optional[Timezone],
+    starts_to_exclude: Optional[Union[List[Date], List[DateTime]]] = None,
 ) -> Union[Set[Date], Set[DateTime]]:
     """
     Return a set of Dates or a set of DateTimes that should be excluded based on the EXDate definitions.
@@ -31,14 +33,20 @@ def _compute_exdates(
     :param exdate_list: The list of EXDate definitions of the component. This defines what dates/datetimes should be
     excluded.
     :param return_range: Returns all DateTimes starts that are within this range.
+    :param first_event_duration: The duration of the original component which we should use for the rest of the
+    components.
     :param make_tz_aware: If this contains a non-none value, we make all timezone naive DateTimes timezone aware to
     using this Timezone.
+    :param starts_to_exclude: List of start Dates or list of start DateTimes of which we already know we should exclude
+    them from our recurrence computation (as they have been completely redefined in another element).
     :return: a set of Dates or a set of DateTimes that should be excluded.
     """
-    full_list: Union[Set[Date], Set[DateTime]] = set()
+    full_list: Union[Set[Date], Set[DateTime]] = set(starts_to_exclude or [])
     for exdate in exdate_list:
         full_list.update(
-            _handle_tz(time, make_tz_aware) for time in exdate.excluded_date_times if return_range.includes(time)
+            _handle_tz(time, make_tz_aware)
+            for time in exdate.excluded_date_times
+            if return_range.intersects(Timespan(time, time + first_event_duration))  # type: ignore
         )
     return full_list
 
@@ -72,17 +80,18 @@ def _yield_rdate_list(
     for rdate in rdate_list:
         rdate_time: Union[DateTime, Date, Tuple[DateTime, DateTime]]
         for rdate_time in rdate.all_values:
-            if not return_range.includes(rdate_time):
+            rdate_timespan = Timespan(rdate_time, rdate_time + first_event_duration)
+            if not return_range.intersects(rdate_timespan):
                 continue
             # Date covers both DateTime and Date. This is because DateTime inherits from Date.
             if isinstance(rdate_time, Date):
                 rdate_time = _handle_tz(rdate_time, make_tz_aware=make_tz_aware)
-                if return_range.includes(rdate_time) and rdate_time not in excluded_times_set:
+                if return_range.intersects(rdate_timespan) and rdate_time not in excluded_times_set:
                     yield rdate_time, rdate_time + first_event_duration
             elif isinstance(rdate_time, tuple):
                 rdate_start = _handle_tz(rdate_time[0], make_tz_aware=make_tz_aware)
                 rdate_end = _handle_tz(rdate_time[1], make_tz_aware=make_tz_aware)
-                if return_range.includes(rdate_start) and rdate_start not in excluded_times_set:
+                if return_range.intersects(rdate_timespan) and rdate_start not in excluded_times_set:
                     yield rdate_start, rdate_end
             else:
                 raise TypeError(f"RDate returned a weird type: {type=}.")
@@ -92,6 +101,7 @@ def _yield_rrule_list(
     rrule: Optional[RRule],
     excluded_times_set: Union[Set[Date], Set[DateTime]],
     first_event_start: Union[DateTime, Date],
+    first_event_duration: Duration,
     return_range: Timespan,
     make_tz_aware: Optional[Timezone],
 ) -> Union[Iterator[Date], Iterator[DateTime]]:
@@ -103,6 +113,8 @@ def _yield_rrule_list(
     :param rrule: The RRule definition of the component.
     :param excluded_times_set: The set of Dates or a set of DateTimes that should be excluded.
     :param first_event_start: The starting point from which we should compute the recurrence.
+    :param first_event_duration: The duration of the original component which we should use for the rest of the
+    components.
     :param return_range: Returns all DateTimes starts that are within this range.
     :param make_tz_aware: If this contains a non-none value, we make all timezone naive DateTimes timezone aware to
     using this Timezone.
@@ -116,7 +128,7 @@ def _yield_rrule_list(
     rrule_time: Union[Date, DateTime]
     for rrule_time in iterator:
         rrule_time = _handle_tz(rrule_time, make_tz_aware=make_tz_aware)
-        if not return_range.includes(rrule_time):
+        if not return_range.intersects(Timespan(rrule_time, rrule_time + first_event_duration)):
             continue
         # Date covers both DateTime and Date. This is because DateTime inherits from Date.
         if isinstance(rrule_time, Date):
@@ -166,6 +178,7 @@ def expand_event_in_range_only_return_first(
         rrule=rrule,
         excluded_times_set=set(),
         first_event_start=first_event_start,
+        first_event_duration=Duration(),
         return_range=return_range,
         make_tz_aware=make_tz_aware,
     )
@@ -180,6 +193,7 @@ def expand_component_in_range(
     rrule: Optional[RRule],
     first_event_start: Union[DateTime, Date],
     first_event_duration: Duration,
+    starts_to_exclude: Union[List[Date], List[DateTime]],
     return_range: Timespan,
     make_tz_aware: Optional[Timezone],
 ) -> Union[Iterator[Tuple[DateTime, DateTime]], Iterator[Tuple[Date, Date]]]:
@@ -200,14 +214,20 @@ def expand_component_in_range(
     :param first_event_start: The starting point from which we should compute the recurrence.
     :param first_event_duration: The duration of the original component which we should use for the rest of the
     components.
+    :param starts_to_exclude: List of start Dates or list of start DateTimes of which we already know we should exclude
+    them from our recurrence computation (as they have been completely redefined in another element).
     :param return_range: Returns all DateTimes starts that are within this range.
     :param make_tz_aware: If this contains a non-none value, we make all timezone naive DateTimes timezone aware to
     using this Timezone.
     :return: an Iterator returning a tuple with two values of either DateTimes or Dates.
     """
-    # @ToDo(jorrick) improve upon this time filter using intersect.
+    print(f"{starts_to_exclude=}")
     excluded_times_set: Union[Set[DateTime], Set[Date]] = _compute_exdates(
-        exdate_list=exdate_list, return_range=return_range, make_tz_aware=make_tz_aware
+        exdate_list=exdate_list,
+        return_range=return_range,
+        make_tz_aware=make_tz_aware,
+        first_event_duration=first_event_duration,
+        starts_to_exclude=starts_to_exclude,
     )
 
     iterator = _yield_rdate_list(
@@ -225,6 +245,7 @@ def expand_component_in_range(
         rrule=rrule,
         excluded_times_set=excluded_times_set,
         first_event_start=first_event_start,
+        first_event_duration=first_event_duration,
         return_range=return_range,
         make_tz_aware=make_tz_aware,
     )

@@ -1,13 +1,13 @@
-from typing import Iterator, List, Optional
+from typing import Iterator, List, Optional, Union
 
-from pendulum import DateTime, Duration
+from pendulum import Date, DateTime, Duration
 
 from ical_library.base_classes.component import Component
 from ical_library.help_modules import property_utils
-from ical_library.help_modules.timespan import Timespan
+from ical_library.help_modules.timespan import Timespan, TimespanWithParent
 from ical_library.ical_components.abstract_components import (
-    AbstractComponentWithDuration,
-    AbstractRecurringComponentWithDuration,
+    AbstractComponentWithRecurringProperties,
+    AbstractRecurrence,
 )
 from ical_library.ical_components.v_alarm import VAlarm
 from ical_library.ical_properties.cal_address import Attendee, Organizer
@@ -44,7 +44,7 @@ from ical_library.ical_properties.periods import EXDate, RDate
 from ical_library.ical_properties.rrule import RRule
 
 
-class VToDo(AbstractComponentWithDuration):
+class VToDo(AbstractComponentWithRecurringProperties):
     """
     This class represents the VTODO component specified in RFC 5545 in '3.6.2. To-Do Component'.
 
@@ -152,7 +152,6 @@ class VToDo(AbstractComponentWithDuration):
         self.sequence: Optional[Sequence] = self.as_parent(sequence)
         self.status: Optional[Status] = self.as_parent(status)
         self.url: Optional[URL] = self.as_parent(url)
-        self.recurrence_id: Optional[RecurrenceID] = self.as_parent(recurrence_id)
         self.due: Optional[Due] = self.as_parent(due)
 
         # Optional, may occur more than once
@@ -179,7 +178,7 @@ class VToDo(AbstractComponentWithDuration):
         """
         Return the ending of the vtodo.
 
-        Note: This is an abstract method from :class:`AbstractComponentWithDuration` that we have to implement.
+        Note: This is an abstract method from :class:`AbstractComponentWithRecurringProperties` we have to implement.
         """
         return self.due
 
@@ -187,17 +186,22 @@ class VToDo(AbstractComponentWithDuration):
         """
         Return the duration of the vtodo.
 
-        Note: This is an abstract method from :class:`AbstractComponentWithDuration` that we have to implement.
+        Note: This is an abstract method from :class:`AbstractComponentWithRecurringProperties` we have to implement.
         """
         return self.duration.duration if self.duration else None
 
-    def expand_component_in_range(self: "VToDo", return_range: Timespan) -> Iterator["VToDo"]:
+    def expand_component_in_range(
+        self, return_range: Timespan, starts_to_exclude: Union[List[Date], List[DateTime]]
+    ) -> Iterator[TimespanWithParent]:
         """
         Expand this VToDo in range according to its recurring *RDate*, *EXDate* and *RRule* properties.
         :param return_range: The timespan range on which we should return VToDo instances.
+        :param starts_to_exclude: List of start Dates or list of start DateTimes of which we already know we should
+        exclude them from our recurrence computation (as they have been completely redefined in another element).
         :return: Yield all recurring VToDo instances related to this VToDo in the given *return_range*.
         """
-        yield self
+        yield self.timespan
+        starts_to_exclude.append(self.start)
 
         start = self.start
         duration = self.computed_duration
@@ -210,6 +214,7 @@ class VToDo(AbstractComponentWithDuration):
             rrule=self.rrule,
             first_event_start=self.start,
             first_event_duration=self.computed_duration,
+            starts_to_exclude=starts_to_exclude,
             return_range=return_range,
             make_tz_aware=None,
         )
@@ -219,13 +224,13 @@ class VToDo(AbstractComponentWithDuration):
                 original_component_instance=self,
                 start=event_start_time,
                 end=event_end_time,
-            )
+            ).timespan
 
 
-class VRecurringToDo(AbstractRecurringComponentWithDuration, VToDo):
+class VRecurringToDo(AbstractRecurrence, VToDo):
     """
     This class represents VToDo that are recurring.
-    Inside the AbstractRecurringComponentWithDuration class we overwrite specific dunder methods and property methods.
+    Inside the AbstractRecurrence class we overwrite specific dunder methods and property methods.
     This way our end users have a very similar interface to an actual VToDo but without us needing to code the exact
     same thing twice.
 
@@ -235,10 +240,10 @@ class VRecurringToDo(AbstractRecurringComponentWithDuration, VToDo):
     """
 
     def __init__(self, original_component_instance: VToDo, start: DateTime, end: DateTime):
-        super(VToDo, self).__init__("VTODO", parent=original_component_instance)
         self._original = original_component_instance
         self._start = start
         self._end = end
+        super(VToDo, self).__init__("VTODO", parent=original_component_instance)
 
     def __repr__(self) -> str:
         """Overwrite the repr to create a better representation for the item."""

@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from ical_library.base_classes.component import Component
 from ical_library.exceptions import MissingRequiredProperty
+from ical_library.help_modules.timespan import TimespanWithParent
 from ical_library.ical_properties.cal_address import Attendee, Organizer
 from ical_library.ical_properties.dt import DTEnd, DTStamp, DTStart
 from ical_library.ical_properties.pass_properties import Comment, Contact, RequestStatus, UID, URL
@@ -92,3 +93,13 @@ class VFreeBusy(Component):
     def uid(self, value: UID):
         """A setter to set the required property."""
         self._uid = value
+
+    @property
+    def timespan(self) -> Optional[TimespanWithParent]:
+        start = self.dtstart.datetime_or_date_value if self.dtstart else None
+        end = self.dtend.datetime_or_date_value if self.dtend else None
+        if start is None:
+            return None
+        if end is None:
+            TimespanWithParent(parent=self, begin=start, end=start)
+        return TimespanWithParent(parent=self, begin=start, end=end)
