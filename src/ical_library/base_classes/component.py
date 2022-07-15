@@ -351,10 +351,11 @@ class Component(ICalBaseClass):
         :return: The created Property instance based on the *line* that we set for the component.
         """
         property_mapping = self._get_property_mapping()
-        result = re.search("([^\r\n;:]+)(;[^\r\n:]+)?:(.*)", line)
+        result = re.search("^([^\r\n;:]+)(;[^\r\n:]+)?:(.*)$", line)
         if result is None:
             raise ValueError(f"{result=} should never be None! {line=} is invalid.")
         name, property_parameters, value = result.group(1), result.group(2), result.group(3)
+        property_parameters = property_parameters.lstrip(";") if property_parameters else None
         if name in property_mapping.keys():
             property_map_info = property_mapping[name]
             var_name, var_type, is_list = property_map_info

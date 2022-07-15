@@ -111,5 +111,5 @@ class Property(ICalBaseClass):
         Return the iCalendar representation of the parameter.
         :return: the iCalendar string representation.
         """
-        add_subs = f";{self._property_parameters.strip(';')}" if self._property_parameters else ""
+        add_subs = f";{self._property_parameters}" if self._property_parameters else ""
         return f"{self._name}{add_subs}:{self._value}"
