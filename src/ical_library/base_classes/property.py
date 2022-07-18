@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 class Property(ICalBaseClass):
     """
-    This is the base class for any property (according to the RFC 5545 specification) in iCalLibrary.
+    This is the base class for any property (according to the RFC 5545 specification) in iCal-library.
 
     A property always exists of three parts:
 

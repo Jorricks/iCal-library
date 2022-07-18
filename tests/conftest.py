@@ -12,7 +12,7 @@ from ical_library.ical_properties import ProdID
 def root_folder() -> Path:
     starting_place = Path(os.getcwd()).resolve()
     folder = starting_place
-    while not (folder / ".git").is_dir() and not folder.name.lower() == "icallibrary":
+    while not (folder / ".git").is_dir() and not folder.name.lower() == "iCal-library":
         folder = folder.parent
         if folder.name == "":
             raise ValueError(f"Could not find the root folder starting from {starting_place=}.")

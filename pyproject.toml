@@ -60,11 +60,11 @@ dev = [
 
 
 [project.urls]
-Home = "https://jorricks.github.io/iCalLibrary"
-Documentation = "https://jorricks.github.io/iCalLibrary"
-Source = "https://github.com/Jorricks/iCalLibrary"
-PullRequests = "https://github.com/Jorricks/iCalLibrary/issues"
-Issues = "https://github.com/Jorricks/iCalLibrary/issues"
+Home = "https://jorricks.github.io/iCal-library"
+Documentation = "https://jorricks.github.io/iCal-library"
+Source = "https://github.com/Jorricks/iCal-library"
+PullRequests = "https://github.com/Jorricks/iCal-library/pulls"
+Issues = "https://github.com/Jorricks/iCal-library/issues"
 
 [tool.black]
 line-length=120

@@ -1,6 +1,6 @@
 # Exceptions
 
-These are all the custom exceptions you might encounter when using `iCalLibrary`.
+These are all the custom exceptions you might encounter when using `iCal-library`.
 
 ::: ical_library.CalendarParentRelationError
 

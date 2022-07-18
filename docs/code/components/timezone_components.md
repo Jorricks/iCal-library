@@ -1,5 +1,5 @@
 # Timezone components
-These are the components that are related to TimeZone information. You generally don't use these directly but let iCalLibrary use it when there is a TZID parameter set for a property.
+These are the components that are related to TimeZone information. You generally don't use these directly but let iCal-library use it when there is a TZID parameter set for a property.
 
 The [DayLight](ical_library.ical_components.DayLight) and [Standard](ical_library.ical_components.Standard) class both extend the [_TimeOffsetPeriod](ical_library.ical_components.v_timezone._TimeOffsetPeriod).
 

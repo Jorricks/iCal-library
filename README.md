@@ -1,30 +1,30 @@
 <p align="center">
-  <a href="https://jorricks.github.io/iCalLibrary"><img src="docs/icallibrary.png" alt="iCalLibrary" width="600px"></a>
+  <a href="https://jorricks.github.io/iCal-library"><img src="docs/ical-library.png" alt="iCal-library" width="600px"></a>
 </p>
 <p align="center">
     <em>Fast, yet simple, iCalendar reader&writer with excellent recurrence support. <a href="https://www.ietf.org/rfc/rfc5545.txt">RFC 5545</a> compliant.</em>
 </p>
 <p align="center">
-<a href="https://github.com/Jorricks/iCalLibrary/actions/workflows/validate.yml" target="_blank">
-    <img src="https://img.shields.io/github/workflow/status/Jorricks/iCalLibrary/Validate" alt="GitHub Workflow Test Status" >
+<a href="https://github.com/Jorricks/iCal-library/actions/workflows/validate.yml" target="_blank">
+    <img src="https://img.shields.io/github/workflow/status/Jorricks/iCal-library/Validate" alt="GitHub Workflow Test Status" >
 </a>
-<a href="https://codecov.io/gh/Jorricks/iCalLibrary" target="_blank">
-    <img src="https://img.shields.io/codecov/c/github/Jorricks/iCalLibrary/main" alt="Coverage">
+<a href="https://codecov.io/gh/Jorricks/iCal-library" target="_blank">
+    <img src="https://img.shields.io/codecov/c/github/Jorricks/iCal-library/main" alt="Coverage">
 </a>
 </p>
 
-[//]: # (<a href="https://pypi.org/project/iCalLibrary" target="_blank">)
-[//]: # (    <img src="https://img.shields.io/pypi/v/iCalLibrary?color=%2334D058&label=pypi%20package" alt="Package version">)
+[//]: # (<a href="https://pypi.org/project/iCal-library" target="_blank">)
+[//]: # (    <img src="https://img.shields.io/pypi/v/iCal-library?color=%2334D058&label=pypi%20package" alt="Package version">)
 [//]: # (</a>)
-[//]: # (<a href="https://pypi.org/project/iCalLibrary" target="_blank">)
-[//]: # (    <img src="https://img.shields.io/pypi/pyversions/iCalLibrary.svg?color=%2334D058" alt="Supported Python versions">)
+[//]: # (<a href="https://pypi.org/project/iCal-library" target="_blank">)
+[//]: # (    <img src="https://img.shields.io/pypi/pyversions/iCal-library.svg?color=%2334D058" alt="Supported Python versions">)
 [//]: # (</a>)
 
 ---
 
-**Documentation**: [https://jorricks.github.io/iCalLibrary/](https://jorricks.github.io/iCalLibrary/)
+**Documentation**: [https://jorricks.github.io/iCal-library/](https://jorricks.github.io/iCal-library/)
 
-**Source Code**: [https://github.com/Jorricks/iCalLibrary](https://github.com/Jorricks/iCalLibrary)
+**Source Code**: [https://github.com/Jorricks/iCal-library](https://github.com/Jorricks/iCal-library)
 
 
 ## Features
@@ -45,20 +45,20 @@
 ## Requirements
 Python 3.8+
 
-iCalLibrary uses two major libraries for their date and time utilities:
+iCal-library uses two major libraries for their date and time utilities:
 - [Pendulum](https://github.com/sdispater/pendulum) for its extensions on datetime objects and parsing of durations.
 - [Python-Dateutil](https://github.com/dateutil/dateutil) for its RRule support.
 
 
 ## Installation
 
-To use iCalLibrary, first install it using pip:
+To use iCal-library, first install it using pip:
 
-    pip install iCalLibrary
+    pip install iCal-library
 
 
 ## Example
-A simple example. Please look [in the docs](https://jorricks.github.io/iCalLibrary/) for more examples.
+A simple example. Please look [in the docs](https://jorricks.github.io/iCal-library/) for more examples.
 
 ```python3
 from ical_library import client
@@ -71,7 +71,7 @@ print(calendar.free_busy_list)
 print(calendar.time_zones)
 ```
 
-Note: iCalLibrary is fully Debugger compliant, meaning it is very easy to use a debugger with this project. It will be much faster to see all the different attributes and functions from inside a Python debugger. If you are unsure whether your IDE supports it, take a look [here](https://wiki.python.org/moin/PythonDebuggingTools) under the sections 'IDEs with Debug Capabilities'.
+Note: iCal-library is fully Debugger compliant, meaning it is very easy to use a debugger with this project. It will be much faster to see all the different attributes and functions from inside a Python debugger. If you are unsure whether your IDE supports it, take a look [here](https://wiki.python.org/moin/PythonDebuggingTools) under the sections 'IDEs with Debug Capabilities'.
 
 
 ## Limitations

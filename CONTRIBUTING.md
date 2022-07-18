@@ -1,6 +1,6 @@
-# Contributing to iCalLibrary
+# Contributing to iCal-library
 
-As an open source project, iCalLibrary welcomes contributions of many forms.
+As an open source project, iCal-library welcomes contributions of many forms.
 This document summarizes the process.
 
 Examples of contributions include:

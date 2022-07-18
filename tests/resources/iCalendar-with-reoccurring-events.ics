@@ -3,9 +3,9 @@ PRODID:-//Google Inc//Google Calendar 70.9054//EN
 VERSION:2.0
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
-X-WR-CALNAME:Test iCalLibrary
+X-WR-CALNAME:Test iCal-library
 X-WR-TIMEZONE:Europe/Amsterdam
-X-WR-CALDESC:Calendar to test iCalLibrary
+X-WR-CALDESC:Calendar to test iCal-library
 BEGIN:VTIMEZONE
 TZID:Europe/Amsterdam
 X-LIC-LOCATION:Europe/Amsterdam

@@ -32,7 +32,7 @@ T = TypeVar("T")
 
 class Component(ICalBaseClass):
     """
-    This is the base class for any component (according to the RFC 5545 specification) in iCalLibrary.
+    This is the base class for any component (according to the RFC 5545 specification) in iCal-library.
 
     Inside all components (so also all classes inheriting this class, e.g. VEvent) there are four kind of variables:
 
