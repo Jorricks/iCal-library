@@ -12,7 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
+      - name: Install package so we can read
+        run: pip install .
       - name: 🐍 Python Auto Tagging
         uses: Jorricks/action-python-autotagging@1.0.0
         with:

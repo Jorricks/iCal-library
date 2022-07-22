@@ -17,10 +17,11 @@ jobs:
   latest-changes:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.ACTIONS_TOKEN }}
-      - uses: tiangolo/latest-changes:0.0.3
+      - name: Check out source-code repository
+        uses: actions/checkout@v2
+
+      - name: Update docs/release-notes.md with newest PR that was merged.
+        uses: docker://tiangolo/latest-changes:0.0.3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           latest_changes_file: docs/release-notes.md
