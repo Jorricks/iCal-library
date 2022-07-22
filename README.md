@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://jorricks.github.io/iCal-library"><img src="docs/ical-library.png" alt="iCal-library" width="600px"></a>
+  <a href="https://jorricks.github.io/iCal-library"><img src="https://github.com/Jorricks/iCal-library/raw/main/docs/ical-library.png" alt="iCal-library" width="600px"></a>
 </p>
 <p align="center">
     <em>Fast, yet simple, iCalendar reader with excellent recurrence support. <a href="https://www.ietf.org/rfc/rfc5545.txt">RFC 5545</a> compliant.</em>
