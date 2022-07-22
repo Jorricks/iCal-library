@@ -2,6 +2,9 @@
 
 ## Latest Changes
 
+## 0.0.1a1
+- 📝 Update PyPi package description
+- 🔧 Remove auto tagging pipeline
 
 ## 🚀 0.0.1a0 Initial release
 - ✅ Easy python interface. It's as simple as '`client.load_ics_file("<my_file>").timeline`' to show all your events of that week.
