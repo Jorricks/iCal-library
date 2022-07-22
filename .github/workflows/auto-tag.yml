@@ -1,0 +1,21 @@
+name: Python 🐍 Auto Version Tag
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - src/ical_library/__init__.py
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: 🐍 Python Auto Tagging
+        uses: Jorricks/action-python-autotagging@1.0.0
+        with:
+          path: src/ical_library/__init__.py
+          variable: __version__
+          token: ${{ secrets.GITHUB_TOKEN }}

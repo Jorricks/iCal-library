@@ -3,7 +3,7 @@
   <a href="https://jorricks.github.io/iCal-library"><img src="ical-library.png" alt="iCal-library" width="600px"></a>
 </p>
 <p align="center">
-    <em>Fast, yet simple, iCalendar reader&writer with excellent recurrence support. <a href="https://www.ietf.org/rfc/rfc5545.txt">RFC 5545</a> compliant.</em>
+    <em>Fast, yet simple, iCalendar reader with excellent recurrence support. <a href="https://www.ietf.org/rfc/rfc5545.txt">RFC 5545</a> compliant.</em>
 </p>
 <p align="center">
 <a href="https://github.com/Jorricks/iCal-library/actions/workflows/validate.yml" target="_blank">

@@ -2,7 +2,7 @@
   <a href="https://jorricks.github.io/iCal-library"><img src="docs/ical-library.png" alt="iCal-library" width="600px"></a>
 </p>
 <p align="center">
-    <em>Fast, yet simple, iCalendar reader&writer with excellent recurrence support. <a href="https://www.ietf.org/rfc/rfc5545.txt">RFC 5545</a> compliant.</em>
+    <em>Fast, yet simple, iCalendar reader with excellent recurrence support. <a href="https://www.ietf.org/rfc/rfc5545.txt">RFC 5545</a> compliant.</em>
 </p>
 <p align="center">
 <a href="https://github.com/Jorricks/iCal-library/actions/workflows/validate.yml" target="_blank">
@@ -86,9 +86,8 @@ After traversing the code of the other libraries I decided I wanted to build my 
 - No strict evaluation that could lead to errors while parsing the file.
 - Lazy evaluation for iCalendar properties to speed up the process.
 
-## Features on the horizon
-- Implement support for quoted property parameters.
-- Do a first release <3.
-- Implement support for the new Properties for iCalendar (RFC 7986)
-- Support CalDev.
+## Ideas for additional features
+- Support quoted property parameters containing special characters.
+- Support the new Properties for iCalendar (RFC 7986).
+- Support CalDev (RFC 4791).
 
