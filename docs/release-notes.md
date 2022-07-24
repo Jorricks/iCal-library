@@ -2,6 +2,10 @@
 
 ## Latest Changes
 
+## 0.0.1b0
+- 🎨 Update name of package on Pypi
+- 📝 Update buttons
+
 ## 0.0.1a1
 - 📝 Update PyPi package description
 - 🔧 Remove auto tagging pipeline
