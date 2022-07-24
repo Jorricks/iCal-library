@@ -12,6 +12,12 @@
 <a href="https://codecov.io/gh/Jorricks/iCal-library" target="_blank">
     <img src="https://img.shields.io/codecov/c/github/Jorricks/iCal-library/main" alt="Coverage">
 </a>
+<a href="https://pypi.org/project/iCal-library" target="_blank">
+    <img src="https://img.shields.io/pypi/v/iCal-library?color=%2334D058&label=pypi%20package" alt="Package version">
+</a>
+<a href="https://pypi.org/project/iCal-library" target="_blank">
+    <img src="https://img.shields.io/pypi/pyversions/iCal-library.svg?color=%2334D058" alt="Supported Python versions">
+</a>
 </p>
 
 ---
