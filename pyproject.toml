@@ -3,7 +3,7 @@ requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
 [project]
-name = "ical_library"
+name = "ical-library"
 authors = [{name = "Jorrick Sleijster", email = "jorricks3@gmail.com"}]
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -65,6 +65,9 @@ Documentation = "https://jorricks.github.io/iCal-library"
 Source = "https://github.com/Jorricks/iCal-library"
 PullRequests = "https://github.com/Jorricks/iCal-library/pulls"
 Issues = "https://github.com/Jorricks/iCal-library/issues"
+
+[tool.flit.module]
+name = "ical_library"
 
 [tool.black]
 line-length=120
