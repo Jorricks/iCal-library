@@ -97,7 +97,7 @@ class Timeline:
             # Do some initial filtering.
             if isinstance(c, AbstractComponentWithRecurringProperties):
                 if c.max_recurring_timespan.intersects(self.get_timespan()):
-                    values_to_exclude = uid_to_datetime_to_exclude.get(c.uid.value)
+                    values_to_exclude = uid_to_datetime_to_exclude[c.uid.value]  # .get defaults to None.
                     list_of_timestamps_with_parents.extend(
                         c.expand_component_in_range(self.get_timespan(), values_to_exclude)
                     )
