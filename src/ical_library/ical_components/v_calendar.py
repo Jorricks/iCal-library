@@ -150,10 +150,3 @@ class VCalendar(Component):
         if lines is None:
             raise TypeError("We should first parse the component section before calling this function.")
         return "\n".join(line for line in self.tree_root._lines[max(0, start_line) : min(len(lines), end_line)])
-
-
-if __name__ == "__main__":
-    import pprint
-
-    pprint.pprint(VCalendar._get_property_mapping())
-    pprint.pprint(VCalendar._get_child_component_mapping())
