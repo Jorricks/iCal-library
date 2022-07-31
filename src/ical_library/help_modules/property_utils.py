@@ -221,7 +221,6 @@ def expand_component_in_range(
     using this Timezone.
     :return: an Iterator returning a tuple with two values of either DateTimes or Dates.
     """
-    print(f"{starts_to_exclude=}")
     excluded_times_set: Union[Set[DateTime], Set[Date]] = _compute_exdates(
         exdate_list=exdate_list,
         return_range=return_range,
