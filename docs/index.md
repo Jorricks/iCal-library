@@ -37,18 +37,19 @@ It is one of the fastest iCalender python library out there and has excellent su
     You may encounter items on which we can improve, please file an issue if you encounter any issue or create a feature request for any missing feature.
 
 ## Features
-- Easy python interface. It's as simple as '`client.load_ics_file("<my_file>").timeline`' to show all your events of that week.
-- Timeline support. Show exactly what is planned for a specific week.
-- ***Fully functional*** support for recurring iCal components. E.g. Any recurring event will show up as intended within the timeline interface. This includes:
-  - Recurring components/events based on RRule.
-  - Recurring components/events based on RDate.
-  - Excluding components/events based on EXDate.
-  - Any combination of the above three.
-  - Redefined/changed components/events correctly show the latest version. 
-- Very fast parsing due to lazy evaluation of iCal properties.
-- Debugger supported. Any issues? Open up a debugger and inspect all values.
-- Minimal dependencies. Only `python-dateutil` and `pendulum`.
-- Fully typed code base.
+- 🚀 Easy python interface. It's as simple as '`client.load_ics_file("<my_file>").timeline`' to show all your events of that week.
+- 📈 Timeline support. Show exactly what is planned for a specific week.
+- ✨ ***Fully functional*** support for recurring iCal components. E.g. Any recurring event will show up as intended within the timeline interface. This includes:
+    1. Recurring components/events based on RRule.
+    2. Recurring components/events based on RDate.
+    3. Excluding components/events based on EXDate.
+    4. Any combination of the above three.
+    5. Redefined/changed components/events correctly show the latest version. 
+- ⏩ Very fast parsing due to lazy evaluation of iCal properties.
+- ⁉️ Debugger supported. Any issues? Open up a debugger and inspect all values.
+- 🔅 Minimal dependencies. Only `python-dateutil` and `pendulum`.
+- 🆎 Fully typed code base.
+
 
 
 ## Installation
