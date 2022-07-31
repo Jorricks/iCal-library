@@ -249,7 +249,8 @@ class RRule(Property):
             return dt_utils.convert_time_object_to_aware_datetime(self.until) + component_duration  # type: ignore
         elif self.count:
             if self.count < 1000:
-                *_, last = self.sequence_iterator(starting_datetime=starting_datetime, max_datetime=DateTime.max)
+                max_datetime = DateTime.max if isinstance(starting_datetime, DateTime) else Date(9999, 12, 31)
+                *_, last = self.sequence_iterator(starting_datetime=starting_datetime, max_datetime=max_datetime)
                 return dt_utils.convert_time_object_to_aware_datetime(last) + component_duration  # type: ignore
         return DateTime.max
 
