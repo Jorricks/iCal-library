@@ -2,13 +2,19 @@
 
 ## Latest Changes
 
-## 0.0.1b0
-- 🎨 Update name of package on Pypi
-- 📝 Update buttons
+## 0.1.0
+- 📝 Add emoji to features docs.
+- ✅ Add tests for CalAddress.
+- 🐛 Defaultlist gave None when using `.get`.
+- 🐛 Function arg date type should match other arg.
+- 🐛 Remove unwanted commented code.
+- 🐛 Remove unwanted print.
+- 🎨 Update name of package on Pypi.
+- 📝 Update buttons.
 
 ## 0.0.1a1
-- 📝 Update PyPi package description
-- 🔧 Remove auto tagging pipeline
+- 📝 Update PyPi package description.
+- 🔧 Remove auto tagging pipeline.
 
 ## 🚀 0.0.1a0 Initial release
 - ✅ Easy python interface. It's as simple as '`client.load_ics_file("<my_file>").timeline`' to show all your events of that week.
