@@ -15,8 +15,8 @@ def test_recurrence_with_offset_changes(multi_offset_calendar: VCalendar) -> Non
     recurring_event = multi_offset_calendar.events[0]
     return_rage = Timespan(DateTime(2022, 10, 1), DateTime(2022, 11, 10))
     components: List[TimespanWithParent] = list(recurring_event.expand_component_in_range(return_rage, []))
-    assert components[0].begin == pendulum.parse("2022-10-20T12:00:00+02:00")
-    assert components[0].end == pendulum.parse("2022-10-20T17:00:00+02:00")
+    assert components[0].begin == pendulum.parse("2022-10-18T12:00:00+02:00")
+    assert components[0].end == pendulum.parse("2022-10-18T17:00:00+02:00")
     assert components[1].begin == pendulum.parse("2022-10-25T12:00:00+02:00")
     assert components[1].end == pendulum.parse("2022-10-25T17:00:00+02:00")
     assert components[2].begin == pendulum.parse("2022-11-01T12:00:00+01:00")
