@@ -2,7 +2,19 @@
 
 ## Latest Changes
 
-## 0.1.0
+## 0.2.0 Release to improve timezone offset changes support
+This release contains some bugfixes and a major improvement to also support timezone offset changes over time.
+Thereby, recurring events for timezones that have Daylight saving time now correctly change according to the VTIMEZONE definition.
+Furthermore, EXDATE (so excluding a single occurrence from a recurring event) now correctly handles timezones. Previously it did not exclude EXDATE's with a Timezone correctly. This release fixes that.
+
+- ✨ Support offset changes in a sequence of recurring events.
+- 🐛 Return only recurring items in Timespan range.
+- 🐛 EXDate now takes TZID into account.
+- 📝 Make pipeline name more generic.
+
+## 0.1.0 Code structure release
+This release mostly contains general improvements to the code base with some minor bugfixes.
+
 - 📝 Add emoji to features docs.
 - ✅ Add tests for CalAddress.
 - 🐛 Defaultlist gave None when using `.get`.
@@ -12,11 +24,15 @@
 - 🎨 Update name of package on Pypi.
 - 📝 Update buttons.
 
-## 0.0.1a1
+## 0.0.1a1 BugFix release
+This release contains some updates to the release process.
+
 - 📝 Update PyPi package description.
 - 🔧 Remove auto tagging pipeline.
 
 ## 🚀 0.0.1a0 Initial release
+The initial release of the package. Some turbulence expected.
+
 - ✅ Easy python interface. It's as simple as '`client.load_ics_file("<my_file>").timeline`' to show all your events of that week.
 - 📈 Timeline support. Show exactly what is planned for a specific week.
 - 👌 ***Fully functional*** support for recurring iCal components. E.g. Any recurring event will show up as intended within the timeline interface. This includes:
