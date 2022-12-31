@@ -1,10 +1,15 @@
+from datetime import timedelta
 from typing import Callable, Dict, Iterator, List, Optional, Tuple, Union
 
-from pendulum import Date, DateTime, Duration
+from pendulum import Date, DateTime
+from pendulum.tz.timezone import Timezone
+from pendulum.tz.zoneinfo.transition import Transition
+from pendulum.tz.zoneinfo.transition_type import TransitionType
 
 from ical_library.base_classes.component import Component
 from ical_library.exceptions import MissingRequiredProperty
 from ical_library.help_modules import dt_utils, property_utils
+from ical_library.help_modules.lru_cache import instance_lru_cache
 from ical_library.help_modules.timespan import Timespan
 from ical_library.ical_properties.dt import DTStart, LastModified
 from ical_library.ical_properties.pass_properties import Comment, TZID, TZName, TZURL
@@ -39,6 +44,7 @@ class _TimeOffsetPeriod(Component):
         rdate: Optional[List[RDate]] = None,
         tzname: Optional[List[TZName]] = None,
         parent: Optional[Component] = None,
+        is_dst: bool = False,
     ):
         super().__init__(name, parent=parent)
         # Required, must occur only once.
@@ -51,6 +57,7 @@ class _TimeOffsetPeriod(Component):
         self.comment: Optional[List[Comment]] = self.as_parent(comment)
         self.rdate: Optional[List[RDate]] = self.as_parent(rdate)
         self.tzname: Optional[List[TZName]] = self.as_parent(tzname)
+        self.is_dst = is_dst
 
     def __repr__(self) -> str:
         """Overwrite the repr to create a better representation for the item."""
@@ -73,7 +80,7 @@ class _TimeOffsetPeriod(Component):
             rdate_list=self.rdate or [],
             rrule=self.rrule,
             first_event_start=self.timezone_aware_start(),
-            return_range=Timespan(self.dtstart.datetime_or_date_value, max_datetime),
+            return_range=Timespan(self.timezone_aware_start() - timedelta(days=1), max_datetime),
             make_tz_aware=self.tzoffsetfrom.as_timezone_object(),
         ):
             if not isinstance(rtime, DateTime):
@@ -85,7 +92,7 @@ class DayLight(_TimeOffsetPeriod):
     """A TimeOffsetPeriod representing a DayLight(a.k.a. Advanced Time, Summer Time or Legal Time) configuration."""
 
     def __init__(self, parent: Optional[Component] = None, **kwargs):
-        super().__init__("DAYLIGHT", parent=parent, **kwargs)
+        super().__init__("DAYLIGHT", parent=parent, is_dst=True, **kwargs)
 
     @classmethod
     def _get_init_method_for_var_mapping(cls) -> Callable:
@@ -96,7 +103,7 @@ class Standard(_TimeOffsetPeriod):
     """A TimeOffsetPeriod representing a Standard(a.k.a. Winter Time) configuration."""
 
     def __init__(self, parent: Optional[Component] = None, **kwargs):
-        super().__init__("STANDARD", parent=parent, **kwargs)
+        super().__init__("STANDARD", parent=parent, is_dst=False, **kwargs)
 
     @classmethod
     def _get_init_method_for_var_mapping(cls) -> Callable:
@@ -187,10 +194,43 @@ class VTimeZone(Component):
         """
         if dt.tzinfo is not None:
             return dt
+        return dt.in_timezone(self.get_as_timezone_object(DateTime(2100, 1, 1)))
 
-        dt_object: DateTime
-        time_offset_period: _TimeOffsetPeriod
-        for i, (dt_object, time_offset_period) in enumerate(self.get_ordered_timezone_overview(dt + Duration(years=1))):
-            if dt < dt_object.replace(tzinfo=None):
-                return dt.in_timezone(time_offset_period.tzoffsetfrom.as_timezone_object())
-        return dt
+    def get_ordered_timezone_overview_as_transition(self, max_datetime: DateTime) -> List[Transition]:
+        """
+        Get timezone components as a list of pendulum Transitions.
+        :param max_datetime: The maximum datetime for which we include transitions. Any transitions after are excluded.
+        :return: Return the list of pendulum Transitions for this VTimezone.
+        """
+        timezones: List[Tuple[DateTime, _TimeOffsetPeriod]] = self.get_ordered_timezone_overview(max_datetime)
+        transitions: List[Transition] = []
+        previous_transition: Optional[Transition] = None
+        for time, offset_period in timezones:
+            new_transition_type = TransitionType(
+                offset=offset_period.tzoffsetto.parse_value_as_seconds(),
+                is_dst=offset_period.is_dst,
+                abbr=offset_period.tzname[0].value if offset_period.tzname else "unknown",
+            )
+            at = int(time.in_tz("UTC").timestamp())
+            new_transition = Transition(at=at, ttype=new_transition_type, previous=previous_transition)
+            previous_transition = new_transition
+            transitions.append(new_transition)
+        return transitions
+
+    @instance_lru_cache()
+    def get_as_timezone_object(self, max_datetime: DateTime) -> Timezone:
+        """
+        For a given maximum datetime, compute a pendulum Timezone object that contains all transition till max_datetime.
+        :param max_datetime: The maximum datetime for which we include transitions. Any transitions after are excluded.
+        :return: Returns a pendulum Timezone object that you can use for DateTimes.
+        """
+        return CustomTimezone(
+            name=self.tzid.value, transitions=self.get_ordered_timezone_overview_as_transition(max_datetime)
+        )
+
+
+class CustomTimezone(Timezone):
+    def __init__(self, name: str, transitions: List[Transition]):  # noqa
+        self._name = name
+        self._transitions = transitions
+        self._hint = {True: None, False: None}

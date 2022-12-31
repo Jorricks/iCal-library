@@ -2,6 +2,7 @@ from typing import Union
 
 import pendulum
 from pendulum import Date, DateTime
+from pendulum.tz.timezone import FixedTimezone
 
 from ical_library.base_classes.property import Property
 from ical_library.help_modules import dt_utils
@@ -19,6 +20,16 @@ class _DTBoth(Property):
             if value.tz or not tz_id:
                 return value
             return self.parent.tree_root.get_aware_dt_for_timezone(dt=value, tzid=tz_id)
+        elif isinstance(value, Date):
+            return value
+        else:
+            raise TypeError(f"Unknown {type(value)=} returned for {value=}.")
+
+    def get_datetime_or_date_value_in_specific_tz(self, tz: FixedTimezone) -> Union[Date, DateTime]:
+        """Return the value as a DateTime or Date value in a specific timezone."""
+        value = dt_utils.parse_date_or_datetime(self.value)
+        if isinstance(value, DateTime):
+            return value.in_timezone(tz)
         elif isinstance(value, Date):
             return value
         else:
