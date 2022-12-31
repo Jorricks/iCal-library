@@ -44,3 +44,9 @@ def empty_calendar(root_folder: Path) -> VCalendar:
 @pytest.fixture
 def berlin_timezone_calendar(root_folder: Path) -> VCalendar:
     return client.parse_icalendar_file(root_folder / "tests" / "resources" / "iCalendar-with-berlin-timezone.ics")
+
+
+@pytest.fixture
+def multi_offset_calendar(root_folder: Path) -> VCalendar:
+    filename = "iCalendar-with-recurring-event-multiple-timezone-offsets.ics"
+    return client.parse_icalendar_file(root_folder / "tests" / "resources" / filename)
