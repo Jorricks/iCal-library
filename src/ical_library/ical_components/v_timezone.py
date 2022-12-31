@@ -194,7 +194,7 @@ class VTimeZone(Component):
         """
         if dt.tzinfo is not None:
             return dt
-        return dt.in_timezone(self.get_as_timezone_object(DateTime(2100, 1, 1)))
+        return dt.in_timezone(self.get_as_timezone_object())
 
     def get_ordered_timezone_overview_as_transition(self, max_datetime: DateTime) -> List[Transition]:
         """
@@ -218,7 +218,7 @@ class VTimeZone(Component):
         return transitions
 
     @instance_lru_cache()
-    def get_as_timezone_object(self, max_datetime: DateTime) -> Timezone:
+    def get_as_timezone_object(self, max_datetime: DateTime = DateTime(2100, 1, 1)) -> Timezone:
         """
         For a given maximum datetime, compute a pendulum Timezone object that contains all transition till max_datetime.
         :param max_datetime: The maximum datetime for which we include transitions. Any transitions after are excluded.
