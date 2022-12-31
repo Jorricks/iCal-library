@@ -36,8 +36,17 @@ class _PeriodFunctionality(Property):
             list_of_periods.append(instance)
         return list_of_periods
 
-    @staticmethod
-    def _parse_individual_duration_str(period_str: str) -> Tuple[DateTime, DateTime]:
+    def _parse_individual_datetime_or_duration_str(self, datetime_or_duration_str: str) -> Union[DateTime, Duration]:
+        """
+        Parse an individual datetime or duration string.
+        :param datetime_or_duration_str: A string represent either a datetime or duration.
+        :return: A pendulum.DateTime if the string represented a datetime. Return a pendulum.Duration otherwise.
+        """
+        tz_id = self.get_property_parameter("TZID")
+        tz = self.parent.tree_root.get_timezone(tz_id).get_as_timezone_object() if tz_id else None
+        return pendulum.parse(datetime_or_duration_str, tz=tz)
+
+    def _parse_individual_duration_str(self, period_str: str) -> Tuple[DateTime, DateTime]:
         """
         Parse an individual period represented by DateTime/DateTime or DateTime/Duration.
 
@@ -45,8 +54,8 @@ class _PeriodFunctionality(Property):
         :return: A tuple containing two DateTimes representing the start and end of the duration respectively.
         """
         first_str, second_str = period_str.split("/")
-        first_instance: DateTime = _ExOrRDate._parse_individual_datetime_or_duration_str(first_str)
-        second_instance: Union[DateTime, Duration] = _ExOrRDate._parse_individual_datetime_or_duration_str(second_str)
+        first_instance: DateTime = self._parse_individual_datetime_or_duration_str(first_str)
+        second_instance: Union[DateTime, Duration] = self._parse_individual_datetime_or_duration_str(second_str)
         if not isinstance(first_instance, DateTime):
             raise TypeError(f"Expected {period_str=} to contain a DateTime as first argument.")
         if isinstance(second_instance, DateTime):
@@ -78,15 +87,6 @@ class _ExOrRDate(_PeriodFunctionality):
                 raise TypeError(f"{instance} is of {type(instance)=} while it should be a DateTime.")
             list_of_datetimes.append(instance)
         return list_of_datetimes
-
-    @staticmethod
-    def _parse_individual_datetime_or_duration_str(datetime_or_duration_str: str) -> Union[DateTime, Duration]:
-        """
-        Parse an individual datetime or duration string.
-        :param datetime_or_duration_str: A string represent either a datetime or duration.
-        :return: A pendulum.DateTime if the string represented a datetime. Return a pendulum.Duration otherwise.
-        """
-        return pendulum.parse(datetime_or_duration_str, tz=None)
 
     def _parse_date_values(self) -> List[Date]:
         """
