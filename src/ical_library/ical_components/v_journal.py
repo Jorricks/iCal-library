@@ -158,7 +158,8 @@ class VJournal(AbstractComponentWithRecurringProperties):
         exclude them from our recurrence computation (as they have been completely redefined in another element).
         :return: Yield all recurring VJournal instances related to this VJournal in the given *return_range*.
         """
-        yield self.timespan
+        if self.timespan.intersects(return_range):
+            yield self.timespan
         starts_to_exclude.append(self.start)
 
         start = self.start
