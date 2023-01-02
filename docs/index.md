@@ -6,9 +6,6 @@
     <em>Fast, yet simple, iCalendar reader with excellent recurrence support. <a href="https://www.ietf.org/rfc/rfc5545.txt">RFC 5545</a> compliant.</em>
 </p>
 <p align="center">
-<a href="https://github.com/Jorricks/iCal-library/actions/workflows/validate.yml" target="_blank">
-    <img src="https://img.shields.io/github/workflow/status/Jorricks/iCal-library/Validate" alt="GitHub Workflow Test Status">
-</a>
 <a href="https://codecov.io/gh/Jorricks/iCal-library" target="_blank">
     <img src="https://img.shields.io/codecov/c/github/Jorricks/iCal-library/main" alt="Coverage">
 </a>
