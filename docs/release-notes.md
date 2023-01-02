@@ -1,6 +1,9 @@
 # Release Notes
 
-## Latest Changes
+## 0.2.1 Documentation update
+A minor update to improve documentation:
+- 📝 Remove workflow badge
+- ⬆️ Add Python 3.11 & 3.12 support
 
 ## 0.2.0 Release to improve timezone offset changes support
 This release contains some bugfixes and a major improvement to also support timezone offset changes over time.
