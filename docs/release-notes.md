@@ -1,5 +1,10 @@
 # Release Notes
 
+## 0.2.2 BugFix release
+This is a minor release to solve a critical bug.
+It occurred when it is expanding a recurring event with a start date in dates for a range defined by dates.
+- 🐛 RRule expansion failing where event.start_date==return_range.start.
+
 ## 0.2.1 Documentation update
 A minor update to improve documentation:
 - 📝 Remove workflow badge
