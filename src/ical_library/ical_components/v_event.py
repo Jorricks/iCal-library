@@ -189,8 +189,8 @@ class VEvent(AbstractComponentWithRecurringProperties):
         """
         Expand this VEvent in range according to its recurring *RDate*, *EXDate* and *RRule* properties.
         :param return_range: The timespan range on which we should return VEvent instances.
-        :param starts_to_exclude: List of start Dates or list of start DateTimes of which we already know we should
-        exclude them from our recurrence computation (as they have been completely redefined in another element).
+        :param starts_to_exclude: List of start Dates or list of start DateTimes of which we should exclude as they were
+        defined in EXDATE, have already been returned or have been completely redefined in another element.
         :return: Yield all recurring VEvent instances related to this VEvent in the given *return_range*.
         """
         if self.timespan.intersects(return_range):

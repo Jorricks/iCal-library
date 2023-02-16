@@ -271,7 +271,7 @@ class RRule(Property):
                 raise TypeError(f"The tz info should be consistent: {starting_datetime=}, {max_datetime=}.")
         if not isinstance(starting_datetime, (Date, DateTime)) or not isinstance(max_datetime, (Date, DateTime)):
             raise TypeError(f"{type(starting_datetime)=} and {type(max_datetime)=} should be of Date or DateTime.")
-        if starting_datetime >= max_datetime:
+        if starting_datetime > max_datetime:
             raise ValueError(f"This should not be the case: {starting_datetime=} >= {max_datetime=} .")
 
         if not (is_datetime_format := isinstance(starting_datetime, DateTime) and isinstance(max_datetime, DateTime)):

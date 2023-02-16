@@ -53,5 +53,10 @@ def multi_offset_calendar(root_folder: Path) -> VCalendar:
 
 
 @pytest.fixture
+def recurring_date_events_calendar(root_folder: Path) -> VCalendar:
+    return client.parse_icalendar_file(root_folder / "tests" / "resources" / "iCalender-recurring-date-events.ics")
+
+
+@pytest.fixture
 def calendar_exdate(root_folder: Path) -> VCalendar:
     return client.parse_icalendar_file(root_folder / "tests" / "resources" / "iCalendar-exdate.ics")
