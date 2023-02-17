@@ -2,6 +2,7 @@ from typing import List
 
 import pendulum
 from pendulum import Date, DateTime
+from pendulum.tz import get_local_timezone
 
 from ical_library.help_modules.timespan import Timespan, TimespanWithParent
 from ical_library.ical_components import VCalendar
@@ -33,10 +34,10 @@ def test_recurrence_with_dates_includes_intersected_dates(recurring_date_events_
     recurring_event = recurring_date_events_calendar.events[0]
     return_rage = Timespan(Date(2023, 3, 4), Date(2023, 3, 8))
     components: List[TimespanWithParent] = list(recurring_event.expand_component_in_range(return_rage, []))
-    assert components[0].begin == pendulum.parse("2023-03-08T00:00:00+01:00")
-    assert components[0].end == pendulum.parse("2023-03-15T00:00:00+01:00")
+    assert components[0].begin == pendulum.parse("2023-03-08T00:00:00", tz=get_local_timezone())
+    assert components[0].end == pendulum.parse("2023-03-15T00:00:00", tz=get_local_timezone())
 
     return_rage = Timespan(Date(2023, 3, 4), Date(2023, 5, 31))
     components: List[TimespanWithParent] = list(recurring_event.expand_component_in_range(return_rage, []))
-    assert components[1].begin == pendulum.parse("2023-05-31T00:00:00+02:00")
-    assert components[1].end == pendulum.parse("2023-06-07T00:00:00+02:00")
+    assert components[1].begin == pendulum.parse("2023-05-31T00:00:00", tz=get_local_timezone())
+    assert components[1].end == pendulum.parse("2023-06-07T00:00:00", tz=get_local_timezone())
