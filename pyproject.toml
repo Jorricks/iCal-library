@@ -36,7 +36,7 @@ classifiers = [
 dynamic = ["version", "description"]
 requires-python = ">=3.8"
 dependencies = [
-    "pendulum>=2.0.0",
+    "pendulum>=2.0.0,<3.0.0",
     "python-dateutil>=2.8.0",
 ]
 
