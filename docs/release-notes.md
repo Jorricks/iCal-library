@@ -1,5 +1,10 @@
 # Release Notes
 
+## 0.2.3 Pendulum pinning
+This version is there to pin the pendulum version. Two changes:
+- 📌 Pin pendulum to <3.0.0
+- ✅ Update tests for compatibility with different timezones
+
 ## 0.2.2 BugFix release
 This is a minor release to solve a critical bug.
 It occurred when it is expanding a recurring event with a start date in dates for a range defined by dates.
